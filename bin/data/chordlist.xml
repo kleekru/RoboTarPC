@@ -1,0 +1,42 @@
+<chordlist>
+<chord>
+  <chordname>C</chordname>
+  <fingeraddress6>69</fingeraddress6>
+  <fingeraddress5>53</fingeraddress5>
+  <fingeraddress4>42</fingeraddress4>
+  <fingeraddress3>30</fingeraddress3>
+  <fingeraddress2>22</fingeraddress2>
+  <fingeraddress1>10</fingeraddress1>
+  <chordimage>"CChord.png"</chordimage>
+</chord>
+<chord>
+  <chordname>G</chordname>
+  <fingeraddress6>63</fingeraddress6>
+  <fingeraddress5>52</fingeraddress5>
+  <fingeraddress4>40</fingeraddress4>
+  <fingeraddress3>30</fingeraddress3>
+  <fingeraddress2>20</fingeraddress2>
+  <fingeraddress1>13</fingeraddress1>
+  <chordimage>"GChord.png"</chordimage>
+</chord>
+<chord>
+  <chordname>D</chordname>
+  <fingeraddress6>69</fingeraddress6>
+  <fingeraddress5>59</fingeraddress5>
+  <fingeraddress4>40</fingeraddress4>
+  <fingeraddress3>32</fingeraddress3>
+  <fingeraddress2>23</fingeraddress2>
+  <fingeraddress1>12</fingeraddress1>
+  <chordimage>"DChord.png"</chordimage>
+</chord>
+<chord>
+  <chordname>E</chordname>
+  <fingeraddress6>60</fingeraddress6>
+  <fingeraddress5>52</fingeraddress5>
+  <fingeraddress4>42</fingeraddress4>
+  <fingeraddress3>31</fingeraddress3>
+  <fingeraddress2>20</fingeraddress2>
+  <fingeraddress1>10</fingeraddress1>
+  <chordimage>"EChord.png"</chordimage>
+</chord>
+</chordlist>

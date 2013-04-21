@@ -1,0 +1,61 @@
+8
+
+dir
+52
+https://l-sb8b90hyn1.americas.gap.com:8443/svn/AndroidApps/RoboTarIOIOforPCConsole
+https://l-sb8b90hyn1.americas.gap.com:8443/svn/AndroidApps
+
+
+
+2013-04-21T07:16:09.640625Z
+52
+kleekru
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+8fea6367-0351-8f4f-9f7e-0c1b96737238
+
+.classpath
+file
+
+
+
+
+2013-04-21T07:28:41.484375Z
+c00aafeafabffca5354fb17c629c9b6f
+2013-04-21T07:16:09.640625Z
+52
+kleekru
+
+.project
+file
+
+
+
+
+2013-04-01T14:47:12.625000Z
+834d0b080c183f870eccf336571a1eeb
+2013-04-01T15:14:58.218750Z
+44
+kleekru
+
+src
+dir
+
+bin
+dir
+
+.settings
+dir
+
