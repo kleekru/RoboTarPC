@@ -79,7 +79,8 @@ public class RoboTarChordsPage extends JFrame implements ActionListener, ListSel
 	protected static int[] chordSend;
 	public JTextField chordName;
 	private JTextField textField;
-
+	public static String ROOT_DIR = "C:/AndroidWorkspace";//"d:/projects/kleekru/";
+	
 	/**
 	 * Launch the application.
 	 */
@@ -386,10 +387,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener, ListSel
 		highEstring.add(radioButton_11);
 		radioButton_11.addActionListener(this);
 		
-		JTextField chordName_1 = new JTextField();
-		panel.add(chordName_1, "17, 3, center, default");
-		chordName_1.setColumns(10);
-		chordName_1.setText("Enter Name");
+		chordName = new JTextField();
+		panel.add(chordName, "17, 3, center, default");
+		chordName.setColumns(10);
+		chordName.setText("Enter Name");
 		
 		//frmBlueAhuizoteChords.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{btnNewChord_1, tglbtnTestChord, btnAddToSong, chordName_1, radioButton_6M, radioButton_5M, radioButton_4M, radioButton_3M, radioButton_2M, radioButton_1M, radioButton_6O, radioButton_5O, radioButton_4O, radioButton_3O, radioButton_2O, radioButton_1O, radioButton_61, radioButton_51, radioButton_41, radioButton_31, radioButton_21, radioButton_11, radioButton_62, radioButton_52, radioButton_42, radioButton_32, radioButton_22, radioButton_12, radioButton_63, radioButton_53, radioButton_43, radioButton_33, radioButton_23, radioButton_13, radioButton_64, radioButton_54, radioButton_44, radioButton_34, radioButton_24, radioButton_14, listChords}));
 		
@@ -586,7 +587,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener, ListSel
 		                		radioButton_1O.setSelected(true);
 		                		chordName.setText((String) listChords.getSelectedValue());
 		                		getChordNotes(chordSend);
-		                		String imageName = "C:/AndroidWorkspace/RoboTarIOIOforPCConsole/src/data/CChord.png";
+		                		String imageName = ROOT_DIR + "RoboTarIOIOforPCConsole/src/data/CChord.png";
 		                		try {
 		                			lblChordPicture.setIcon( new ImageIcon(ImageIO.read( new File(imageName) ) ) );
 		                			} catch (IOException e) {
@@ -604,7 +605,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener, ListSel
 		                		radioButton_13.setSelected(true);
 		                		chordName.setText((String) listChords.getSelectedValue());
 		                		getChordNotes(chordSend);
-		                		imageName = "C:/AndroidWorkspace/RoboTarIOIOforPCConsole/src/data/CmChord.png";
+		                		imageName = ROOT_DIR + "RoboTarIOIOforPCConsole/src/data/CmChord.png";
 		                		try {
 		                			lblChordPicture.setIcon( new ImageIcon(ImageIO.read( new File(imageName) ) ) );
 		                			} catch (IOException e) {
@@ -621,7 +622,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener, ListSel
 		                		radioButton_1O.setSelected(true);
 		                		chordName.setText((String) listChords.getSelectedValue());
 		                		getChordNotes(chordSend);
-		                		imageName = "C:/AndroidWorkspace/RoboTarIOIOforPCConsole/src/data/C7Chord.png";
+		                		imageName = ROOT_DIR + "RoboTarIOIOforPCConsole/src/data/C7Chord.png";
 		                		try {
 		                			lblChordPicture.setIcon( new ImageIcon(ImageIO.read( new File(imageName) ) ) );
 		                			} catch (IOException e) {
