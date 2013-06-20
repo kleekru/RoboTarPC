@@ -14,7 +14,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
+	static final Logger LOG = LoggerFactory.getLogger(RoboTarIOIOforPCConsole.class);
+	
 	private boolean ledOn_ = false;
 
 	// Boilerplate main(). Copy-paste this code into any IOIOapplication.
@@ -29,10 +34,10 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
-			System.out.println("Could not load RoboTar User Interface");
+			LOG.error("Could not load RoboTar User Interface");
 			e.printStackTrace();
 		}
-		System.out.println("Start of the Run method");
+		LOG.info("Start of the Run method");
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				System.in));
 		boolean abort = false;
@@ -41,13 +46,12 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 		while (!abort && (line = reader.readLine()) != null) {
 			if (line.equals("q")) {
 				abort = true;
-				System.out.println("Quitting. ");
+				LOG.info("Quitting. ");
 			} else {
-				System.out
-						.println("Unknown input. Q=quit.");
+				LOG.info("Unknown input. Q=quit.");
 			}
 		}
-		System.out.println("End of the Run method");
+		LOG.info("End of the Run method");
 		}
 
 	@Override
