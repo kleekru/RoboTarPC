@@ -74,8 +74,8 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	private JLabel lblChordPicture;
 	private ResourceBundle messages;
 	
-	public static String ROOT_DIR = "C:/AndroidWorkspace";
-	//public static String ROOT_DIR = "d:/projects/kleekru/";
+	//public static String ROOT_DIR = "C:/AndroidWorkspace";
+	public static String ROOT_DIR = "d:/projects/kleekru/";
 
 	private ChordRadioPanel radioPanel;
 
@@ -252,6 +252,8 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 					/*XMLChordLoader.chordloader(chordNameSend, lowEstringSend,
 						AstringSend, DstringSend, GstringSend, BstringSend,
 						highEstringSend);*/
+					Chord chord = radioPanel.createChordFromRadios();
+					chordList.addElement(chord);
 					radioPanel.setChordName(null);
 					clearSelection();
 				} else {

@@ -600,9 +600,51 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		}
 	}
 
-/*	public int[] getChordNotes(int[] chordSend) {
-		if (radioButton_6M.isSelected()) {
-			setLowEstringSend(9);
+	public Chord createChordFromRadios() {
+		Chord chord = new Chord();
+		chord.setName(getChordName());
+		StringInfo si = getFrom("e6", radioButton_6M, radioButton_6O, radioButton_61, radioButton_62, radioButton_63, radioButton_64);
+		chord.setString(0, si);
+		si = getFrom("a", radioButton_5M, radioButton_5O, radioButton_51, radioButton_52, radioButton_53, radioButton_54);
+		chord.setString(1, si);
+		si = getFrom("d", radioButton_4M, radioButton_4O, radioButton_41, radioButton_42, radioButton_43, radioButton_44);
+		chord.setString(2, si);
+		si = getFrom("g", radioButton_3M, radioButton_3O, radioButton_31, radioButton_32, radioButton_33, radioButton_34);
+		chord.setString(3, si);
+		si = getFrom("b", radioButton_2M, radioButton_2O, radioButton_21, radioButton_22, radioButton_23, radioButton_24);
+		chord.setString(4, si);
+		si = getFrom("e1", radioButton_1M, radioButton_1O, radioButton_11, radioButton_12, radioButton_13, radioButton_14);
+		chord.setString(5, si);
+		return chord;
+	}
+	
+	public StringInfo getFrom(String name, JRadioButton muted, JRadioButton open, JRadioButton firstFret, JRadioButton secondFret, JRadioButton thirdFret, JRadioButton fourthFret) {
+		StringInfo si = new StringInfo();
+		si.setName(name);
+		if (muted.isSelected()) {
+			si.setState(StringState.DISABLED);
+		} else if (open.isSelected()) {
+			si.setState(StringState.OPEN);
+		} else if (firstFret.isSelected()) {
+			si.setFret(1);
+			si.setState(StringState.OK);
+		} else if (secondFret.isSelected()) {
+			si.setFret(2);
+			si.setState(StringState.OK);
+		} else if (thirdFret.isSelected()) {
+			si.setFret(3);
+			si.setState(StringState.OK);
+		} else if (fourthFret.isSelected()) {
+			si.setFret(4);
+			si.setState(StringState.OK);
+		} else {
+			return null;
+		}
+		
+		return si;
+	}
+/*
+			
 			Chords.setChannelLowE(1);
 		}
 		if (radioButton_6O.isSelected()) {
