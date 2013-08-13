@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : XChords.xsd
+    Created on : 26.9.2005, 19:30
+    Author     : miira
+    Version    : 0.1.1
+    Description:
+        This schema describes XChords XML format. 
+        It is used by xchords utility - http://xchords.sourceforge.net.
+    Last change: 19.9.2006    
+    History:
+	19.9.2006 - added 'open' state of string  
+        
+-->
+
+<xsd:schema targetNamespace="http://xchords.versarius.cz/2003/XChords"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:chord="http://xchords.versarius.cz/2003/XChords" 
+            elementFormDefault="qualified">
+
+            
+<!-- 
+ This import must be here because of xml:lang attribute in name element in chord element.
+ original schemaLocation was: http://www.w3.org/2001/xml.xsd 
+ I downloaded the file and put it on local file system, to not rely on remote stuff.
+ better solution will be maybe through catalog. later...
+-->            
+            <xsd:import namespace="http://www.w3.org/XML/1998/namespace"
+             schemaLocation="file:/d:/projects/kleekru/RoboTarIOIOforPCConsole/src/xsd/xml.xsd"/>
+
+             <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+     XChords schema, written by miira, 26th September 2005.
+     Please visit http://xchords.sourceforge.net/
+    </xsd:documentation>
+  </xsd:annotation>
+  
+   <xsd:element name="chord" type="chord:ChordType"/>
+   
+   <xsd:complexType name="NameType">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:string">
+        <xsd:attribute ref="xml:lang"/> 
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+   
+   <xsd:complexType name="ChordType" >
+     <xsd:sequence>
+       <xsd:element name="name" type="chord:NameType" minOccurs="1" maxOccurs="unbounded"/>
+       <xsd:element name="position" type="chord:PositionType" minOccurs="0" maxOccurs="unbounded"/>
+     </xsd:sequence>
+     <xsd:attribute name="id" type="xsd:ID"/>
+   </xsd:complexType>
+   
+   <xsd:complexType name="PositionType">
+     <xsd:sequence>
+        <xsd:element name="barre" type="chord:BarreType" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element name="string" type="chord:StringType" minOccurs="0" maxOccurs="unbounded"/>
+     </xsd:sequence>
+     <xsd:attribute name="base" type="chord:FretNumber"/>
+     <xsd:attribute name="name" type="xsd:string"/>
+   </xsd:complexType>
+
+   <xsd:complexType name="StringType">
+        <xsd:attribute name="name" type="chord:StringName" use="required"/>
+        <xsd:attribute name="fret" type="chord:FretNumber"/>
+        <xsd:attribute name="finger" type="chord:FingerMark"/>
+        <xsd:attribute name="state" type="chord:StateType"/>
+   </xsd:complexType> 
+   
+   <!-- <barre low="e6" high="e1" fret="3" finger="1"/> -->
+   <xsd:complexType name="BarreType">
+        <xsd:attribute name="low" type="chord:StringName" use="required"/>
+        <xsd:attribute name="high" type="chord:StringName" use="required"/>
+        <xsd:attribute name="fret" type="chord:FretNumber"/>
+        <xsd:attribute name="finger" type="chord:FingerMark"/>
+   </xsd:complexType>
+   
+   <xsd:simpleType name="StringName">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="e6"/>
+      <xsd:enumeration value="a"/>
+      <xsd:enumeration value="d"/>
+      <xsd:enumeration value="g"/>
+      <xsd:enumeration value="b"/>
+      <xsd:enumeration value="e1"/>
+    </xsd:restriction>
+  </xsd:simpleType>   
+  
+  <xsd:simpleType name="FretNumber">
+   <xsd:restriction base="xsd:decimal">
+    <xsd:minInclusive value="1"/>
+    <xsd:maxInclusive value="15"/>
+   </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:simpleType name="FingerMark">
+   <xsd:restriction base="xsd:string">
+    <xsd:enumeration value="1"/>
+    <xsd:enumeration value="2"/>
+    <xsd:enumeration value="3"/>
+    <xsd:enumeration value="4"/>
+    <xsd:enumeration value="T"/>
+   </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:simpleType name="StateType">
+   <xsd:restriction base="xsd:string">
+    <xsd:enumeration value="ok"/>
+    <xsd:enumeration value="no"/>
+    <xsd:enumeration value="opt"/>
+    <xsd:enumeration value="open"/>
+   </xsd:restriction>
+  </xsd:simpleType>
+</xsd:schema>

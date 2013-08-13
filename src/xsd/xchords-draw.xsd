@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : XChords-Draw.xsd
+    Created on : 26.9.2005, 23:17
+    Author     : miira
+    Description:
+        Purpose of XML Schema document follows.
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            elementFormDefault="qualified">
+
+            <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+     XChords Draw schema, written by miira, 26th September 2005.
+    </xsd:documentation>
+  </xsd:annotation>
+  
+  <!--
+  <?xml version="1.0" encoding="utf-8"?>
+<chord id="Amaj" name="Amaj" positions="1">
+   <position base="1" fretlabel="1" maxfret="2">
+      <endneck fret="3"/>
+      <string name="d" fret="2" finger="2" state="ok"/>
+      <string name="b" fret="2" finger="3" state="ok"/>
+      <string name="g" fret="1" finger="1" state="ok"/>
+   </position>
+</chord>
+  -->
+   <xsd:element name="chord" type="ChordDrawType"/>
+   
+   <xsd:complexType name="ChordDrawType">
+     <xsd:sequence>
+       <xsd:element name="position" type="PositionDrawType" minOccurs="0" maxOccurs="unbounded"/>
+     </xsd:sequence>
+     <xsd:attribute name="id" type="xsd:ID"/>
+     <xsd:attribute name="name" type="xsd:string"/>
+     <xsd:attribute name="positions" type="xsd:string"/>
+   </xsd:complexType>
+   
+   <xsd:complexType name="PositionDrawType">
+     <xsd:sequence>
+        <xsd:element name="endneck" type="EndNeckType" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="barre" type="BarreType" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element name="string" type="StringType" minOccurs="0" maxOccurs="unbounded"/>
+     </xsd:sequence>
+     <xsd:attribute name="base" type="xsd:string"/>
+     <xsd:attribute name="fretlabel" type="xsd:string"/>
+     <xsd:attribute name="maxfret" type="xsd:string"/>
+   </xsd:complexType>
+
+   <xsd:complexType name="StringType">
+        <xsd:attribute name="name" type="StringName" use="required"/>
+        <xsd:attribute name="fret" type="xsd:string"/>
+        <xsd:attribute name="finger" type="xsd:string"/>
+        <xsd:attribute name="state" type="xsd:string"/>
+   </xsd:complexType> 
+   
+   <!-- <barre low="e6" high="e1" fret="3" finger="1"/> -->
+   <xsd:complexType name="BarreType">
+        <xsd:attribute name="low" type="StringName" use="required"/>
+        <xsd:attribute name="high" type="StringName" use="required"/>
+        <xsd:attribute name="fret" type="xsd:string"/>
+        <xsd:attribute name="finger" type="xsd:string"/>
+   </xsd:complexType>
+   
+   <xsd:complexType name="EndNeckType">
+    <xsd:attribute name="fret" type="xsd:string"/>
+   </xsd:complexType>
+   
+   <xsd:simpleType name="StringName">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="e6"/>
+      <xsd:enumeration value="a"/>
+      <xsd:enumeration value="d"/>
+      <xsd:enumeration value="g"/>
+      <xsd:enumeration value="b"/>
+      <xsd:enumeration value="e1"/>
+    </xsd:restriction>
+  </xsd:simpleType>   
+</xsd:schema>
