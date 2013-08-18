@@ -4,7 +4,7 @@
 	<groupId>RoboTarIOIOforPCConsole</groupId>
 	<artifactId>RoboTarIOIOforPCConsole</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -21,25 +21,48 @@
 			<artifactId>jgoodies-forms</artifactId>
 			<version>${jgoodies.version}</version>
 		</dependency>
-		<!-- dependency>
-			<groupId>org.ioio</groupId>
-			<artifactId>ioio-lib</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ioio</groupId>
-			<artifactId>android</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ioio</groupId>
-			<artifactId>pc</artifactId>
-			<version>1.0</version>
-		</dependency-->
+		<!-- dependency> <groupId>org.ioio</groupId> <artifactId>ioio-lib</artifactId> 
+			<version>1.0</version> </dependency> <dependency> <groupId>org.ioio</groupId> 
+			<artifactId>android</artifactId> <version>1.0</version> </dependency> <dependency> 
+			<groupId>org.ioio</groupId> <artifactId>pc</artifactId> <version>1.0</version> 
+			</dependency -->
 	</dependencies>
 	<properties>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.13</logback.version>
 		<jgoodies.version>1.6.0</jgoodies.version>
 	</properties>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- because m2e errors in eclipse -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-resources-plugin</artifactId>
+										<versionRange>[2.0,)</versionRange>
+										<goals>
+											<goal>resources</goal>
+											<goal>testResources</goal>
+
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>
