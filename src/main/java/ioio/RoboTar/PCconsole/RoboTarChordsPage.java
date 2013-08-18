@@ -277,7 +277,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 		// populate the list based on XML file load.
 		XMLChordLoader3 loader = new XMLChordLoader3();
-		List<Chord> chords = loader.load(new File("src/data/default-chords/robotar-default.xml"));
+		List<Chord> chords = loader.load(new File("src/main/resources/default-chords/robotar-default.xml"));
 		chordList = new DefaultListModel();
 		for (Chord chord : chords) {
 			chordList.addElement(chord);
@@ -360,7 +360,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 */
 	private void showChordImage(Chord chord) {
 		String chordName = chord.getName();
-		String imageName = "src/data/default-chords/" + chordName + ".png";
+		String imageName = "src/main/resources/default-chords/" + chordName + ".png";
 		try {
 			lblChordPicture.setIcon(new ImageIcon(ImageIO
 					.read(new File(imageName))));

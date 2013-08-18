@@ -21,7 +21,7 @@
 			<artifactId>jgoodies-forms</artifactId>
 			<version>${jgoodies.version}</version>
 		</dependency>
-		<!-- dependency> <groupId>org.ioio</groupId> <artifactId>ioio-lib</artifactId> 
+	 	<!-- dependency> <groupId>org.ioio</groupId> <artifactId>ioio-lib</artifactId> 
 			<version>1.0</version> </dependency> <dependency> <groupId>org.ioio</groupId> 
 			<artifactId>android</artifactId> <version>1.0</version> </dependency> <dependency> 
 			<groupId>org.ioio</groupId> <artifactId>pc</artifactId> <version>1.0</version> 
@@ -60,6 +60,16 @@
 								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+				<!-- set maven-compiler-plugin to be sure about versions -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
 					</configuration>
 				</plugin>
 			</plugins>
