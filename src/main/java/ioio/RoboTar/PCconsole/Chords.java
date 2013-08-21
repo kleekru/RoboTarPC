@@ -1,5 +1,9 @@
 package ioio.RoboTar.PCconsole;
 
+import cz.versarius.xchords.Chord;
+import cz.versarius.xchords.StringInfo;
+import cz.versarius.xchords.StringState;
+
 public class Chords {
 
 	private static int lowEstringReceive;
@@ -22,6 +26,19 @@ public class Chords {
 	private static float highEStringPosition;
 	private static int[] chordReceive;
 
+	// what I meant
+	public static int[] translate(Chord chord) {
+		for (int i = 0; i < 6; i++) {
+			StringInfo si = chord.getString(i);
+			if (si.getState() == StringState.OK || si.getState() == StringState.OPEN) {
+				int fret = si.getFret();
+				// further processing...
+			}
+		}
+		// just to compile
+		return chordReceive;
+	}
+	
 	public static int[] Chords(int lowEstringSend, int AstringSend, int DstringSend, int GstringSend, int BstringSend, int highEstringSend)
 		{
 		
