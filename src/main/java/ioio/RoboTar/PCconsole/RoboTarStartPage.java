@@ -35,6 +35,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
 import java.awt.Point;
+import java.net.URL;
 
 public class RoboTarStartPage implements ActionListener {
 
@@ -80,7 +81,10 @@ public class RoboTarStartPage implements ActionListener {
 		lblNewLabel.setSize(new Dimension(50, 50));
 		lblNewLabel.setLocation(new Point(0, 43));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/BlueAhuizoteIcon.png")));
+		java.net.URL res = RoboTarStartPage.class.getResource("/data/BlueAhuizoteIcon.png");
+		System.out.println(res.getPath());
+		lblNewLabel.setIcon(new ImageIcon(res));
+		//lblNewLabel.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/BlueAhuizoteIcon.png")));
 		lblNewLabel.setBorder(null);
 		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
 		frmBlueAhuizote.getContentPane().add(lblNewLabel, BorderLayout.WEST);

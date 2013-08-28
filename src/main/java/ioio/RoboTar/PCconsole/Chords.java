@@ -27,6 +27,7 @@ public class Chords {
 	private static int[] chordReceive;
 
 	// what I meant
+	/** Git test - Validate see new Chords transformation - Kevin... I'll take a look ok to remove**/
 	public static int[] translate(Chord chord) {
 		for (int i = 0; i < 6; i++) {
 			StringInfo si = chord.getString(i);

@@ -74,8 +74,8 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	private JLabel lblChordPicture;
 	private ResourceBundle messages;
 	
-	//public static String ROOT_DIR = "C:/AndroidWorkspace";
-	public static String ROOT_DIR = "d:/projects/kleekru/";
+	public static String ROOT_DIR = "C:/AndroidWorkspace";
+	//public static String ROOT_DIR = "d:/projects/kleekru/";
 
 	private ChordRadioPanel radioPanel;
 
@@ -128,7 +128,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 				RowSpec.decode("max(49dlu;default)"),
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(76dlu;default)"),
-				FormSpecs.LINE_GAP_ROWSPEC, RowSpec.decode("92px"), }));
+				FormSpecs.LINE_GAP_ROWSPEC, RowSpec.decode("92px")}));
 
 		JLabel activeSongLbl = new JLabel(messages.getString("robotar.chords.active_song"));
 		activeSongLbl.setForeground(Color.WHITE);
