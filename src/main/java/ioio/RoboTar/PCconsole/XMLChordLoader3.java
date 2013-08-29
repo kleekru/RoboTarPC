@@ -1,7 +1,7 @@
 package ioio.RoboTar.PCconsole;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +21,12 @@ import cz.versarius.xchords.StringState;
 
 public class XMLChordLoader3 {
 
-	public List<Chord> load(File file) {
+	public List<Chord> load(InputStream stream) {
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(file);
+			Document doc = dBuilder.parse(stream);
 			doc.getDocumentElement().normalize();
 
 			if (doc.hasChildNodes()) {

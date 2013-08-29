@@ -10,8 +10,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -25,23 +25,28 @@ import com.jgoodies.forms.layout.FormSpecs;
 import cz.versarius.xchords.Chord;
 
 import javax.swing.JLabel;
+
 import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Font;
 import java.awt.Dimension;
+
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
+
 import java.awt.Insets;
+
 import javax.swing.JList;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import java.awt.Rectangle;
+
 import javax.swing.ListSelectionModel;
 import javax.swing.JToggleButton;
 
@@ -277,7 +282,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 		// populate the list based on XML file load.
 		XMLChordLoader3 loader = new XMLChordLoader3();
-		List<Chord> chords = loader.load(new File("src/main/resources/default-chords/robotar-default.xml"));
+		List<Chord> chords = loader.load(RoboTarChordsPage.class.getResourceAsStream("/default-chords/robotar-default.xml"));
 		chordList = new DefaultListModel();
 		for (Chord chord : chords) {
 			chordList.addElement(chord);
@@ -360,10 +365,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 */
 	private void showChordImage(Chord chord) {
 		String chordName = chord.getName();
-		String imageName = "src/main/resources/default-chords/" + chordName + ".png";
+		String imageName = "/default-chords/" + chordName + ".png";
 		try {
 			lblChordPicture.setIcon(new ImageIcon(ImageIO
-					.read(new File(imageName))));
+					.read(RoboTarChordsPage.class.getResource(imageName)))); 
 			lblChordPicture.setText(chordName);
 		} catch (IOException e) {
 			LOG.error("file not found: {}", imageName);
