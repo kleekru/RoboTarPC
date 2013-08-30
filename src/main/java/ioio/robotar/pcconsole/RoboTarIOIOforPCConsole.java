@@ -168,12 +168,17 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 						setServo(Chords.getChannelG(), Chords.getGStringPosition());
 						setServo(Chords.getChannelB(), Chords.getBStringPosition());
 						setServo(Chords.getChannelHighE(), Chords.getHighEStringPosition());*/
-						Chords chordServoValues = robotarGUI.getChordsPage().getChordServo();
-						for (int i = 0; i < 6; i++) {
-							int servoNumber = chordServoValues.getServos()[i];
-							float servoValue = chordServoValues.getValues()[i];
-							LOG.debug("sending: servo: {}, value: {}", servoNumber, servoValue);
-							setServo(servoNumber, servoValue);
+						if ((robotarGUI == null) || (robotarGUI.getChordsPage() == null) || (robotarGUI.getChordsPage().getChordServo() == null)) {
+							LOG.info("There is nothing to play! Open chord page and choose chord!");
+						} else {
+							Chords chordServoValues = robotarGUI.getChordsPage().getChordServo();
+							LOG.debug("got chord: {}", chordServoValues.debugOutput());
+							for (int i = 0; i < 6; i++) {
+								int servoNumber = chordServoValues.getServos()[i];
+								float servoValue = chordServoValues.getValues()[i];
+								//LOG.debug("sending: servo: {}, value: {}", servoNumber, servoValue);
+								setServo(servoNumber, servoValue);
+							}
 						}
 
 						// TODO isn't it better here, at the end of the method?
