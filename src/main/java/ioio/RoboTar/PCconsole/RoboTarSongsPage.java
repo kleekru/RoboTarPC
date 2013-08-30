@@ -15,6 +15,8 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 
+import cz.versarius.xchords.Chord;
+import cz.versarius.xchords.ChordLibrary;
 import cz.versarius.xsong.ChordRef;
 import cz.versarius.xsong.Line;
 import cz.versarius.xsong.Part;
@@ -31,8 +33,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
-import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -40,7 +40,14 @@ import javax.swing.text.StyledDocument;
 import javax.swing.ListSelectionModel;
 
 public class RoboTarSongsPage extends JFrame {
-
+	/** style constants */
+	private static final String TITLE_STYLE = "TitleStyle";
+	private static final String MAIN_STYLE = "MainStyle";
+	private static final String MARKED_STYLE = "MarkedStyle";
+	private static final String CHORD_STYLE = "ChordStyle";
+	private static final String MARKED_CHORD_STYLE = "MarkedChordStyle";
+	private static final String MISSING_CHORD_STYLE = "MissingChordStyle";
+	
 	private JPanel frmBlueAhuizoteSongs;
 	private JTextPane textPane; 
 	private Song actualSong;
@@ -48,27 +55,20 @@ public class RoboTarSongsPage extends JFrame {
 	private PositionHints hints;
 	private JList songList;
 	private DefaultListModel songListModel;
+	/** reference to mainframe and chordmanager. */
+	private RoboTarStartPage mainFrame;
+	private boolean missingChords;
+	private JButton btnPlay;
+	private JButton btnSimPedal;
+	private JButton btnEdit;
+	private JButton btnNewSong;
+	private JButton btnLoadDefaultSongs;
 	
-	/**
-	 * Launch the application.
-	 */
-	public static void startSongsPage(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					RoboTarSongsPage frame = new RoboTarSongsPage();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
 	/**
 	 * Create the frame.
 	 */
-	public RoboTarSongsPage() {
+	public RoboTarSongsPage(RoboTarStartPage mainFrame) {
+		this.mainFrame = mainFrame;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 630, 441);
 		frmBlueAhuizoteSongs = new JPanel();
@@ -94,7 +94,7 @@ public class RoboTarSongsPage extends JFrame {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),}));
 		
-		JButton btnLoadDefaultSongs = new JButton("Load default songs");
+		btnLoadDefaultSongs = new JButton("Load default songs");
 		btnLoadDefaultSongs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				XMLSongLoader loader = new XMLSongLoader();
@@ -104,14 +104,15 @@ public class RoboTarSongsPage extends JFrame {
 				songListModel.addElement(song);
 				actualSong = (Song) songListModel.get(0);
 				songList.setModel(songListModel);
+				btnLoadDefaultSongs.setEnabled(false);
 			}
 		});
 		frmBlueAhuizoteSongs.add(btnLoadDefaultSongs, "4, 2");
 		
-		JButton btnNewSong = new JButton("New song");
+		btnNewSong = new JButton("New song");
 		frmBlueAhuizoteSongs.add(btnNewSong, "6, 2");
 		
-		JButton btnEdit = new JButton("Edit");
+		btnEdit = new JButton("Edit");
 		frmBlueAhuizoteSongs.add(btnEdit, "10, 2");
 		
 		songList = new JList();
@@ -129,7 +130,7 @@ public class RoboTarSongsPage extends JFrame {
 			}
 		});
 		
-		JButton btnSimPedal = new JButton("Sim Pedal");
+		btnSimPedal = new JButton("Sim Pedal");
 		btnSimPedal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				simPedalPressed();
@@ -137,10 +138,14 @@ public class RoboTarSongsPage extends JFrame {
 		});
 		frmBlueAhuizoteSongs.add(btnSimPedal, "6, 4");
 		
-		JButton btnPlay = new JButton("Play");
+		btnPlay = new JButton("Play");
 		btnPlay.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				playSong();
+				if ("Stop".equals(((JButton)e.getSource()).getText())) {
+					stopSong();
+				} else {
+					playSong();
+				}
 			}
 		});
 		frmBlueAhuizoteSongs.add(btnPlay, "10, 4");
@@ -154,49 +159,93 @@ public class RoboTarSongsPage extends JFrame {
 		panel.add(textPane);
 	}
 
+	/**
+	 * Simulation of pressing pedal.
+	 * The processing will be almost the same, but written in some event, to react for the pedal.
+	 */
 	protected void simPedalPressed() {
 		PositionHint oldChordHint = hints.getChordHint();
 		PositionHint oldLineHint = hints.getLineHint(oldChordHint);
 		
 		PositionHint chordHint = hints.getNextChordHint();
 		if (chordHint != null) {
+			// visual handling
 			PositionHint lineHint = hints.getLineHint(chordHint);
 			unmarkCurrent(oldChordHint, oldLineHint, lineHint);
 			markCurrent(chordHint, lineHint);
+			
+			// TODO call IOIO to change servos
+			
 		} else {
 			// end of song
-			unmarkCurrent(oldChordHint, oldLineHint, null);
+			stopIt(oldChordHint, oldLineHint);
 		}
 		
 	}
 
+	/**
+	 * Checks, if all the chords in the song exists in chordManager (set of chord libraries)
+	 */
 	protected void checkChords() {
-		// TODO
+		ChordManager manager = mainFrame.getChordManager();
+		for (PositionHint hint : hints.getChords()) {
+			ChordRef ref = hint.getChordRef();
+			String libraryName = Chord.getLibraryName(ref.getChordId());
+			String chordName = Chord.getChordName(ref.getChordId());
+			ChordLibrary library = manager.getChordLibraries().get(libraryName);
+			if (library != null) {
+				Chord chord = library.findByName(chordName);
+				if (chord != null) {
+					ref.setChord(chord);
+					continue;
+				}
+			}
+			markMissing(hint);
+			missingChords = true;
+			
+		}
+		btnPlay.setEnabled(!missingChords);
+		// first press Play
+		btnSimPedal.setEnabled(false); 
+		// TODO not implemented yet
+		btnEdit.setEnabled(false);
+		// TODO not implemented yet
+		btnNewSong.setEnabled(false);
 	}
 	
-	protected void markCurrent(PositionHint chordHint, PositionHint lineHint) {
-		StyleContext sc = new StyleContext();
-		final Style markedStyle = sc.addStyle("MarkedStyle", null);
-		StyleConstants.setForeground(markedStyle, Color.BLUE);
-		StyleConstants.setBackground(markedStyle, Color.YELLOW);
-
-		final Style markedChordStyle = sc.addStyle("MarkedChordStyle", null);
-		StyleConstants.setForeground(markedChordStyle, Color.RED);
-		StyleConstants.setBackground(markedChordStyle, Color.YELLOW);
-
-		// select the first chord and line
+	/**
+	 * Select this chord as missing one.
+	 */
+	protected void markMissing(PositionHint chordHint) {
 		StyledDocument doc = textPane.getStyledDocument();
-		doc.getStyle("ChordStyle");
+		Style missingChordStyle = doc.getStyle(MISSING_CHORD_STYLE);
+		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), missingChordStyle, false);
+	}
+	
+	/**
+	 * Select current chord and line.
+	 * @param chordHint
+	 * @param lineHint
+	 */
+	protected void markCurrent(PositionHint chordHint, PositionHint lineHint) {
+		StyledDocument doc = textPane.getStyledDocument();
+		Style markedStyle = doc.getStyle(MARKED_STYLE);
+		Style markedChordStyle = doc.getStyle(MARKED_CHORD_STYLE);
 		
 		doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), markedStyle, false);
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), markedChordStyle, false);
-
 	}
 
+	/**
+	 * Unselect current chord and line.
+	 * @param chordHint
+	 * @param lineHint
+	 * @param newLineHint
+	 */
 	protected void unmarkCurrent(PositionHint chordHint, PositionHint lineHint, PositionHint newLineHint) {
 		StyledDocument doc = textPane.getStyledDocument();
-		Style chordStyle = doc.getStyle("ChordStyle");
-		Style mainStyle = doc.getStyle("MainStyle");
+		Style chordStyle = doc.getStyle(CHORD_STYLE);
+		Style mainStyle = doc.getStyle(MAIN_STYLE);
 
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), chordStyle, true);
 		if (newLineHint == null || lineHint != newLineHint) {
@@ -205,7 +254,12 @@ public class RoboTarSongsPage extends JFrame {
 
 	}
 
+	/**
+	 * Start to play a song.
+	 */
 	protected void playSong() {
+		btnPlay.setText("Stop");
+		btnSimPedal.setEnabled(true);
 		// select the first chord and line
 		hints.setCurrentChord(0);
 		hints.setCurrentLine(0);
@@ -215,37 +269,80 @@ public class RoboTarSongsPage extends JFrame {
 	}
 
 	/**
-	 * Prepare song for display
-	 * @param song
+	 * Stop to play a song.
+	 */
+	protected void stopSong() {
+		PositionHint oldChordHint = hints.getChordHint();
+		PositionHint oldLineHint = hints.getLineHint(oldChordHint);
+		
+		stopIt(oldChordHint, oldLineHint);
+	}
+	
+	
+	protected void stopIt(PositionHint oldChordHint, PositionHint oldLineHint) {
+		unmarkCurrent(oldChordHint, oldLineHint, null);
+		btnPlay.setText("Play Song");
+		btnSimPedal.setEnabled(false);
+		
+		// TODO call to release servos
+	}
+
+	/**
+	 * Prepare styles for lyrics and chords.
 	 * @param pane
 	 */
-	protected PositionHints showSong(Song song, JTextPane pane) {
-		// prepare styles
+	protected void setupStyles(JTextPane pane) {
 		StyleContext sc = new StyleContext();
 		Style defaultStyle = sc.getStyle(StyleContext.DEFAULT_STYLE);
 
-		final Style mainStyle = sc.addStyle("MainStyle", defaultStyle);
+		Style mainStyle = sc.addStyle(MAIN_STYLE, null);
 	    StyleConstants.setForeground(mainStyle, Color.BLACK);
 	    StyleConstants.setBackground(mainStyle, Color.WHITE);
 	    StyleConstants.setBold(mainStyle, true);
 	    StyleConstants.setFontFamily(mainStyle, "monospaced");
 	    StyleConstants.setFontSize(mainStyle, 12);
 	    
-	    final Style chordStyle = sc.addStyle("ChordStyle", mainStyle);
+	    Style chordStyle = sc.addStyle(CHORD_STYLE, mainStyle);
 		
-	    final Style markedStyle = sc.addStyle("MarkedStyle", null);
+	    Style markedStyle = sc.addStyle(MARKED_STYLE, mainStyle);
 		StyleConstants.setForeground(markedStyle, Color.BLUE);
 		StyleConstants.setBackground(markedStyle, Color.YELLOW);
 
-	    final Style titleStyle = sc.addStyle("TitleStyle", defaultStyle);
+		Style markedChordStyle = sc.addStyle(MARKED_CHORD_STYLE, mainStyle);
+		StyleConstants.setForeground(markedChordStyle, Color.BLUE);
+		StyleConstants.setBackground(markedChordStyle, Color.YELLOW);
+
+		Style missingChordStyle = sc.addStyle(MISSING_CHORD_STYLE, mainStyle);
+		StyleConstants.setForeground(missingChordStyle, Color.RED);
+		StyleConstants.setBackground(missingChordStyle, Color.WHITE);
+
+	    Style titleStyle = sc.addStyle(TITLE_STYLE, defaultStyle);
 		StyleConstants.setForeground(titleStyle, Color.BLACK);
 		StyleConstants.setBackground(titleStyle, Color.WHITE);
 		StyleConstants.setBold(titleStyle, true);
 		StyleConstants.setFontSize(titleStyle, 18);
 		
 		StyledDocument doc = pane.getStyledDocument();
-		doc.addStyle("ChordStyle", chordStyle);
-		doc.addStyle("MainStyle", mainStyle);
+		doc.addStyle(CHORD_STYLE, chordStyle);
+		doc.addStyle(MAIN_STYLE, mainStyle);
+		doc.addStyle(TITLE_STYLE, titleStyle);
+		doc.addStyle(MARKED_STYLE, markedStyle);
+		doc.addStyle(MARKED_CHORD_STYLE, markedChordStyle);
+		doc.addStyle(MISSING_CHORD_STYLE, missingChordStyle);
+	}
+
+	/**
+	 * Prepare song for display
+	 * @param song
+	 * @param pane
+	 */
+	protected PositionHints showSong(Song song, JTextPane pane) {
+		// prepare styles
+		setupStyles(pane);
+		StyledDocument doc = pane.getStyledDocument();
+		Style titleStyle = doc.getStyle(TITLE_STYLE);
+		Style chordStyle = doc.getStyle(CHORD_STYLE);
+		Style mainStyle = doc.getStyle(MAIN_STYLE);
 		
 		hints = new PositionHints();
 		try {
@@ -270,11 +367,10 @@ public class RoboTarSongsPage extends JFrame {
 					
 					lineNum++;
 				}
-				//doc.setCharacterAttributes(10, 20, markedStyle, false);
 	            
 			}
 		} catch (BadLocationException e1) {
-			e1.printStackTrace();
+			e1.printStackTrace(); //TODO
 		}
 		return hints;
 	}
@@ -297,13 +393,13 @@ public class RoboTarSongsPage extends JFrame {
 					str.append(" ");
 				}
 			}
-			// TODO very specific to current format, future change?
-			String chordName = ref.getChordId().split("-")[1];
+			String chordName = Chord.getChordName(ref.getChordId());
 			
 			PositionHint chordHint = new PositionHint();
 			chordHint.setOffset(lineOffset + position - 1);
 			chordHint.setLength(chordName.length());
 			chordHint.setLine(lineNum);
+			chordHint.setChordRef(ref);
 			hints.getChords().add(chordHint);
 			
 			str.append(chordName);	

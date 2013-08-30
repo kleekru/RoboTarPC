@@ -35,7 +35,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
 import java.awt.Point;
-import java.net.URL;
 
 public class RoboTarStartPage implements ActionListener {
 
@@ -43,6 +42,11 @@ public class RoboTarStartPage implements ActionListener {
 	public JButton btnChords;
 	public JButton btnSongs;
 
+	/**
+	 * This will hold all chord libraries loaded in one instance.
+	 */
+	private ChordManager chordManager;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -70,6 +74,7 @@ public class RoboTarStartPage implements ActionListener {
 	 * Initialize the contents of the frame.
 	 */
 	public void initialize() {
+		chordManager = new ChordManager();
 		frmBlueAhuizote = new JFrame();
 		frmBlueAhuizote.setBackground(new Color(0, 0, 255));
 		frmBlueAhuizote.setBounds(100, 100, 800, 600);
@@ -171,12 +176,24 @@ public class RoboTarStartPage implements ActionListener {
 	
 	public void actionPerformed(ActionEvent event) {
 		if (event.getSource() == btnChords) {
-			RoboTarChordsPage window = new RoboTarChordsPage(null);
+			RoboTarChordsPage window = new RoboTarChordsPage(this);
 			window.setVisible(true);
 		}
 		if (event.getSource() == btnSongs) {
-			RoboTarSongsPage window = new RoboTarSongsPage();
+			RoboTarSongsPage window = new RoboTarSongsPage(this);
 			window.setVisible(true);
 	}
+	}
+
+	public ChordManager getChordManager() {
+		// TODO rewrite to better use of singleton pattern - synchronize!
+		if (!chordManager.isInitialized()) {
+			chordManager.initialize();
+		}
+		return chordManager;
+	}
+
+	public void setChordManager(ChordManager chordManager) {
+		this.chordManager = chordManager;
 	}
 }

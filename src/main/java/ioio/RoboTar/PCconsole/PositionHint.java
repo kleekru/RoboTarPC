@@ -1,9 +1,12 @@
 package ioio.RoboTar.PCconsole;
 
+import cz.versarius.xsong.ChordRef;
+
 public class PositionHint {
 	private int offset;
 	private int length;
 	private int line;
+	private ChordRef chordRef;
 	
 	public int getLength() {
 		return length;
@@ -22,6 +25,12 @@ public class PositionHint {
 	}
 	public void setOffset(int offset) {
 		this.offset = offset;
+	}
+	public ChordRef getChordRef() {
+		return chordRef;
+	}
+	public void setChordRef(ChordRef ref) {
+		this.chordRef = ref;
 	}
 	
 }

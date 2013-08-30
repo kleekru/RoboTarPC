@@ -17,7 +17,8 @@ public class XMLChordLoader {
 
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-            Document doc = docBuilder.parse (new File(RoboTarChordsPage.ROOT_DIR + "RoboTarIOIOforPCConsole/src/data/chordlist.xml"));
+            //RoboTarChordsPage.ROOT_DIR + 
+            Document doc = docBuilder.parse (new File("RoboTarIOIOforPCConsole/src/data/chordlist.xml"));
 
             // normalize text representation
             doc.getDocumentElement ().normalize ();

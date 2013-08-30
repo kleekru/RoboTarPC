@@ -6,6 +6,7 @@ package cz.versarius.xchords;
  *
  */
 public class Chord {
+	private String id;
 	private String name;
 	private StringInfo[] strings;
 
@@ -35,5 +36,21 @@ public class Chord {
 	
 	public StringInfo getString(int idx) {
 		return strings[idx];
+	}
+	
+	public static String getChordName(String text) {
+		return text.split("-")[1];
+	}
+	
+	public static String getLibraryName(String text) {
+		return text.split("-")[0];
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }

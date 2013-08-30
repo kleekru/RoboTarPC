@@ -79,33 +79,19 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	private JLabel lblChordPicture;
 	private ResourceBundle messages;
 	
-	public static String ROOT_DIR = "C:/AndroidWorkspace";
-	//public static String ROOT_DIR = "d:/projects/kleekru/";
+	/** reference to mainframe and chordmanager */
+	private RoboTarStartPage mainFrame;
 
 	private ChordRadioPanel radioPanel;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void StartChordsPage() {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					RoboTarChordsPage frame = new RoboTarChordsPage(chordSend);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	/**
 	 * Create the frame.
 	 * 
 	 * @param chordReceived
 	 */
-	public RoboTarChordsPage(int[] chordReceived) {
+	public RoboTarChordsPage(RoboTarStartPage mainFrame) {
+		this.setMainFrame(mainFrame);
+		
 		messages = ResourceBundle.getBundle("ioio.RoboTar.PCconsole.RoboTarBundle", Locale.ENGLISH);
 		
 		setVisible(true);
@@ -467,6 +453,14 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 	public void setChordList(DefaultListModel chordList) {
 		this.chordList = chordList;
+	}
+
+	public RoboTarStartPage getMainFrame() {
+		return mainFrame;
+	}
+
+	public void setMainFrame(RoboTarStartPage mainFrame) {
+		this.mainFrame = mainFrame;
 	}
 
 }

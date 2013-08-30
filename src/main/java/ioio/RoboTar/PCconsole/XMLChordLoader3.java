@@ -56,6 +56,13 @@ public class XMLChordLoader3 {
 						// loop through properties
 						Chord chord = readChord(tempNode.getChildNodes());
 						chords.add(chord);
+						
+						// set id
+						if (tempNode.hasAttributes()) {
+							NamedNodeMap nodeMap = tempNode.getAttributes();
+							Node node = nodeMap.getNamedItem("id");
+							chord.setId(node.getNodeValue());
+						}
 					}
 				}
 			}
