@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -70,7 +71,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	protected int GstringSend;
 	protected int BstringSend;
 	protected int highEstringSend;
-	protected static int[] chordSend;
+	private Chords chordServo;
 	
 	private DefaultListModel chordList;
 	private JList listChords;
@@ -167,44 +168,9 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 				.getResource("/data/TestChordOff.png")));
 		tglbtnTestChord.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				tglbtnTestChordActionPerformed(evt);
+				prepareServoValues();
 			}
 
-			private void tglbtnTestChordActionPerformed(ActionEvent evt) {
-				try {
-					int[] chord = Chords.Chords(lowEstringSend, AstringSend,
-							DstringSend, GstringSend, BstringSend,
-							highEstringSend);
-					if (isGridFilled(chord)) {
-						LOG.debug("Chord values from Chords Constructor: ");
-						for (int i = 0; i < chord.length; i++) {
-							LOG.debug("{}. - {}", i, chord[i]);
-						}
-						logValues("Low E", Chords.getChannelLowE(), Chords.getLowEstringPosition());
-						logValues("A", Chords.getChannelA(), Chords.getAStringPosition());
-						logValues("D", Chords.getChannelD(), Chords.getDStringPosition());
-						logValues("G", Chords.getChannelG(), Chords.getGStringPosition());
-						logValues("B", Chords.getChannelB(), Chords.getBStringPosition());
-						logValues("High E", Chords.getChannelHighE(), Chords.getHighEStringPosition());
-					} else {
-						JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.chords.fill_chord_grid"));
-					}
-				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
-				}
-
-			}
-			private void logValues(String stringName, int channel, float position) {
-				LOG.debug("{} channel: {}, value: {}", stringName, channel, position);
-			}
-			// TODO this is not working now - Chords.Chords returns array of 0's
-			private boolean isGridFilled(int[] chord) {
-				boolean result = true;
-				for (int i = 0; i<chord.length; i++) {
-					result &= (chord[i]>0);
-				}
-				return result;
-			}
 		});
 
 		// add chord to song button
@@ -395,10 +361,6 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		return highEstringSend;
 	}
 
-	public static int[] getChordSend() {
-		return chordSend;
-	}
-
 	public void setChordNameSend(String chordNameSend) {
 		this.chordNameSend = chordNameSend;
 	}
@@ -427,10 +389,20 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		this.highEstringSend = highEstringSend;
 	}
 
-	public static void setChordSend(int[] chordSend) {
-		RoboTarChordsPage.chordSend = chordSend;
+	/**
+	 * Fills servoValue field to be used in loop() - RoboTarConsole
+	 */
+	public void prepareServoValues() {
+		try {
+			// use radio panel as source for chord, unfilled radios will be marked OPEN
+			Chord chord = radioPanel.createChordFromRadios();
+			chordServo = new Chords(chord);
+			LOG.info(chordServo.debugOutput());
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
-
+	
 	public JButton getBtnNewChord() {
 		return btnNewChord;
 	}
@@ -461,6 +433,14 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 	public void setMainFrame(RoboTarStartPage mainFrame) {
 		this.mainFrame = mainFrame;
+	}
+
+	public Chords getChordServo() {
+		return chordServo;
+	}
+
+	public void setChordServo(Chords servoValues) {
+		this.chordServo = servoValues;
 	}
 
 }

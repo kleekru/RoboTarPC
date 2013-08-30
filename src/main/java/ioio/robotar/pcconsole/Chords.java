@@ -6,6 +6,49 @@ import cz.versarius.xchords.StringState;
 
 public class Chords {
 
+	private int[] servos;
+	private int[] values;
+	
+	public Chords(Chord chord) {
+		for (int i = 0; i < 6; i++) {
+			StringInfo si = chord.getString(i);
+			if (si.getState() == StringState.OK || si.getState() == StringState.OPEN) {
+				int fret = si.getFret();
+				// further processing...
+			}
+		}
+		// servo and values are set..
+	}
+	
+	public String debugOutput() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 6; i++) {
+			sb.append("Servo: ").append(servos[i]);
+			sb.append(", value: ").append(values[i]);
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+	
+	public int[] getServos() {
+		return servos;
+	}
+
+	public void setServos(int[] servos) {
+		this.servos = servos;
+	}
+
+	public int[] getValues() {
+		return values;
+	}
+
+	public void setValues(int[] values) {
+		this.values = values;
+	}
+	
+	//////////TODO delete after validating, all works
+	
+	
 	private static int lowEstringReceive;
 	private static int AstringReceive;
 	private static int DstringReceive;
@@ -25,22 +68,8 @@ public class Chords {
 	private static float BStringPosition;
 	private static float highEStringPosition;
 	private static int[] chordReceive;
-
-	// what I meant
-	/** Git test - Validate see new Chords transformation - Kevin... I'll take a look ok to remove**/
-	public static int[] translate(Chord chord) {
-		for (int i = 0; i < 6; i++) {
-			StringInfo si = chord.getString(i);
-			if (si.getState() == StringState.OK || si.getState() == StringState.OPEN) {
-				int fret = si.getFret();
-				// further processing...
-			}
-		}
-		// just to compile
-		return chordReceive;
-	}
 	
-	public static int[] Chords(int lowEstringSend, int AstringSend, int DstringSend, int GstringSend, int BstringSend, int highEstringSend)
+	public static int[] deprecated(int lowEstringSend, int AstringSend, int DstringSend, int GstringSend, int BstringSend, int highEstringSend)
 		{
 		
 		if (lowEstringSend == 1 | lowEstringSend == 3) {

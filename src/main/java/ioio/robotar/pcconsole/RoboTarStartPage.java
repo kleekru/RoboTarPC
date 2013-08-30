@@ -46,6 +46,8 @@ public class RoboTarStartPage implements ActionListener {
 	 * This will hold all chord libraries loaded in one instance.
 	 */
 	private ChordManager chordManager;
+	private RoboTarChordsPage chordsPage;
+	private RoboTarSongsPage songsPage;
 	
 	/**
 	 * Launch the application.
@@ -176,12 +178,12 @@ public class RoboTarStartPage implements ActionListener {
 	
 	public void actionPerformed(ActionEvent event) {
 		if (event.getSource() == btnChords) {
-			RoboTarChordsPage window = new RoboTarChordsPage(this);
-			window.setVisible(true);
+			setChordsPage(new RoboTarChordsPage(this));
+			getChordsPage().setVisible(true);
 		}
 		if (event.getSource() == btnSongs) {
-			RoboTarSongsPage window = new RoboTarSongsPage(this);
-			window.setVisible(true);
+			setSongsPage(new RoboTarSongsPage(this));
+			getSongsPage().setVisible(true);
 	}
 	}
 
@@ -195,5 +197,21 @@ public class RoboTarStartPage implements ActionListener {
 
 	public void setChordManager(ChordManager chordManager) {
 		this.chordManager = chordManager;
+	}
+
+	public RoboTarChordsPage getChordsPage() {
+		return chordsPage;
+	}
+
+	public void setChordsPage(RoboTarChordsPage chordsPage) {
+		this.chordsPage = chordsPage;
+	}
+
+	public RoboTarSongsPage getSongsPage() {
+		return songsPage;
+	}
+
+	public void setSongsPage(RoboTarSongsPage songsPage) {
+		this.songsPage = songsPage;
 	}
 }

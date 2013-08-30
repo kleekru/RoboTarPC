@@ -23,6 +23,8 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 	
 	private boolean ledOn_ = false;
 
+	private RoboTarStartPage robotarGUI;
+
 	// Boilerplate main(). Copy-paste this code into any IOIOapplication.
 	public static void main(String[] args) throws Exception {
 		new RoboTarIOIOforPCConsole().go(args);
@@ -30,8 +32,8 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 
 	@Override
 	protected void run(String[] args) throws IOException {
-		RoboTarStartPage window = new RoboTarStartPage();
-		window.mainstart(args);
+		robotarGUI = new RoboTarStartPage();
+		robotarGUI.mainstart(args);
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -66,7 +68,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			private static final byte PCA9685_MODE1 = 0x00;
 			private static final byte PCA9685_PRESCALE = (byte) 0xFE;
 			private final int BUTTON1_PIN = 34;
-			private DigitalInput mButton1;
+			private DigitalInput pedalButton;
 			//private DigitalInput mButton2;
 			
 			private TwiMaster twi_;
@@ -74,8 +76,8 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			@Override
 			protected void setup() throws ConnectionLostException,
 					InterruptedException {
-				System.out.println("Start of the BaseIOIOLooper.setup method");
-				mButton1 = ioio_.openDigitalInput(BUTTON1_PIN, DigitalInput.Spec.Mode.PULL_UP); // Setup Input Button 1
+				LOG.info("Start of the BaseIOIOLooper.setup method");
+				pedalButton = ioio_.openDigitalInput(BUTTON1_PIN, DigitalInput.Spec.Mode.PULL_UP); // Setup Input Button 1
 				led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
 				twi_ = ioio_.openTwiMaster(I2C_PAIR, TwiMaster.Rate.RATE_1MHz, false); // Setup IOIO TWI Pins	
 				reset();
@@ -84,7 +86,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			private void reset() throws ConnectionLostException,
 			InterruptedException {
 				// Set prescaler - see PCA9685 data sheet
-				System.out.println("Start of the BaseIOIOLooper.reset method");
+				LOG.info("Start of the BaseIOIOLooper.reset method");
 				float prescaleval = 25000000;
 				prescaleval /= 4096;
 				prescaleval /= FREQ;
@@ -98,7 +100,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			
 			void write8(byte reg, byte val) throws ConnectionLostException,
 				InterruptedException {
-				System.out.println("Start of the write8 method");
+				LOG.info("Start of the write8 method");
 				byte[] request = {reg, val};
 				twi_.writeReadAsync(PCA_ADDRESS, false, request, request.length, null, 0);
 			}
@@ -106,17 +108,16 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			@Override
 			public void loop() throws ConnectionLostException,
 					InterruptedException {
-				System.out.println("Start of the loop method");
+				LOG.info("Start of the loop method");
 				led_.write(!ledOn_);
 				//Thread.sleep(10);
-				System.out.println("Made it to the Loop");
 				/*Chords[] chordreceived = new Chords[6];
 				BufferedReader reader2 = new BufferedReader(new InputStreamReader(
 						System.in));
 				boolean abort2 = false;
 				String line;*/
 				
-				boolean reading1 = mButton1.read();
+				boolean isPressed = pedalButton.read();
 				//boolean reading2 = mButton1.read();
 				/**
 				 * Logic that determines chord note maps to servo address and direction
@@ -145,18 +146,17 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 				 *  
 				 */
 				
-				System.out.println("Value of Button Push OUT of While Loop: " + reading1);
+				LOG.debug("Value of Button Push OUT of While Loop: " + isPressed);
 				//Thread.sleep(10);
-				while (!reading1) {
+				while (!isPressed) {
 					//if (!reading1){
 					//if (line.equals("n")) {
-						reading1 = mButton1.read();
 					//	reading2 = mButton1.read();
-						System.out.println("Value of Button Push 1 IN ON While Loop: " + reading1);
+						LOG.debug("Value of Button Push 1 IN ON While Loop start: " + isPressed);
 						//System.out.println("Value of Button Push 2 IN ON While Loop: " + reading2);
 					
 						ledOn_ = true;
-						System.out.println("Low E Channel Value with IOIO Class: " + Chords.getChannelLowE()+ "Low E Position value with IOIO Class: "+ Chords.getLowEstringPosition());
+						/*System.out.println("Low E Channel Value with IOIO Class: " + Chords.getChannelLowE()+ "Low E Position value with IOIO Class: "+ Chords.getLowEstringPosition());
 						System.out.println("A Channel Value with IOIO Class: " + Chords.getChannelA()+ "A Position value with IOIO Class: "+ Chords.getAStringPosition());
 						System.out.println("D Channel Value with IOIO Class: " + Chords.getChannelD()+ "D Position value with IOIO Class: "+ Chords.getDStringPosition());
 						System.out.println("G Channel Value with IOIO Class: " + Chords.getChannelG()+ "G Position value with IOIO Class: "+ Chords.getGStringPosition());
@@ -167,11 +167,22 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 						setServo(Chords.getChannelD(), Chords.getDStringPosition());
 						setServo(Chords.getChannelG(), Chords.getGStringPosition());
 						setServo(Chords.getChannelB(), Chords.getBStringPosition());
-						setServo(Chords.getChannelHighE(), Chords.getHighEStringPosition());
+						setServo(Chords.getChannelHighE(), Chords.getHighEStringPosition());*/
+						Chords chordServoValues = robotarGUI.getChordsPage().getChordServo();
+						for (int i = 0; i < 6; i++) {
+							int servoNumber = chordServoValues.getServos()[i];
+							int servoValue = chordServoValues.getValues()[i];
+							LOG.debug("sending: servo: {}, value: {}", servoNumber, servoValue);
+							setServo(servoNumber, servoValue);
+						}
+
+						// TODO isn't it better here, at the end of the method?
+						isPressed = pedalButton.read();
+						LOG.debug("Value of Button Push 1 IN ON While Loop end: " + isPressed);
 				} 
 				
 				//while (reading2) {
-					System.out.println("Value of Button Push 1 IN OFF While Loop: " + reading1);
+					LOG.debug("Value of Button Push 1 IN OFF While Loop: " + isPressed);
 					//System.out.println("Value of Button Push 2 IN OFF While Loop: " + reading2);
 					ledOn_ = false;
 					setServo(0, 1.0f);
@@ -187,7 +198,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 					setServo(10, 1.0f);
 					setServo(11, 1.0f);
 					setServo(12, 1.0f);
-					System.out.println("Servos in neutral position default");
+					LOG.info("Servos in neutral position default");
 				//}
 				/*
 				for (int i=0;i<chordreceived.length;i++)
