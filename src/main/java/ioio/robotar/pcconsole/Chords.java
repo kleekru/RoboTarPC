@@ -6,22 +6,57 @@ import cz.versarius.xchords.StringState;
 
 public class Chords {
 
-	private int[] servos;
-	private int[] values;
+	public static final float NEUTRAL = 0.5f;
+	public static final float MUTED = 0.8f;
+	/** this is for top 3 string right - higher numbered fret, bottom 3 strings left - also higher numbered fret */
+	public static final float PRESSED_HIGHER = 1.5f;
+	/** exact opposite :) */
+	public static final float PRESSED_LOWER = 0.0f;
+	
+	private int[] servos = new int[6];
+	private float[] values = new float[6];
 	
 	public Chords(Chord chord) {
 		for (int i = 0; i < 6; i++) {
 			StringInfo si = chord.getString(i);
-			if (si.getState() == StringState.OK || si.getState() == StringState.OPEN) {
+			if (si.getState() == StringState.OK || si.getState() == StringState.OPTIONAL) {
+				// something is pressed
 				int fret = si.getFret();
-				// further processing...
+				
+				// compute values for servos
+				int servoNum = i*2 + ((fret - 1) / 2);
+				float servoValue = compute(i, fret, servoNum);
+				
+				servos[i] = servoNum;
+				values[i] = servoValue;
+			} else if (si.getState() == StringState.OPEN){
+				// neutral position
+				servos[i] = i*2;
+				values[i] = NEUTRAL;
+			} else if (si.getState() == StringState.DISABLED) {
+				// muted
+				servos[i] = i*2;
+				values[i] = MUTED;
 			}
 		}
 		// servo and values are set..
 	}
 	
+	private float compute(int string, int fret, int servoNum) {
+		  /* Top 3 strings right = 1.5, left = 0.0
+         * Bottom 3 strings right = 0.0, left = 1.5
+             */
+		int higher = (fret - 1) % 2;
+		if (higher == 1) {
+			return PRESSED_HIGHER;
+		} else {
+			return PRESSED_LOWER;
+		}
+	}
+	
 	public String debugOutput() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("\n");
 		for (int i = 0; i < 6; i++) {
 			sb.append("Servo: ").append(servos[i]);
 			sb.append(", value: ").append(values[i]);
@@ -38,11 +73,11 @@ public class Chords {
 		this.servos = servos;
 	}
 
-	public int[] getValues() {
+	public float[] getValues() {
 		return values;
 	}
 
-	public void setValues(int[] values) {
+	public void setValues(float[] values) {
 		this.values = values;
 	}
 	
