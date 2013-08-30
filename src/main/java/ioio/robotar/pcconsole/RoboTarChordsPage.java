@@ -301,7 +301,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	}
 
 	private void clearSelection() {
-		listChords.setSelectedIndex(0);
+		listChords.clearSelection();
 		lblChordPicture.setText(messages.getString("robotar.chords.no_chord_selected"));
 		lblChordPicture.setIcon(null);
 	}
@@ -328,8 +328,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 			JList theList = (JList) event.getSource();
 			DefaultListModel model = (DefaultListModel) theList.getModel();
 			int selIdx = (int) theList.getSelectedIndex();
-			Chord chord = (Chord) model.get(selIdx);
-			setChord(chord);
+			if (selIdx >= 0) {
+				Chord chord = (Chord) model.get(selIdx);
+				setChord(chord);
+			}
 		}
 	}
 

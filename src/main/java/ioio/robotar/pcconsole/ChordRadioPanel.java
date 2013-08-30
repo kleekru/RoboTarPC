@@ -392,7 +392,8 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		for (int i = 0; i < strings.length; i++) {
 			StringInfo si = chord.getString(i);
 			if (si == null) {
-				clearString(i);
+				//clearString(i);
+				openString(i);
 			} else {
 				StringState state = si.getState();
 				if (state == StringState.DISABLED) {
