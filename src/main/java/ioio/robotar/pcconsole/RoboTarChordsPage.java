@@ -1,7 +1,5 @@
-package ioio.RoboTar.PCconsole;
+package ioio.robotar.pcconsole;
 
-
-import java.awt.EventQueue;
 
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;

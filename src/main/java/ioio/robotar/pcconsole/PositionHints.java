@@ -1,4 +1,4 @@
-package ioio.RoboTar.PCconsole;
+package ioio.robotar.pcconsole;
 
 import java.util.ArrayList;
 import java.util.List;

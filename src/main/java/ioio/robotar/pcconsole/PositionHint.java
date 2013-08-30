@@ -1,4 +1,4 @@
-package ioio.RoboTar.PCconsole;
+package ioio.robotar.pcconsole;
 
 import cz.versarius.xsong.ChordRef;
 

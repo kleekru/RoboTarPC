@@ -1,8 +1,4 @@
-package ioio.RoboTar.PCconsole;
-
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Font;
+package ioio.robotar.pcconsole;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;

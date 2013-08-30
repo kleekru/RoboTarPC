@@ -1,5 +1,5 @@
 /** Kevin's Commit and Check in Test for Git**/
-package ioio.RoboTar.PCconsole;
+package ioio.robotar.pcconsole;
 
 import ioio.lib.api.DigitalInput;
 import ioio.lib.api.DigitalOutput;

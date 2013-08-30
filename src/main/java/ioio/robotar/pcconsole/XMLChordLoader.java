@@ -1,4 +1,4 @@
-package ioio.RoboTar.PCconsole;
+package ioio.robotar.pcconsole;
 
 import java.io.File;
 import org.w3c.dom.*;

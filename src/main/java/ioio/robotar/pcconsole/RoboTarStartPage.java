@@ -14,7 +14,7 @@
 // TODO Create an About page
 
 
-package ioio.RoboTar.PCconsole;
+package ioio.robotar.pcconsole;
 
 import java.awt.Color;
 import java.awt.Dimension;
