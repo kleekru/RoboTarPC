@@ -121,6 +121,17 @@ public class RoboTarSongsPage extends JFrame {
 				}
 			}
 		});
+		
+		JButton btnSimPedal = new JButton("Sim Pedal");
+		frmBlueAhuizoteSongs.add(btnSimPedal, "6, 4");
+		
+		JButton btnPlay = new JButton("Play");
+		btnPlay.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				playSong();
+			}
+		});
+		frmBlueAhuizoteSongs.add(btnPlay, "10, 4");
 		frmBlueAhuizoteSongs.add(songList, "4, 6, fill, fill");
 		
 		JPanel panel = new JPanel();
@@ -128,6 +139,10 @@ public class RoboTarSongsPage extends JFrame {
 		
 		textPane = new JTextPane();
 		panel.add(textPane);
+	}
+
+	protected void playSong() {
+		// first check the chords
 	}
 
 	/**
@@ -150,6 +165,13 @@ public class RoboTarSongsPage extends JFrame {
 		StyleConstants.setFontFamily(textStyle, "courier");
 		StyleConstants.setFontSize(textStyle, 12);
 		
+		SimpleAttributeSet markedStyle = new SimpleAttributeSet();
+		StyleConstants.setForeground(markedStyle, Color.RED);
+		StyleConstants.setBackground(markedStyle, Color.YELLOW);
+		StyleConstants.setBold(markedStyle, true);
+		StyleConstants.setFontFamily(markedStyle, "monospaced");
+		StyleConstants.setFontSize(markedStyle, 20);
+		
 		SimpleAttributeSet titleStyle = new SimpleAttributeSet();
 		StyleConstants.setForeground(titleStyle, Color.BLACK);
 		StyleConstants.setBackground(titleStyle, Color.WHITE);
@@ -169,6 +191,7 @@ public class RoboTarSongsPage extends JFrame {
 					doc.insertString(doc.getLength(), formatChords(line), chordStyle);
 					doc.insertString(doc.getLength(), line.getText() + "\n", textStyle);
 				}
+				doc.setParagraphAttributes(0, 1, markedStyle, true);
 			}
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
