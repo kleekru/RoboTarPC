@@ -2,6 +2,7 @@ package ioio.RoboTar.PCconsole;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,8 +31,11 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import javax.swing.ListSelectionModel;
 
@@ -40,6 +44,8 @@ public class RoboTarSongsPage extends JFrame {
 	private JPanel frmBlueAhuizoteSongs;
 	private JTextPane textPane; 
 	private Song actualSong;
+	// where are chords and lines in the text pane - to be able to select them during play
+	private PositionHints hints;
 	private JList songList;
 	private DefaultListModel songListModel;
 	
@@ -118,11 +124,17 @@ public class RoboTarSongsPage extends JFrame {
 					JList list = (JList)e.getSource();
 					actualSong = (Song) list.getSelectedValue();
 					showSong(actualSong, textPane);
+					checkChords();
 				}
 			}
 		});
 		
 		JButton btnSimPedal = new JButton("Sim Pedal");
+		btnSimPedal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				simPedalPressed();
+			}
+		});
 		frmBlueAhuizoteSongs.add(btnSimPedal, "6, 4");
 		
 		JButton btnPlay = new JButton("Play");
@@ -138,11 +150,68 @@ public class RoboTarSongsPage extends JFrame {
 		frmBlueAhuizoteSongs.add(panel, "10, 6, fill, fill");
 		
 		textPane = new JTextPane();
+		textPane.setEditable(false);
 		panel.add(textPane);
 	}
 
+	protected void simPedalPressed() {
+		PositionHint oldChordHint = hints.getChordHint();
+		PositionHint oldLineHint = hints.getLineHint(oldChordHint);
+		
+		PositionHint chordHint = hints.getNextChordHint();
+		if (chordHint != null) {
+			PositionHint lineHint = hints.getLineHint(chordHint);
+			unmarkCurrent(oldChordHint, oldLineHint, lineHint);
+			markCurrent(chordHint, lineHint);
+		} else {
+			// end of song
+			unmarkCurrent(oldChordHint, oldLineHint, null);
+		}
+		
+	}
+
+	protected void checkChords() {
+		// TODO
+	}
+	
+	protected void markCurrent(PositionHint chordHint, PositionHint lineHint) {
+		StyleContext sc = new StyleContext();
+		final Style markedStyle = sc.addStyle("MarkedStyle", null);
+		StyleConstants.setForeground(markedStyle, Color.BLUE);
+		StyleConstants.setBackground(markedStyle, Color.YELLOW);
+
+		final Style markedChordStyle = sc.addStyle("MarkedChordStyle", null);
+		StyleConstants.setForeground(markedChordStyle, Color.RED);
+		StyleConstants.setBackground(markedChordStyle, Color.YELLOW);
+
+		// select the first chord and line
+		StyledDocument doc = textPane.getStyledDocument();
+		doc.getStyle("ChordStyle");
+		
+		doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), markedStyle, false);
+		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), markedChordStyle, false);
+
+	}
+
+	protected void unmarkCurrent(PositionHint chordHint, PositionHint lineHint, PositionHint newLineHint) {
+		StyledDocument doc = textPane.getStyledDocument();
+		Style chordStyle = doc.getStyle("ChordStyle");
+		Style mainStyle = doc.getStyle("MainStyle");
+
+		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), chordStyle, true);
+		if (newLineHint == null || lineHint != newLineHint) {
+			doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), mainStyle, true);
+		}
+
+	}
+
 	protected void playSong() {
-		// first check the chords
+		// select the first chord and line
+		hints.setCurrentChord(0);
+		hints.setCurrentLine(0);
+		PositionHint chordHint = hints.getChordHint();
+		PositionHint lineHint = hints.getLineHint(chordHint);
+		markCurrent(chordHint, lineHint);
 	}
 
 	/**
@@ -150,35 +219,35 @@ public class RoboTarSongsPage extends JFrame {
 	 * @param song
 	 * @param pane
 	 */
-	protected void showSong(Song song, JTextPane pane) {
-		SimpleAttributeSet chordStyle = new SimpleAttributeSet();
-		StyleConstants.setForeground(chordStyle, Color.BLACK);
-		StyleConstants.setBackground(chordStyle, Color.WHITE);
-		StyleConstants.setBold(chordStyle, true);
-		StyleConstants.setFontFamily(chordStyle, "courier");
-		StyleConstants.setFontSize(chordStyle, 12);
+	protected PositionHints showSong(Song song, JTextPane pane) {
+		// prepare styles
+		StyleContext sc = new StyleContext();
+		Style defaultStyle = sc.getStyle(StyleContext.DEFAULT_STYLE);
+
+		final Style mainStyle = sc.addStyle("MainStyle", defaultStyle);
+	    StyleConstants.setForeground(mainStyle, Color.BLACK);
+	    StyleConstants.setBackground(mainStyle, Color.WHITE);
+	    StyleConstants.setBold(mainStyle, true);
+	    StyleConstants.setFontFamily(mainStyle, "monospaced");
+	    StyleConstants.setFontSize(mainStyle, 12);
+	    
+	    final Style chordStyle = sc.addStyle("ChordStyle", mainStyle);
 		
-		SimpleAttributeSet textStyle = new SimpleAttributeSet();
-		StyleConstants.setForeground(textStyle, Color.BLACK);
-		StyleConstants.setBackground(textStyle, Color.WHITE);
-		StyleConstants.setBold(textStyle, true);
-		StyleConstants.setFontFamily(textStyle, "courier");
-		StyleConstants.setFontSize(textStyle, 12);
-		
-		SimpleAttributeSet markedStyle = new SimpleAttributeSet();
-		StyleConstants.setForeground(markedStyle, Color.RED);
+	    final Style markedStyle = sc.addStyle("MarkedStyle", null);
+		StyleConstants.setForeground(markedStyle, Color.BLUE);
 		StyleConstants.setBackground(markedStyle, Color.YELLOW);
-		StyleConstants.setBold(markedStyle, true);
-		StyleConstants.setFontFamily(markedStyle, "monospaced");
-		StyleConstants.setFontSize(markedStyle, 20);
-		
-		SimpleAttributeSet titleStyle = new SimpleAttributeSet();
+
+	    final Style titleStyle = sc.addStyle("TitleStyle", defaultStyle);
 		StyleConstants.setForeground(titleStyle, Color.BLACK);
 		StyleConstants.setBackground(titleStyle, Color.WHITE);
 		StyleConstants.setBold(titleStyle, true);
 		StyleConstants.setFontSize(titleStyle, 18);
 		
 		StyledDocument doc = pane.getStyledDocument();
+		doc.addStyle("ChordStyle", chordStyle);
+		doc.addStyle("MainStyle", mainStyle);
+		
+		hints = new PositionHints();
 		try {
 			// title and interpret line
 			doc.insertString(0, song.getTitle() + "     " + song.getInterpret() + "\n", titleStyle);
@@ -187,15 +256,27 @@ public class RoboTarSongsPage extends JFrame {
 			for (Part part : song.getParts()) {
 				doc.insertString(doc.getLength(), "\n", null);
 				
+				int lineNum = 0;
 				for (Line line : part.getLines()) {
-					doc.insertString(doc.getLength(), formatChords(line), chordStyle);
-					doc.insertString(doc.getLength(), line.getText() + "\n", textStyle);
+					doc.insertString(doc.getLength(), formatChords(line, hints, lineNum, doc.getLength()), chordStyle);
+
+					int lineOffset = doc.getLength();
+					doc.insertString(doc.getLength(), line.getText() + "\n", mainStyle);
+					PositionHint lineHint = new PositionHint();
+					lineHint.setLine(lineNum);
+					lineHint.setOffset(lineOffset);
+					lineHint.setLength(line.getText().length());
+					hints.getLines().add(lineHint);
+					
+					lineNum++;
 				}
-				doc.setParagraphAttributes(0, 1, markedStyle, true);
+				//doc.setCharacterAttributes(10, 20, markedStyle, false);
+	            
 			}
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
 		}
+		return hints;
 	}
 
 	/**
@@ -205,7 +286,7 @@ public class RoboTarSongsPage extends JFrame {
 	 * @param line
 	 * @return
 	 */
-	private String formatChords(Line line) {
+	private String formatChords(Line line, PositionHints hints, int lineNum, int lineOffset) {
 		StringBuilder str = new StringBuilder();
 		
 		for (ChordRef ref : line.getChords()) {
@@ -216,7 +297,16 @@ public class RoboTarSongsPage extends JFrame {
 					str.append(" ");
 				}
 			}
-			str.append(ref.getChordId().split("-")[1]);	// TODO very specific to current format, future change?
+			// TODO very specific to current format, future change?
+			String chordName = ref.getChordId().split("-")[1];
+			
+			PositionHint chordHint = new PositionHint();
+			chordHint.setOffset(lineOffset + position - 1);
+			chordHint.setLength(chordName.length());
+			chordHint.setLine(lineNum);
+			hints.getChords().add(chordHint);
+			
+			str.append(chordName);	
 		}
 		
 		str.append("\n");
