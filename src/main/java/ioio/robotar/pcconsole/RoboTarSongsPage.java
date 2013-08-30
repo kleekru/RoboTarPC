@@ -153,6 +153,13 @@ public class RoboTarSongsPage extends JFrame {
 		textPane = new JTextPane();
 		textPane.setEditable(false);
 		panel.add(textPane);
+		
+		// buttons default status
+		btnLoadDefaultSongs.setEnabled(true);
+		btnEdit.setEnabled(false);
+		btnNewSong.setEnabled(false);
+		btnPlay.setEnabled(false);
+		btnSimPedal.setEnabled(false);
 	}
 
 	/**
