@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.FormSpecs;
 
 import cz.versarius.xchords.Chord;
 
@@ -123,17 +123,17 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		frmBlueAhuizoteChords.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(frmBlueAhuizoteChords);
 		frmBlueAhuizoteChords.setLayout(new FormLayout(new ColumnSpec[] {
-				FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,
+				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
 				ColumnSpec.decode("max(62dlu;pref)"),
 				ColumnSpec.decode("center:pref:grow"),
-				FormSpecs.RELATED_GAP_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(50dlu;min):grow"), }, new RowSpec[] {
-				FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(49dlu;default)"),
-				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(76dlu;default)"),
-				FormSpecs.LINE_GAP_ROWSPEC, RowSpec.decode("92px")}));
+				FormFactory.LINE_GAP_ROWSPEC, RowSpec.decode("92px")}));
 
 		JLabel activeSongLbl = new JLabel(messages.getString("robotar.chords.active_song"));
 		activeSongLbl.setForeground(Color.WHITE);

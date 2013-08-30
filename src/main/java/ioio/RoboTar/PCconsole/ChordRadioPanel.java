@@ -13,9 +13,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 import cz.versarius.xchords.Chord;
@@ -81,17 +81,17 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		setAlignmentX(Component.RIGHT_ALIGNMENT);
 		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("5px"),
 				ColumnSpec.decode("5px"), ColumnSpec.decode("101px"),
-				ColumnSpec.decode("75px"), FormSpecs.DEFAULT_COLSPEC,
-				ColumnSpec.decode("3px"), FormSpecs.DEFAULT_COLSPEC,
-				ColumnSpec.decode("4px"), FormSpecs.DEFAULT_COLSPEC,
-				ColumnSpec.decode("3px"), FormSpecs.DEFAULT_COLSPEC,
-				ColumnSpec.decode("4px"), FormSpecs.DEFAULT_COLSPEC,
-				ColumnSpec.decode("5px"), FormSpecs.DEFAULT_COLSPEC,
-				FormSpecs.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("75px"), FormFactory.DEFAULT_COLSPEC,
+				ColumnSpec.decode("3px"), FormFactory.DEFAULT_COLSPEC,
+				ColumnSpec.decode("4px"), FormFactory.DEFAULT_COLSPEC,
+				ColumnSpec.decode("3px"), FormFactory.DEFAULT_COLSPEC,
+				ColumnSpec.decode("4px"), FormFactory.DEFAULT_COLSPEC,
+				ColumnSpec.decode("5px"), FormFactory.DEFAULT_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(86dlu;default)"), }, new RowSpec[] {
-				FormSpecs.DEFAULT_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, }));
+				FormFactory.DEFAULT_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
 
 		// Group the radio buttons.
 		lowEstring = new ButtonGroup();

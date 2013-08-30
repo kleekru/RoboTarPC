@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : XSong-Simple.xsd
+    Created on : 30.8.2013
+    Author     : miira
+    Description:
+        This schema describes XSongSimple XML format. 
+        It is used by robotar project.
+        This schema uses references to chords in XChordsLibrary format. 
+    Last change: 30.08.2013    
+-->
+<xsd:schema targetNamespace="http://xsong.versarius.cz/2013/XSongSimple"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:chord="http://xsong.versarius.cz/2013/XSongSimple"
+	elementFormDefault="qualified">
+
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="file:/d:/projects/kleekru/RoboTarIOIOforPCConsole/src/xsd/xml.xsd" />
+
+
+	<xsd:include
+		schemaLocation="file:/d:/projects/kleekru/RoboTarIOIOforPCConsole/src/xsd/xchords.xsd" />
+
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			XSongSimple schema, written by miira, 30th August 2013.
+		</xsd:documentation>
+	</xsd:annotation>
+	
+	<!--  big todo along with other xsd's! -->
+</xsd:schema>  

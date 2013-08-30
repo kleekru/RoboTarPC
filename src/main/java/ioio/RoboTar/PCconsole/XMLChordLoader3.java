@@ -30,6 +30,7 @@ public class XMLChordLoader3 {
 			doc.getDocumentElement().normalize();
 
 			if (doc.hasChildNodes()) {
+				// going into <chordlibrary> element
 				List<Chord> chords = readList(doc.getChildNodes().item(0).getChildNodes());
 				return chords;
 			}

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<song xmlns="http://xsong.versarius.cz/2013/XSongSimple" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xsong.versarius.cz/2013/XSongSimple file:/d:/projects/kleekru/RoboTarIOIOforPCConsole/src/xsd/xsong-simple.xsd">
+	<title>Greensleeves</title>
+	<interpret>traditional</interpret>
+	<info>"Greensleeves" is a traditional English folk song and tune, a
+		ground either of the form called a romanesca or of its slight variant,
+		the passamezzo antico.
+		A broadside ballad by this name was registered at the London
+		Stationer's Company in September 1580, by Richard Jones, as "A Newe
+		Northen Dittye of ye Ladye Greene Sleves".
+	</info>
+	<verse>
+		<line>
+			<text>Alas, my love, you do me wrong,</text>
+			<chords>
+				<chordref id="robotar-Em" position="1" />
+				<chordref id="robotar-G" position="8" />
+				<chordref id="robotar-D" position="18" />
+				<chordref id="robotar-Bm" position="24" />
+			</chords>
+		</line>
+		<line>
+			<text>To cast me off discourteously.</text>
+			<chords>
+				<chordref id="robotar-Em" position="4" />
+				<chordref id="robotar-B7" position="16" />
+			</chords>
+		</line>
+		<line>
+			<text>For I have loved you well and long,</text>
+			<chords>
+				<chordref id="robotar-Em" position="5" />
+				<chordref id="robotar-G" position="12" />
+				<chordref id="robotar-D" position="22" />
+				<chordref id="robotar-B" position="31" />
+			</chords>
+		</line>
+		<line>
+			<text>Delighting in your company.</text>
+			<chords>
+				<chordref id="robotar-Em" position="4" />
+				<chordref id="robotar-B7" position="12" />
+				<chordref id="robotar-Em" position="20" />
+			</chords>
+		</line>
+	</verse>
+	<chorus>
+		<line>
+			<text>Greensleeves was all my joy</text>
+			<chords>
+				<chordref id="robotar-G" position="1" />
+				<chordref id="robotar-D" position="18" />
+			</chords>
+		</line>
+		<line>
+			<text>Greensleeves was my delight,</text>
+			<chords>
+				<chordref id="robotar-Em" position="1" />
+				<chordref id="robotar-B7" position="18" />
+
+			</chords>
+		</line>
+		<line>
+			<text>Greensleeves was my heart of gold,</text>
+			<chords>
+				<chordref id="robotar-G" position="1" />
+				<chordref id="robotar-D" position="21" />
+			</chords>
+		</line>
+		<line>
+			<text>And who but my lady greensleeves.</text>
+			<chords>
+				<chordref id="robotar-Em" position="5" />
+				<chordref id="robotar-B7" position="16" />
+				<chordref id="robotar-E" position="21" />
+			</chords>
+		</line>
+	</chorus>
+</song>
+ 
