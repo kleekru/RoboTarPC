@@ -176,7 +176,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 							for (int i = 0; i < 6; i++) {
 								int servoNumber = chordServoValues.getServos()[i];
 								float servoValue = chordServoValues.getValues()[i];
-								//LOG.debug("sending: servo: {}, value: {}", servoNumber, servoValue);
+								LOG.debug("setServo call: servo: {}, value: {}", servoNumber, servoValue);
 								setServo(servoNumber, servoValue);
 							}
 						}

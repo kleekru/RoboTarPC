@@ -8,6 +8,11 @@ public class Chords {
 
 	public static final float NEUTRAL = 0.5f;
 	public static final float MUTED = 0.8f;
+	public static final float PRESSED_TOP_RIGHT = 1.5f;
+	public static final float PRESSED_TOP_LEFT = 0.0f;
+	public static final float PRESSED_BOTTOM_RIGHT = 0.0f;
+	public static final float PRESSED_BOTTOM_LEFT = 1.5f;
+
 	/** this is for top 3 string right - higher numbered fret, bottom 3 strings left - also higher numbered fret */
 	public static final float PRESSED_HIGHER = 1.5f;
 	/** exact opposite :) */
@@ -46,11 +51,22 @@ public class Chords {
 		  /* Top 3 strings right = 1.5, left = 0.0
          * Bottom 3 strings right = 0.0, left = 1.5
              */
+		// higher also known as right one :)
 		int higher = (fret - 1) % 2;
 		if (higher == 1) {
-			return PRESSED_HIGHER;
+			if (string < 3) {
+				return PRESSED_TOP_RIGHT;
+			} else {
+				return PRESSED_BOTTOM_RIGHT;
+			}
+			//return PRESSED_HIGHER;
 		} else {
-			return PRESSED_LOWER;
+			if (string < 3) {
+				return PRESSED_TOP_LEFT;
+			} else {
+				return PRESSED_BOTTOM_LEFT;
+			}
+			//return PRESSED_LOWER;
 		}
 	}
 	
