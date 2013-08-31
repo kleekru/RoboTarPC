@@ -192,7 +192,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 								}
 								
 								// everything is set correctly and we have servo settings available 
-								// (either from songs or chords page, or default - neutral)
+								// (either from songs or chords page, or default - neutral) or last one? - check
 								ServoSettings chordServoValues = robotarGUI.getServoSettings();
 								LOG.debug("got chord: {}", chordServoValues.debugOutput());
 								for (int i = 0; i < 6; i++) {
