@@ -168,20 +168,39 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 						setServo(Chords.getChannelG(), Chords.getGStringPosition());
 						setServo(Chords.getChannelB(), Chords.getBStringPosition());
 						setServo(Chords.getChannelHighE(), Chords.getHighEStringPosition());*/
+
+						// we are checking and logging the status first
 						if (robotarGUI == null) {
-							LOG.info("There is no RoboTar GUI!");
-						} else if (robotarGUI.getChordsPage() == null) {
-							LOG.info("There is no chords page!");
-						} else if (robotarGUI.getChordsPage().getChordServo() == null) {
-							LOG.info("There is no chord chosen!");
+							LOG.error("There is no RoboTar GUI!");
 						} else {
-							Chords chordServoValues = robotarGUI.getChordsPage().getChordServo();
-							LOG.debug("got chord: {}", chordServoValues.debugOutput());
-							for (int i = 0; i < 6; i++) {
-								int servoNumber = chordServoValues.getServos()[i];
-								float servoValue = chordServoValues.getValues()[i];
-								LOG.debug("setServo call: servo: {}, value: {}", servoNumber, servoValue);
-								setServo(servoNumber, servoValue);
+							if (robotarGUI.getChordsPage() == null) {
+								LOG.debug("informative - there is no chords page");
+							}
+							if (robotarGUI.getSongsPage() == null) {
+								LOG.debug("informative - there is no songs page");
+							}
+							if (robotarGUI.getServoSettings() == null) {
+								// this should not happen, servo settings are initialized to neutral positions in the constructor
+								LOG.warn("There is no chord chosen!");
+							} else {
+								// if songs page exists and we already play the song, play next chord
+								if (robotarGUI.getSongsPage() != null && robotarGUI.getSongsPage().isPlaying()) {
+									robotarGUI.getSongsPage().simPedalPressed();
+								} else if (robotarGUI.getChordsPage() != null) {
+									// if not, and chords page exists, play chord that is set in radio buttons
+									robotarGUI.getChordsPage().prepareServoValues();
+								}
+								
+								// everything is set correctly and we have servo settings available 
+								// (either from songs or chords page, or default - neutral)
+								ServoSettings chordServoValues = robotarGUI.getServoSettings();
+								LOG.debug("got chord: {}", chordServoValues.debugOutput());
+								for (int i = 0; i < 6; i++) {
+									int servoNumber = chordServoValues.getServos()[i];
+									float servoValue = chordServoValues.getValues()[i];
+									LOG.debug("setServo call: servo: {}, value: {}", servoNumber, servoValue);
+									setServo(servoNumber, servoValue);
+								}
 							}
 						}
 

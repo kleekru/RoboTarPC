@@ -11,7 +11,6 @@ import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -71,7 +70,6 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	protected int GstringSend;
 	protected int BstringSend;
 	protected int highEstringSend;
-	private Chords chordServo;
 	
 	private DefaultListModel chordList;
 	private JList listChords;
@@ -391,17 +389,14 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	}
 
 	/**
-	 * Fills servoValue field to be used in loop() - RoboTarConsole
+	 * Fills servoSettings field to be used in loop() - RoboTarConsole
 	 */
 	public void prepareServoValues() {
-		try {
-			// use radio panel as source for chord, unfilled radios will be marked OPEN
-			Chord chord = radioPanel.createChordFromRadios();
-			chordServo = new Chords(chord);
-			LOG.info("preparing servo Values on chords page: " + chordServo.debugOutput());
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
+		// use radio panel as source for chord, unfilled radios will be marked OPEN
+		Chord chord = radioPanel.createChordFromRadios();
+		ServoSettings servos = new ServoSettings(chord);
+		mainFrame.setServoSettings(servos);
+		LOG.info("preparing servos Values on chords page: " + servos.debugOutput());
 	}
 	
 	public JButton getBtnNewChord() {
@@ -434,14 +429,6 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 	public void setMainFrame(RoboTarStartPage mainFrame) {
 		this.mainFrame = mainFrame;
-	}
-
-	public Chords getChordServo() {
-		return chordServo;
-	}
-
-	public void setChordServo(Chords servoValues) {
-		this.chordServo = servoValues;
 	}
 
 }

@@ -4,8 +4,11 @@ import cz.versarius.xchords.Chord;
 import cz.versarius.xchords.StringInfo;
 import cz.versarius.xchords.StringState;
 
-public class Chords {
-
+/**
+ * Class for holding info for servos.
+ * Can translate XChord into the values for RoboTar device.
+ */
+public class ServoSettings {
 	public static final float NEUTRAL = 0.5f;
 	public static final float MUTED = 0.8f;
 	public static final float PRESSED_TOP_RIGHT = 1.5f;
@@ -21,7 +24,18 @@ public class Chords {
 	private int[] servos = new int[6];
 	private float[] values = new float[6];
 	
-	public Chords(Chord chord) {
+	/**
+	 * Instantiates servos to neutral positions.
+	 */
+	public ServoSettings() {
+		neutralPosition();
+	}
+	
+	/**
+	 * Instantiates servos to chord values.
+	 * @param chord
+	 */
+	public ServoSettings(Chord chord) {
 		for (int i = 0; i < 6; i++) {
 			StringInfo si = chord.getString(i);
 			if (si.getState() == StringState.OK || si.getState() == StringState.OPTIONAL) {
@@ -45,6 +59,13 @@ public class Chords {
 			}
 		}
 		// servo and values are set..
+	}
+	
+	private void neutralPosition() {
+		for (int i = 0; i < 6; i++) {
+			servos[i] = i*2;
+			values[i] = NEUTRAL;
+		}
 	}
 	
 	private float compute(int string, int fret, int servoNum) {
@@ -224,7 +245,7 @@ public class Chords {
 	}
 
 	public static void setLowEstringReceive(int lowEstringReceive) {
-		Chords.lowEstringReceive = lowEstringReceive;
+		ServoSettings.lowEstringReceive = lowEstringReceive;
 	}
 
 	public void setAstringReceive(int astringReceive) {
@@ -244,11 +265,11 @@ public class Chords {
 	}
 
 	public static void setHighEstringReceive(int highEstringReceive) {
-		Chords.highEstringReceive = highEstringReceive;
+		ServoSettings.highEstringReceive = highEstringReceive;
 	}
 
 	public static void setChordReceive(int[] chordReceive) {
-		Chords.chordReceive = chordReceive;
+		ServoSettings.chordReceive = chordReceive;
 	}
 
 	public static int getChannelLowE() {
@@ -276,27 +297,27 @@ public class Chords {
 	}
 
 	public static void setChannelLowE(int channelLowE) {
-		Chords.channelLowE = channelLowE;
+		ServoSettings.channelLowE = channelLowE;
 	}
 
 	public static void setChannelA(int channelA) {
-		Chords.channelA = channelA;
+		ServoSettings.channelA = channelA;
 	}
 
 	public static void setChannelD(int channelD) {
-		Chords.channelD = channelD;
+		ServoSettings.channelD = channelD;
 	}
 
 	public static void setChannelG(int channelG) {
-		Chords.channelG = channelG;
+		ServoSettings.channelG = channelG;
 	}
 
 	public static void setChannelB(int channelB) {
-		Chords.channelB = channelB;
+		ServoSettings.channelB = channelB;
 	}
 
 	public static void setChannelHighE(int channelHighE) {
-		Chords.channelHighE = channelHighE;
+		ServoSettings.channelHighE = channelHighE;
 	}
 
 	public static float getLowEstringFloat() {
@@ -304,7 +325,7 @@ public class Chords {
 	}
 
 	public static void setLowEstringFloat(float lowEstringFloat) {
-		Chords.lowEstringPosition = lowEstringFloat;
+		ServoSettings.lowEstringPosition = lowEstringFloat;
 	}
 
 	public static float getLowEstringPosition() {
@@ -312,7 +333,7 @@ public class Chords {
 	}
 
 	public static void setLowEstringPosition(float lowEstringPosition) {
-		Chords.lowEstringPosition = lowEstringPosition;
+		ServoSettings.lowEstringPosition = lowEstringPosition;
 	}
 
 	public static float getAStringPosition() {
@@ -352,7 +373,7 @@ public class Chords {
 	}
 
 	public static void setHighEStringPosition(float highEStringPosition) {
-		Chords.highEStringPosition = highEStringPosition;
+		ServoSettings.highEStringPosition = highEStringPosition;
 	}
 
 			

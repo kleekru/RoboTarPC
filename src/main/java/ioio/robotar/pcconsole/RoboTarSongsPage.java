@@ -35,7 +35,11 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import javax.swing.ListSelectionModel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RoboTarSongsPage extends JFrame {
+	static final Logger LOG = LoggerFactory.getLogger(RoboTarSongsPage.class);
 	/** style constants */
 	private static final String TITLE_STYLE = "TitleStyle";
 	private static final String MAIN_STYLE = "MainStyle";
@@ -47,6 +51,7 @@ public class RoboTarSongsPage extends JFrame {
 	private JPanel frmBlueAhuizoteSongs;
 	private JTextPane textPane; 
 	private Song actualSong;
+	private boolean playing;
 	// where are chords and lines in the text pane - to be able to select them during play
 	private PositionHints hints;
 	private JList songList;
@@ -178,7 +183,8 @@ public class RoboTarSongsPage extends JFrame {
 			markCurrent(chordHint, lineHint);
 			
 			// TODO call IOIO to change servos
-			
+			// hm. we can't call IOIO. there is loop() in console, that check's pedal
+			prepareServoValues(chordHint.getChordRef().getChord());
 		} else {
 			// end of song
 			stopIt(oldChordHint, oldLineHint);
@@ -186,6 +192,15 @@ public class RoboTarSongsPage extends JFrame {
 		
 	}
 
+	public void prepareServoValues(Chord chord) {
+		prepareServoValues(new ServoSettings(chord));
+	}
+	
+	public void prepareServoValues(ServoSettings servos) {
+		mainFrame.setServoSettings(servos);
+		LOG.info("preparing servos Values on songs page: " + servos.debugOutput());
+	}
+	
 	/**
 	 * Checks, if all the chords in the song exists in chordManager (set of chord libraries)
 	 */
@@ -269,6 +284,7 @@ public class RoboTarSongsPage extends JFrame {
 		PositionHint chordHint = hints.getChordHint();
 		PositionHint lineHint = hints.getLineHint(chordHint);
 		markCurrent(chordHint, lineHint);
+		playing = true;
 	}
 
 	/**
@@ -283,11 +299,13 @@ public class RoboTarSongsPage extends JFrame {
 	
 	
 	protected void stopIt(PositionHint oldChordHint, PositionHint oldLineHint) {
+		playing = false;
 		unmarkCurrent(oldChordHint, oldLineHint, null);
 		btnPlay.setText("Play Song");
 		btnSimPedal.setEnabled(false);
 		
-		// TODO call to release servos
+		// TODO call to release servos - neutral positions
+		prepareServoValues(new ServoSettings());
 	}
 
 	/**
@@ -434,6 +452,14 @@ public class RoboTarSongsPage extends JFrame {
 
 	public void setSongList(DefaultListModel songList) {
 		this.songListModel = songList;
+	}
+
+	public boolean isPlaying() {
+		return playing;
+	}
+
+	public void setPlaying(boolean playing) {
+		this.playing = playing;
 	}
 
 }

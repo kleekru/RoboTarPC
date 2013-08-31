@@ -22,6 +22,7 @@ import java.awt.EventQueue;
 import java.awt.Insets;
 
 import javax.swing.JFrame;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,6 +35,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
+
 import java.awt.Point;
 
 public class RoboTarStartPage implements ActionListener {
@@ -41,7 +43,12 @@ public class RoboTarStartPage implements ActionListener {
 	private JFrame frmBlueAhuizote;
 	public JButton btnChords;
 	public JButton btnSongs;
-
+	/**
+	 * This is the field, which RoboTarIOIOforPCConsole reads in loop() 
+	 * and uses its values to send them to the device.
+	 */
+	private ServoSettings servoSettings;
+	
 	/**
 	 * This will hold all chord libraries loaded in one instance.
 	 */
@@ -56,8 +63,8 @@ public class RoboTarStartPage implements ActionListener {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					RoboTarStartPage window = new RoboTarStartPage();
-					window.frmBlueAhuizote.setVisible(true);
+					//RoboTarStartPage window = new RoboTarStartPage();
+					frmBlueAhuizote.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -77,6 +84,7 @@ public class RoboTarStartPage implements ActionListener {
 	 */
 	public void initialize() {
 		chordManager = new ChordManager();
+		servoSettings = new ServoSettings();
 		frmBlueAhuizote = new JFrame();
 		frmBlueAhuizote.setBackground(new Color(0, 0, 255));
 		frmBlueAhuizote.setBounds(100, 100, 800, 600);
@@ -213,5 +221,13 @@ public class RoboTarStartPage implements ActionListener {
 
 	public void setSongsPage(RoboTarSongsPage songsPage) {
 		this.songsPage = songsPage;
+	}
+
+	public ServoSettings getServoSettings() {
+		return servoSettings;
+	}
+
+	public void setServoSettings(ServoSettings chordServo) {
+		this.servoSettings = chordServo;
 	}
 }
