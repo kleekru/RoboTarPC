@@ -795,7 +795,9 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-
+		
+		/*RoboTarChordsPage chordsPage = (RoboTarChordsPage)getTopLevelAncestor();
+		chordsPage.prepareServoValues();*/
 	}
 
 	public ButtonGroup getAstring() {

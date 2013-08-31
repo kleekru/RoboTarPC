@@ -168,8 +168,12 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 						setServo(Chords.getChannelG(), Chords.getGStringPosition());
 						setServo(Chords.getChannelB(), Chords.getBStringPosition());
 						setServo(Chords.getChannelHighE(), Chords.getHighEStringPosition());*/
-						if ((robotarGUI == null) || (robotarGUI.getChordsPage() == null) || (robotarGUI.getChordsPage().getChordServo() == null)) {
-							LOG.info("There is nothing to play! Open chord page and choose chord!");
+						if (robotarGUI == null) {
+							LOG.info("There is no RoboTar GUI!");
+						} else if (robotarGUI.getChordsPage() == null) {
+							LOG.info("There is no chords page!");
+						} else if (robotarGUI.getChordsPage().getChordServo() == null) {
+							LOG.info("There is no chord chosen!");
 						} else {
 							Chords chordServoValues = robotarGUI.getChordsPage().getChordServo();
 							LOG.debug("got chord: {}", chordServoValues.debugOutput());

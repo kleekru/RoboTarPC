@@ -309,6 +309,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		radioPanel.setChordName(chord.getName());
 		radioPanel.setupRadios(chord);
 		showChordImage(chord);
+		prepareServoValues();
 	}
 	
 	/**
@@ -397,7 +398,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 			// use radio panel as source for chord, unfilled radios will be marked OPEN
 			Chord chord = radioPanel.createChordFromRadios();
 			chordServo = new Chords(chord);
-			LOG.info(chordServo.debugOutput());
+			LOG.info("preparing servo Values on chords page: " + chordServo.debugOutput());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
