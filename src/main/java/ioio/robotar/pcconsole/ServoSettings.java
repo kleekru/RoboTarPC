@@ -38,7 +38,11 @@ public class ServoSettings {
 	public ServoSettings(Chord chord) {
 		for (int i = 0; i < 6; i++) {
 			StringInfo si = chord.getString(i);
-			if (si.getState() == StringState.OK || si.getState() == StringState.OPTIONAL) {
+			if ((si == null) || (si.getState() == StringState.OPEN)) {
+				// neutral position
+				servos[i] = i*2;
+				values[i] = NEUTRAL;
+			} else if (si.getState() == StringState.OK || si.getState() == StringState.OPTIONAL) {
 				// something is pressed
 				int fret = si.getFret();
 				
@@ -48,10 +52,6 @@ public class ServoSettings {
 				
 				servos[i] = servoNum;
 				values[i] = servoValue;
-			} else if (si.getState() == StringState.OPEN){
-				// neutral position
-				servos[i] = i*2;
-				values[i] = NEUTRAL;
 			} else if (si.getState() == StringState.DISABLED) {
 				// muted
 				servos[i] = i*2;
