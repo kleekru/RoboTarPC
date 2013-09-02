@@ -33,6 +33,16 @@ public class ServoSettings {
 	
 	/**
 	 * Instantiates servos to chord values.
+	 * 
+	 * TODO - Set up a page under a Utilities or Setup menu that allows each
+	 * individual note to be "trimmed" in case adjustments are needed for different
+	 * guitars (different guitars have different action on the strings/frets.
+	 * A user can then set up a plus or minus value to the default that will be 
+	 * saved permanantly or until the user selects a "reset to default" button. 
+	 * While setting each alternate trim value, user should be able to test 
+	 * the value by pushing the pedal and plucking the note that is being trimmed 
+	 * to ensure the proper pressure is on the string.
+	 * 
 	 * @param chord
 	 */
 	public ServoSettings(Chord chord) {
