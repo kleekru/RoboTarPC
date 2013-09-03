@@ -113,15 +113,15 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			@Override
 			public void loop() throws ConnectionLostException,
 					InterruptedException {
-				LOG.info("Start of the loop method");
+				//LOG.info("Start of the loop method");
 				led_.write(!ledOn_);
 
 				// initial position
 				// high = true, low = false
 				boolean pedalInHighPosition = pedalButton.read();
-				LOG.debug("current position of pedal is: {}", pedalInHighPosition);
+				//LOG.debug("current position of pedal is: {}", pedalInHighPosition);
 
-				LOG.debug("lastPedalPosition: {}", lastKnownPedalPosition);
+				//LOG.debug("lastPedalPosition: {}", lastKnownPedalPosition);
 				if (lastKnownPedalPosition == pedalInHighPosition) {
 					// no change from last time
 					return;

@@ -48,7 +48,7 @@ public class ServoSettings {
 	public ServoSettings(Chord chord) {
 		for (int i = 0; i < 6; i++) {
 			StringInfo si = chord.getString(i);
-			if ((si == null) || (si.getState() == StringState.OPEN)) {
+			if ((si == null) || (si.getState() == StringState.OPEN) || (si.getState() == null)) {
 				// neutral position
 				servos[i] = i*2;
 				values[i] = NEUTRAL;

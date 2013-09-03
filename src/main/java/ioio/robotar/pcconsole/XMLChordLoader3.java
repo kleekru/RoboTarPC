@@ -114,6 +114,9 @@ public class XMLChordLoader3 {
 
 						}
 						int idx = convertName2Idx(si.getName());
+						if (si.getState() == null) {
+							si.setState(StringState.OK);
+						}
 						chord.setString(idx, si);
 					}
 				}			
