@@ -76,6 +76,8 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			
 			private TwiMaster twi_;
 			
+			private boolean lastKnownPedalPosition = true;
+			
 			@Override
 			protected void setup() throws ConnectionLostException,
 					InterruptedException {
@@ -113,21 +115,19 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 					InterruptedException {
 				LOG.info("Start of the loop method");
 				led_.write(!ledOn_);
-				//Thread.sleep(10);
 
 				// initial position
-				boolean pedalPosition = pedalButton.read();
-				LOG.debug("current position of pedal is: {}", pedalPosition);
+				// high = true, low = false
+				boolean pedalInHighPosition = pedalButton.read();
+				LOG.debug("current position of pedal is: {}", pedalInHighPosition);
+
+				if (lastKnownPedalPosition == pedalInHighPosition) {
+					// no change from last time
+					return;
+				}
 				
-				// infinite loop
-				while (true) {
-					// wait until the pedal is pressed
-					pedalButton.waitForValue(false);
-					
-					// for debug purposes only, can be removed
-					pedalPosition = pedalButton.read();
-					LOG.debug("current position of pedal is: {}", pedalPosition);
-					
+				if (!pedalInHighPosition) {
+					// PEDAL IS PRESSED
 					ledOn_ = true;
 
 					// we are checking and logging the status first
@@ -167,19 +167,17 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 							LOG.debug("It took {} ms to execute 6 servos", timeEnd - timeStart);
 						}
 					}
-					
-					// wait until pedal is released
-					pedalButton.waitForValue(true);
+				} else {
+					// PEDAL IS RELEASED
+					// turn off led
+					ledOn_ = false;
 					// reset servos
 					resetAllToNeutral();
-					// turn off led?
-					ledOn_ = false;
-					
-					// for debug purposes only, can be removed
-					pedalPosition = pedalButton.read();
-					LOG.debug("current position of pedal is: {}", pedalPosition);
 					
 				} 
+
+				// save current status of the pedal
+				lastKnownPedalPosition = pedalInHighPosition;
 				
 				/*
 				 //TODO what is this?
