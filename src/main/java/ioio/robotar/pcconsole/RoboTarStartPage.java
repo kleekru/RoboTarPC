@@ -38,6 +38,9 @@ import javax.swing.SwingConstants;
 
 import java.awt.Point;
 
+/**
+ * RoboTar GUI main window.
+ */
 public class RoboTarStartPage implements ActionListener {
 
 	private JFrame frmBlueAhuizote;

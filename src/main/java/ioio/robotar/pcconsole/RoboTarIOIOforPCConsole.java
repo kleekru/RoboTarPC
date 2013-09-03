@@ -18,6 +18,10 @@ import java.io.InputStreamReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main class.
+ * Manages IOIO console loop and starts RoboTar GUI. 
+ */
 public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 	static final Logger LOG = LoggerFactory.getLogger(RoboTarIOIOforPCConsole.class);
 	
@@ -69,14 +73,13 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			private static final byte PCA9685_PRESCALE = (byte) 0xFE;
 			private final int BUTTON1_PIN = 34;
 			private DigitalInput pedalButton;
-			//private DigitalInput mButton2;
 			
 			private TwiMaster twi_;
 			
 			@Override
 			protected void setup() throws ConnectionLostException,
 					InterruptedException {
-				LOG.info("Start of the BaseIOIOLooper.setup method");
+				LOG.info("IOIO is connected");
 				pedalButton = ioio_.openDigitalInput(BUTTON1_PIN, DigitalInput.Spec.Mode.PULL_UP); // Setup Input Button 1
 				led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
 				twi_ = ioio_.openTwiMaster(I2C_PAIR, TwiMaster.Rate.RATE_1MHz, false); // Setup IOIO TWI Pins	
@@ -98,7 +101,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 				write8(PCA9685_MODE1, (byte) 0x20); // Wake up and set Auto Increment
 			}
 			
-			void write8(byte reg, byte val) throws ConnectionLostException,
+			private void write8(byte reg, byte val) throws ConnectionLostException,
 				InterruptedException {
 				LOG.info("Start of the write8 method");
 				byte[] request = {reg, val};
@@ -111,219 +114,145 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 				LOG.info("Start of the loop method");
 				led_.write(!ledOn_);
 				//Thread.sleep(10);
-				/*Chords[] chordreceived = new Chords[6];
-				BufferedReader reader2 = new BufferedReader(new InputStreamReader(
-						System.in));
-				boolean abort2 = false;
-				String line;*/
+
+				// initial position
+				boolean pedalPosition = pedalButton.read();
+				LOG.debug("current position of pedal is: {}", pedalPosition);
 				
-				boolean isPressed = pedalButton.read();
-				//boolean reading2 = mButton1.read();
-				/**
-				 * Logic that determines chord note maps to servo address and direction
-				 * Map of string and fret locations to channel and servo position:
-				 * Low E String Frets 1 & 2 = Servo 0 Channel 0
-				 * Low E String Frets 3 & 4 = Servo 1 Channel 1
-				 * A String Frets 1 & 2 = Servo 2 Channel 2
-				 * A STring Frets 3 & 4 = Servo 3 Channel 3
-				 * D String Frets 1 & 2 = Servo 4 Channel 4
-				 * D String Frets 3 & 4 = Servo 5 Channel 5
-				 * G String Frets 1 & 2 = Servo 6 Channel 6
-				 * G String Frets 3 & 4 = Servo 7 Channel 7
-				 * B String Frets 1 & 2 = Servo 8 Channel 8
-				 * B String Frets 3 & 4 = Servo 9 Channel 9
-				 * High E String Frets 1 & 2 = Servo 10 Channel 10
-				 * High E String Frets 3 & 4 = Servo 11 Channel 11
-				 * 
-				 * Position
-				 * Neutral for all = 1.0
-				 * Top 3 strings right = 1.5, left = 0.0
-				 * Bottom 3 strings right = 0.0, left = 1.5
-				 * 
-				 * setServo method will take the parameters (Channel, Position)
-				 * 
-				 * A chord will be defined as Channel[6], position [3]
-				 *  
-				 */
-				
-				LOG.debug("Value of Button Push OUT of While Loop: " + isPressed);
-				//Thread.sleep(10);
-				while (!isPressed) {
-					//if (!reading1){
-					//if (line.equals("n")) {
-					//	reading2 = mButton1.read();
-						LOG.debug("Value of Button Push 1 IN ON While Loop start: " + isPressed);
-						//System.out.println("Value of Button Push 2 IN ON While Loop: " + reading2);
+				// infinite loop
+				while (true) {
+					// wait until the pedal is pressed
+					pedalButton.waitForValue(false);
 					
-						ledOn_ = true;
-						/*System.out.println("Low E Channel Value with IOIO Class: " + Chords.getChannelLowE()+ "Low E Position value with IOIO Class: "+ Chords.getLowEstringPosition());
-						System.out.println("A Channel Value with IOIO Class: " + Chords.getChannelA()+ "A Position value with IOIO Class: "+ Chords.getAStringPosition());
-						System.out.println("D Channel Value with IOIO Class: " + Chords.getChannelD()+ "D Position value with IOIO Class: "+ Chords.getDStringPosition());
-						System.out.println("G Channel Value with IOIO Class: " + Chords.getChannelG()+ "G Position value with IOIO Class: "+ Chords.getGStringPosition());
-						System.out.println("B Channel Value with IOIO Class: " + Chords.getChannelB()+ "B Position value with IOIO Class: "+ Chords.getBStringPosition());
-						System.out.println("High E Channel Value with IOIO Class: " + Chords.getChannelHighE()+ "High E Position value with IOIO Class: "+ Chords.getHighEStringPosition());
-						setServo(Chords.getChannelLowE(), Chords.getLowEstringPosition());
-						setServo(Chords.getChannelA(), Chords.getAStringPosition());
-						setServo(Chords.getChannelD(), Chords.getDStringPosition());
-						setServo(Chords.getChannelG(), Chords.getGStringPosition());
-						setServo(Chords.getChannelB(), Chords.getBStringPosition());
-						setServo(Chords.getChannelHighE(), Chords.getHighEStringPosition());*/
+					// for debug purposes only, can be removed
+					pedalPosition = pedalButton.read();
+					LOG.debug("current position of pedal is: {}", pedalPosition);
+					
+					ledOn_ = true;
 
-						// we are checking and logging the status first
-						if (robotarGUI == null) {
-							LOG.error("There is no RoboTar GUI!");
-						} else {
-							if (robotarGUI.getChordsPage() == null) {
-								LOG.debug("informative - there is no chords page");
-							}
-							if (robotarGUI.getSongsPage() == null) {
-								LOG.debug("informative - there is no songs page");
-							}
-							if (robotarGUI.getServoSettings() == null) {
-								// this should not happen, servo settings are initialized to neutral positions in the constructor
-								LOG.warn("There is no chord chosen!");
-							} else {
-								// if songs page exists and we already play the song, play next chord
-								if (robotarGUI.getSongsPage() != null && robotarGUI.getSongsPage().isPlaying()) {
-									robotarGUI.getSongsPage().simPedalPressed();
-								} else if (robotarGUI.getChordsPage() != null) {
-									// if not, and chords page exists, play chord that is set in radio buttons
-									robotarGUI.getChordsPage().prepareServoValues();
-								}
-								
-								// everything is set correctly and we have servo settings available 
-								// (either from songs or chords page, or default - neutral) or last one? - check
-								ServoSettings chordServoValues = robotarGUI.getServoSettings();
-								LOG.debug("got chord: {}", chordServoValues.debugOutput());
-								for (int i = 0; i < 6; i++) {
-									int servoNumber = chordServoValues.getServos()[i];
-									float servoValue = chordServoValues.getValues()[i];
-									LOG.debug("setServo call: servo: {}, value: {}", servoNumber, servoValue);
-									setServo(servoNumber, servoValue);
-								}
-							}
+					// we are checking and logging the status first
+					if (robotarGUI == null) {
+						LOG.error("There is no RoboTar GUI!");
+					} else {
+						if (robotarGUI.getChordsPage() == null) {
+							LOG.debug("informative - there is no chords page");
 						}
-
-						// TODO isn't it better here, at the end of the method?
-						isPressed = pedalButton.read();
-						LOG.debug("Value of Button Push 1 IN ON While Loop end: " + isPressed);
+						if (robotarGUI.getSongsPage() == null) {
+							LOG.debug("informative - there is no songs page");
+						}
+						if (robotarGUI.getServoSettings() == null) {
+							// this should not happen, servo settings are initialized to neutral positions in the constructor
+							LOG.warn("There is no chord chosen!");
+						} else {
+							// if songs page exists and we already play the song, play next chord
+							if (robotarGUI.getSongsPage() != null && robotarGUI.getSongsPage().isPlaying()) {
+								robotarGUI.getSongsPage().simPedalPressed();
+							} else if (robotarGUI.getChordsPage() != null) {
+								// if not, and chords page exists, play chord that is set in radio buttons
+								robotarGUI.getChordsPage().prepareServoValues();
+							}
+							
+							// everything is set correctly and we have servo settings available 
+							// (either from songs or chords page, or default - neutral) or last one? - check
+							ServoSettings chordServoValues = robotarGUI.getServoSettings();
+							LOG.debug("got chord: {}", chordServoValues.debugOutput());
+							long timeStart = System.currentTimeMillis();
+							for (int i = 0; i < 6; i++) {
+								int servoNumber = chordServoValues.getServos()[i];
+								float servoValue = chordServoValues.getValues()[i];
+								LOG.debug("setServo call: servo: {}, value: {}", servoNumber, servoValue);
+								setServo(servoNumber, servoValue);
+							}
+							long timeEnd = System.currentTimeMillis();
+							LOG.debug("It took {} ms to execute 6 servos", timeEnd - timeStart);
+						}
+					}
+					
+					// wait until pedal is released
+					pedalButton.waitForValue(true);
+					// reset servos
+					resetAllToNeutral();
+					// turn off led?
+					ledOn_ = false;
+					
+					// for debug purposes only, can be removed
+					pedalPosition = pedalButton.read();
+					LOG.debug("current position of pedal is: {}", pedalPosition);
+					
 				} 
 				
-				//while (reading2) {
-					LOG.debug("Value of Button Push 1 IN OFF While Loop: " + isPressed);
-					//System.out.println("Value of Button Push 2 IN OFF While Loop: " + reading2);
-					ledOn_ = false;
-					setServo(0, 1.0f);
-					setServo(1, 1.0f);
-					setServo(2, 1.0f);
-					setServo(3, 1.0f);
-					setServo(4, 1.0f);
-					setServo(5, 1.0f);
-					setServo(6, 1.0f);
-					setServo(7, 1.0f);
-					setServo(8, 1.0f);
-					setServo(9, 1.0f);
-					setServo(10, 1.0f);
-					setServo(11, 1.0f);
-					setServo(12, 1.0f);
-					LOG.info("Servos in neutral position default");
-				//}
 				/*
-				for (int i=0;i<chordreceived.length;i++)
-					{
-					System.out.println("Value of chordreceived in RoboTarforPCIOIOSwing = "+chordreceived[i]);
-					//System.out.println("Value of ChordReceived in RoboTarforPCIOIOSwing = "+chordSend[i]);
+				 //TODO what is this?
+				//PWM Range below is 0.0. to 1.5.  Cycle through each servo channel.
+				for (int c=0; c<16; c++) {
+					for (float p = 1.5f; p>0.0; p-=0.5f) {
+						Thread.sleep(200);
+						setServo(c, p);
+						led_.write(ledOn_);
 					}
-				//Thread.sleep(1000);
-				int lowEstringIn = Chords.getLowEstringReceive();
-				System.out.println(lowEstringIn);
-				int AstringIn = Chords.getAstringReceive();
-				System.out.println(AstringIn);
-				int DstringIn = Chords.getDstringReceive();
-				System.out.println(DstringIn);
-				int GstringIn = Chords.getGstringReceive();
-				System.out.println(GstringIn);
-				int BstringIn = Chords.getBstringReceive();
-				System.out.println(BstringIn);
-				int highEstringIn = Chords.getHighEstringReceive();
-				System.out.println(highEstringIn);
-			
-				Thread.sleep(10);
-				System.out.println("Made it to the loop further down");
-				Chords[] chordreceived1 = new Chords[6];
-											
-				for (int i=0;i<chordreceived1.length;i++)
-					{
-					System.out.println("Value of chordreceived in RoboTarforPCIOIOSwing = "+chordreceived1[i]);
-					//System.out.println("Value of ChordReceived in RoboTarforPCIOIOSwing = "+chordSend[i]);
+				
+					for (float p=0.0f; p<1.5f; p+=0.5f) {
+						Thread.sleep(200);
+						setServo(c, p);
 					}
-		
-			//All Servos one way
-			setServo(0, 0.0f);
-			setServo(1, 0.0f);
-			setServo(2, 0.0f);
-			setServo(3, 0.0f);
-			setServo(4, 0.0f);
-			setServo(5, 0.0f);
-			setServo(6, 0.0f);
-			setServo(7, 0.0f);
-			setServo(8, 0.0f);
-			setServo(9, 0.0f);
-			setServo(10, 0.0f);
-			setServo(11, 0.0f);
-			setServo(12, 0.0f);
-			setServo(13, 0.0f);
-			setServo(14, 0.0f);
-			setServo(15, 0.0f);
-			Thread.sleep(1000);
-			//All Servos back the other way
-			setServo(0, 1.5f);
-			setServo(1, 1.5f);
-			setServo(2, 1.5f);
-			setServo(3, 1.5f);
-			setServo(4, 1.5f);
-			setServo(5, 1.5f);
-			setServo(6, 1.5f);
-			setServo(7, 1.5f);
-			setServo(8, 1.5f);
-			setServo(9, 1.5f);
-			setServo(10, 1.5f);
-			setServo(11, 1.5f);
-			setServo(12, 1.5f);
-			setServo(13, 1.5f);
-			setServo(14, 1.5f);
-			setServo(15, 1.5f);
-			Thread.sleep(1000);
-			
-			//PWM Range below is 0.0. to 1.5.  Cycle through each servo channel.
-			for (int c=0; c<16; c++) {
-				for (float p = 1.5f; p>0.0; p-=0.5f) {
-					Thread.sleep(200);
-					setServo(c, p);
-					led_.write(ledOn_);
-				}
-			
-				for (float p=0.0f; p<1.5f; p+=0.5f) {
-					Thread.sleep(200);
-					setServo(c, p);
-				}
-			}*/
+				}*/
 				
 			}
-				public void setServo(int servoNum, float pos) throws ConnectionLostException, InterruptedException {
-					//Set Servo channel and milliseconds input to PulseWidth calculation
-					setPulseWidth(servoNum, pos + 1.0f);  //
-				}
-				
-				public void setPulseWidth(int channel, float ms) throws ConnectionLostException, InterruptedException {
-					// Set pulsewidth according to PCA9685 data sheet based on milliseconds value sent from setServo method
-					// 4096 steps per cycle, frequency is 50MHz (50 steps per millisecond)
-					int pw = Math.round(ms / 1000 * FREQ * 4096);
-					// Skip to every 4th address value to turn off the pulse (see datasheet addresses for LED#_OFF_L)
-					byte[] request = { (byte) (0x08 + channel * 4), (byte) pw, (byte) (pw >> 8) };
-					twi_.writeReadAsync(PCA_ADDRESS, false, request, request.length, null, 0);
-				}
 			
+			/**
+			 * Reset all servos to neutral position.
+			 * 
+			 * @throws ConnectionLostException
+			 * @throws InterruptedException
+			 */
+			public void resetAllToNeutral() throws ConnectionLostException, InterruptedException {
+				ledOn_ = false;
+				setServo(0, 1.0f);
+				setServo(1, 1.0f);
+				setServo(2, 1.0f);
+				setServo(3, 1.0f);
+				setServo(4, 1.0f);
+				setServo(5, 1.0f);
+				setServo(6, 1.0f);
+				setServo(7, 1.0f);
+				setServo(8, 1.0f);
+				setServo(9, 1.0f);
+				setServo(10, 1.0f);
+				setServo(11, 1.0f);
+				setServo(12, 1.0f);
+				LOG.info("Servos in neutral position default");
+			}
+			
+			/**
+			 * Set Servo channel and milliseconds input to PulseWidth calculation
+			 * 
+			 * @param servoNum
+			 * @param pos
+			 * @throws ConnectionLostException
+			 * @throws InterruptedException
+			 */
+			public void setServo(int servoNum, float pos) throws ConnectionLostException, InterruptedException {
+				setPulseWidth(servoNum, pos + 1.0f);  //
+			}
+			
+			protected void setPulseWidth(int channel, float ms) throws ConnectionLostException, InterruptedException {
+				// Set pulsewidth according to PCA9685 data sheet based on milliseconds value sent from setServo method
+				// 4096 steps per cycle, frequency is 50MHz (50 steps per millisecond)
+				int pw = Math.round(ms / 1000 * FREQ * 4096);
+				// Skip to every 4th address value to turn off the pulse (see datasheet addresses for LED#_OFF_L)
+				byte[] request = { (byte) (0x08 + channel * 4), (byte) pw, (byte) (pw >> 8) };
+				twi_.writeReadAsync(PCA_ADDRESS, false, request, request.length, null, 0);
+			}
+			
+			@Override
+			public void disconnected() {
+				LOG.info("IOIO disconnected");
+			}
+
+			@Override
+			public void incompatible() {
+				LOG.info("Incompatible firmware version of IOIO");
+			}
 		};
 	}
 }
