@@ -121,12 +121,14 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 				boolean pedalInHighPosition = pedalButton.read();
 				LOG.debug("current position of pedal is: {}", pedalInHighPosition);
 
+				LOG.debug("lastPedalPosition: {}", lastKnownPedalPosition);
 				if (lastKnownPedalPosition == pedalInHighPosition) {
 					// no change from last time
 					return;
 				}
 				
 				if (!pedalInHighPosition) {
+					LOG.debug("Pedal is pressed");
 					// PEDAL IS PRESSED
 					ledOn_ = true;
 
@@ -168,6 +170,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 						}
 					}
 				} else {
+					LOG.debug("Pedal is released");
 					// PEDAL IS RELEASED
 					// turn off led
 					ledOn_ = false;
