@@ -10,16 +10,16 @@ import cz.versarius.xchords.StringState;
  */
 public class ServoSettings {
 	public static final float NEUTRAL = 1.0f;
-	public static final float MUTED = 0.8f;
-	public static final float PRESSED_TOP_RIGHT = 1.5f;
-	public static final float PRESSED_TOP_LEFT = 0.5f;
-	public static final float PRESSED_BOTTOM_RIGHT = 0.5f;
-	public static final float PRESSED_BOTTOM_LEFT = 1.5f;
+	public static final float MUTED = 0.9f;
+	public static final float PRESSED_TOP_RIGHT = 1.3f;
+	public static final float PRESSED_TOP_LEFT = 0.7f;
+	public static final float PRESSED_BOTTOM_RIGHT = 0.7f;
+	public static final float PRESSED_BOTTOM_LEFT = 1.3f;
 
 	/** this is for top 3 string right - higher numbered fret, bottom 3 strings left - also higher numbered fret */
-	public static final float PRESSED_HIGHER = 1.5f;
+	public static final float PRESSED_HIGHER = 1.3f;
 	/** exact opposite :) */
-	public static final float PRESSED_LOWER = 0.0f;
+	public static final float PRESSED_LOWER = 0.7f;
 	
 	private int[] servos = new int[6];
 	private float[] values = new float[6];

@@ -65,6 +65,35 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 	public IOIOLooper createIOIOLooper(String connectionType, Object extra) {
 		return new BaseIOIOLooper() {
 			private DigitalOutput led_;
+			private final int note61 = 6;
+			private final int note51 = 7;
+			private final int note41 = 8;
+			private final int note31 = 9;
+			private final int note21 = 10;
+			private final int note11 = 11;
+			
+			private final int note62 = 12;
+			private final int note52 = 13;
+			private final int note42 = 14;
+			private final int note32 = 15;
+			private final int note22 = 16;
+			private final int note12 = 17;
+			
+			private final int note63 = 18;
+			private final int note53 = 19;
+			private final int note43 = 20;
+			private final int note33 = 21;
+			private final int note23 = 22;
+			private final int note13 = 23;
+			
+			private final int note64 = 24;
+			private final int note54 = 25;
+			private final int note44 = 26;
+			private final int note34 = 27;
+			private final int note24 = 28;
+			private final int note14 = 29;
+			
+			
 
 			private final int I2C_PAIR = 0; //IOIO Pair for I2C
 			private static final float FREQ = 50.0f;
@@ -73,6 +102,33 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			private static final byte PCA9685_PRESCALE = (byte) 0xFE;
 			private final int BUTTON1_PIN = 34;
 			private DigitalInput pedalButton;
+			private DigitalOutput led61;
+			private DigitalOutput led51;
+			private DigitalOutput led41;
+			private DigitalOutput led31;
+			private DigitalOutput led21;
+			private DigitalOutput led11;
+			
+			private DigitalOutput led62;
+			private DigitalOutput led52;
+			private DigitalOutput led42;
+			private DigitalOutput led32;
+			private DigitalOutput led22;
+			private DigitalOutput led12;
+			
+			private DigitalOutput led63;
+			private DigitalOutput led53;
+			private DigitalOutput led43;
+			private DigitalOutput led33;
+			private DigitalOutput led23;
+			private DigitalOutput led13;
+			
+			private DigitalOutput led64;
+			private DigitalOutput led54;
+			private DigitalOutput led44;
+			private DigitalOutput led34;
+			private DigitalOutput led24;
+			private DigitalOutput led14;
 			
 			private TwiMaster twi_;
 			
@@ -84,6 +140,34 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 				LOG.info("IOIO is connected");
 				pedalButton = ioio_.openDigitalInput(BUTTON1_PIN, DigitalInput.Spec.Mode.PULL_UP); // Setup Input Button 1
 				led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
+				
+				led61 = ioio_.openDigitalOutput(note61, true);
+				led51 = ioio_.openDigitalOutput(note51, true);
+				led41 = ioio_.openDigitalOutput(note41, true);
+				led31 = ioio_.openDigitalOutput(note31, true);
+				led21 = ioio_.openDigitalOutput(note21, true);
+				led11 = ioio_.openDigitalOutput(note11, true);
+				
+				led62 = ioio_.openDigitalOutput(note62, true);
+				led52 = ioio_.openDigitalOutput(note52, true);
+				led42 = ioio_.openDigitalOutput(note42, true);
+				led32 = ioio_.openDigitalOutput(note32, true);
+				led22 = ioio_.openDigitalOutput(note22, true);
+				led12 = ioio_.openDigitalOutput(note12, true);
+				
+				led63 = ioio_.openDigitalOutput(note63, true);
+				led53 = ioio_.openDigitalOutput(note53, true);
+				led43 = ioio_.openDigitalOutput(note43, true);
+				led33 = ioio_.openDigitalOutput(note33, true);
+				led23 = ioio_.openDigitalOutput(note23, true);
+				led13 = ioio_.openDigitalOutput(note13, true);
+				
+				led64 = ioio_.openDigitalOutput(note64, true);
+				led54 = ioio_.openDigitalOutput(note54, true);
+				led44 = ioio_.openDigitalOutput(note44, true);
+				led34 = ioio_.openDigitalOutput(note34, true);
+				led24 = ioio_.openDigitalOutput(note24, true);
+				led14 = ioio_.openDigitalOutput(note14, true);
 				twi_ = ioio_.openTwiMaster(I2C_PAIR, TwiMaster.Rate.RATE_1MHz, false); // Setup IOIO TWI Pins	
 				reset();
 			}
