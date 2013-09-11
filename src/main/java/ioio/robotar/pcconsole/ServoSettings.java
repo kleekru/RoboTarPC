@@ -16,10 +16,11 @@ public class ServoSettings {
 	public static final float PRESSED_BOTTOM_RIGHT = 0.7f;
 	public static final float PRESSED_BOTTOM_LEFT = 1.3f;
 
+	// not used anymore - delete in future
 	/** this is for top 3 string right - higher numbered fret, bottom 3 strings left - also higher numbered fret */
-	public static final float PRESSED_HIGHER = 1.3f;
+	//public static final float PRESSED_HIGHER = 1.3f;
 	/** exact opposite :) */
-	public static final float PRESSED_LOWER = 0.7f;
+	//public static final float PRESSED_LOWER = 0.7f;
 	
 	private int[] servos = new int[6];
 	private float[] values = new float[6];

@@ -53,6 +53,11 @@ public class RoboTarStartPage implements ActionListener {
 	private ServoSettings servoSettings;
 	
 	/**
+	 * LED settings for the current chord.
+	 */
+	private LEDSettings leds;
+	
+	/**
 	 * This will hold all chord libraries loaded in one instance.
 	 */
 	private ChordManager chordManager;
@@ -233,4 +238,13 @@ public class RoboTarStartPage implements ActionListener {
 	public void setServoSettings(ServoSettings chordServo) {
 		this.servoSettings = chordServo;
 	}
+
+	public LEDSettings getLeds() {
+		return leds;
+	}
+
+	public void setLeds(LEDSettings leds) {
+		this.leds = leds;
+	}
+
 }

@@ -53,23 +53,15 @@ import org.slf4j.LoggerFactory;
 
 public class RoboTarChordsPage extends JFrame implements ActionListener,
 		ListSelectionListener {
+	private static final long serialVersionUID = -4977090038183485379L;
+
 	static final Logger LOG = LoggerFactory.getLogger(RoboTarChordsPage.class);
 
-	private static final long serialVersionUID = 1L;
-	
 	private JPanel frmBlueAhuizoteChords;
 	
 	private JButton btnNewChord;
 	
 	private String chordNameSend;
-	private int channelSend;
-	
-	protected int lowEstringSend;
-	protected int AstringSend;
-	protected int DstringSend;
-	protected int GstringSend;
-	protected int BstringSend;
-	protected int highEstringSend;
 	
 	private DefaultListModel chordList;
 	private JList listChords;
@@ -166,7 +158,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 				.getResource("/data/TestChordOff.png")));
 		tglbtnTestChord.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				prepareServoValues();
+				prepareChord();
 			}
 
 		});
@@ -307,7 +299,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		radioPanel.setChordName(chord.getName());
 		radioPanel.setupRadios(chord);
 		showChordImage(chord);
-		prepareServoValues();
+		prepareChord();
 	}
 	
 	/**
@@ -329,90 +321,26 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		}
 	}
 
-
-
-
-	public String getChordNameSend() {
-		return chordNameSend;
-	}
-
-	public int getLowEstringSend() {
-		return lowEstringSend;
-	}
-
-	public int getAstringSend() {
-		return AstringSend;
-	}
-
-	public int getDstringSend() {
-		return DstringSend;
-	}
-
-	public int getGstringSend() {
-		return GstringSend;
-	}
-
-	public int getBstringSend() {
-		return BstringSend;
-	}
-
-	public int getHighEstringSend() {
-		return highEstringSend;
-	}
-
-	public void setChordNameSend(String chordNameSend) {
-		this.chordNameSend = chordNameSend;
-	}
-
-	public void setLowEstringSend(int lowEstringSend) {
-		this.lowEstringSend = lowEstringSend;
-	}
-
-	public void setAstringSend(int astringSend) {
-		this.AstringSend = astringSend;
-	}
-
-	public void setDstringSend(int dstringSend) {
-		this.DstringSend = dstringSend;
-	}
-
-	public void setGstringSend(int gstringSend) {
-		this.GstringSend = gstringSend;
-	}
-
-	public void setBstringSend(int bstringSend) {
-		this.BstringSend = bstringSend;
-	}
-
-	public void setHighEstringSend(int highEstringSend) {
-		this.highEstringSend = highEstringSend;
-	}
-
 	/**
 	 * Fills servoSettings field to be used in loop() - RoboTarConsole
 	 */
-	public void prepareServoValues() {
+	public void prepareChord() {
 		// use radio panel as source for chord, unfilled radios will be marked OPEN
 		Chord chord = radioPanel.createChordFromRadios();
 		ServoSettings servos = new ServoSettings(chord);
 		mainFrame.setServoSettings(servos);
-		LOG.info("preparing servos Values on chords page: " + servos.debugOutput());
+		LEDSettings leds = new LEDSettings(chord);
+		mainFrame.setLeds(leds);
+		LOG.debug("preparing servos Values on chords page: {}", servos.debugOutput());
+		LOG.debug("preparing leds on chords page: {}", leds.debugOutput());
 	}
 	
 	public JButton getBtnNewChord() {
 		return btnNewChord;
 	}
 
-	public int getChannelSend() {
-		return channelSend;
-	}
-
 	public void setBtnNewChord(JButton btnNewChord) {
 		this.btnNewChord = btnNewChord;
-	}
-
-	public void setChannelSend(int channelSend) {
-		this.channelSend = channelSend;
 	}
 
 	public DefaultListModel getChordList() {

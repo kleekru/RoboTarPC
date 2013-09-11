@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RoboTarSongsPage extends JFrame {
+	private static final long serialVersionUID = -7862830927381806488L;
 	static final Logger LOG = LoggerFactory.getLogger(RoboTarSongsPage.class);
 	/** style constants */
 	private static final String TITLE_STYLE = "TitleStyle";
@@ -184,7 +185,7 @@ public class RoboTarSongsPage extends JFrame {
 			
 			// TODO call IOIO to change servos
 			// hm. we can't call IOIO. there is loop() in console, that check's pedal
-			prepareServoValues(chordHint.getChordRef().getChord());
+			prepareChord(chordHint.getChordRef().getChord());
 		} else {
 			// end of song
 			stopIt(oldChordHint, oldLineHint);
@@ -192,13 +193,24 @@ public class RoboTarSongsPage extends JFrame {
 		
 	}
 
-	public void prepareServoValues(Chord chord) {
+	public void prepareChord(Chord chord) {
 		prepareServoValues(new ServoSettings(chord));
+		prepareLEDs(new LEDSettings(chord));
+	}
+
+	public void prepareNoChord() {
+		prepareServoValues(new ServoSettings());
+		prepareLEDs(new LEDSettings());
 	}
 	
-	public void prepareServoValues(ServoSettings servos) {
+	protected void prepareServoValues(ServoSettings servos) {
 		mainFrame.setServoSettings(servos);
-		LOG.info("preparing servos Values on songs page: " + servos.debugOutput());
+		LOG.debug("preparing servos Values on songs page: {}", servos.debugOutput());
+	}
+	
+	protected void prepareLEDs(LEDSettings leds) {
+		mainFrame.setLeds(leds);
+		LOG.debug("preparing LED Values on songs page: {}", leds.debugOutput());
 	}
 	
 	/**
@@ -304,8 +316,8 @@ public class RoboTarSongsPage extends JFrame {
 		btnPlay.setText("Play Song");
 		btnSimPedal.setEnabled(false);
 		
-		// TODO call to release servos - neutral positions
-		prepareServoValues(new ServoSettings());
+		// call to release servos - neutral positions
+		prepareNoChord();
 	}
 
 	/**
