@@ -40,6 +40,14 @@ public class Song {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+
+	public String getFullTitle() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(title);
+		sb.append(" - ");
+		sb.append(interpret);
+		return sb.toString();
+	}
 	
 	
 }

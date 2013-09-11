@@ -37,6 +37,8 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
 
 import java.awt.Point;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * RoboTar GUI main window.
@@ -63,6 +65,8 @@ public class RoboTarStartPage implements ActionListener {
 	private ChordManager chordManager;
 	private RoboTarChordsPage chordsPage;
 	private RoboTarSongsPage songsPage;
+	
+	private ResourceBundle messages;
 	
 	/**
 	 * Launch the application.
@@ -93,6 +97,9 @@ public class RoboTarStartPage implements ActionListener {
 	public void initialize() {
 		chordManager = new ChordManager();
 		servoSettings = new ServoSettings();
+		
+		messages = ResourceBundle.getBundle("ioio.RoboTar.PCconsole.RoboTarBundle", Locale.ENGLISH);
+		
 		frmBlueAhuizote = new JFrame();
 		frmBlueAhuizote.setBackground(new Color(0, 0, 255));
 		frmBlueAhuizote.setBounds(100, 100, 800, 600);
@@ -194,11 +201,15 @@ public class RoboTarStartPage implements ActionListener {
 	
 	public void actionPerformed(ActionEvent event) {
 		if (event.getSource() == btnChords) {
-			setChordsPage(new RoboTarChordsPage(this));
+			if (chordsPage == null) {
+				chordsPage = new RoboTarChordsPage(this);
+			}
 			getChordsPage().setVisible(true);
 		}
 		if (event.getSource() == btnSongs) {
-			setSongsPage(new RoboTarSongsPage(this));
+			if (songsPage == null) {
+				songsPage = new RoboTarSongsPage(this);
+			}
 			getSongsPage().setVisible(true);
 	}
 	}
@@ -247,4 +258,16 @@ public class RoboTarStartPage implements ActionListener {
 		this.leds = leds;
 	}
 
+	// mediator pattern...? 
+	public boolean isActiveSongEditable() {
+		return (songsPage != null && songsPage.isEditing()); 
+	}
+
+	public ResourceBundle getMessages() {
+		return messages;
+	}
+
+	public void setMessages(ResourceBundle messages) {
+		this.messages = messages;
+	}
 }

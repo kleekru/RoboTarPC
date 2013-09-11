@@ -21,10 +21,14 @@ import cz.versarius.xsong.Song;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.ResourceBundle;
 
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
@@ -38,9 +42,10 @@ import javax.swing.ListSelectionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RoboTarSongsPage extends JFrame {
+public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -7862830927381806488L;
 	static final Logger LOG = LoggerFactory.getLogger(RoboTarSongsPage.class);
+	
 	/** style constants */
 	private static final String TITLE_STYLE = "TitleStyle";
 	private static final String MAIN_STYLE = "MainStyle";
@@ -50,28 +55,36 @@ public class RoboTarSongsPage extends JFrame {
 	private static final String MISSING_CHORD_STYLE = "MissingChordStyle";
 	
 	private JPanel frmBlueAhuizoteSongs;
-	private JTextPane textPane; 
+	
 	private Song actualSong;
 	private boolean playing;
+	private boolean editing;
+	private boolean missingChords;
+	private boolean defaultSongsLoaded;
+	
 	// where are chords and lines in the text pane - to be able to select them during play
 	private PositionHints hints;
+	private JTextPane textPane; 
 	private JList songList;
 	private DefaultListModel songListModel;
-	/** reference to mainframe and chordmanager. */
-	private RoboTarStartPage mainFrame;
-	private boolean missingChords;
+	
 	private JButton btnPlay;
 	private JButton btnSimPedal;
-	private JButton btnEdit;
+	private JButton btnEditSong;
 	private JButton btnNewSong;
 	private JButton btnLoadDefaultSongs;
+
+	/** reference to mainframe and chordmanager. */
+	private RoboTarStartPage mainFrame;
+	private ResourceBundle messages;
 	
 	/**
 	 * Create the frame.
 	 */
 	public RoboTarSongsPage(RoboTarStartPage mainFrame) {
 		this.mainFrame = mainFrame;
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		messages = mainFrame.getMessages();
+
 		setBounds(100, 100, 630, 441);
 		frmBlueAhuizoteSongs = new JPanel();
 		frmBlueAhuizoteSongs.setBackground(Color.LIGHT_GRAY);
@@ -99,23 +112,31 @@ public class RoboTarSongsPage extends JFrame {
 		btnLoadDefaultSongs = new JButton("Load default songs");
 		btnLoadDefaultSongs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				XMLSongLoader loader = new XMLSongLoader();
-				Song song = loader.load(RoboTarChordsPage.class.getResourceAsStream("/default-songs/greensleeves.xml"));
-				// other songs..
-				songListModel = new DefaultListModel();
-				songListModel.addElement(song);
-				actualSong = (Song) songListModel.get(0);
-				songList.setModel(songListModel);
-				btnLoadDefaultSongs.setEnabled(false);
+				loadDefaultSongs();
 			}
 		});
 		frmBlueAhuizoteSongs.add(btnLoadDefaultSongs, "4, 2");
 		
-		btnNewSong = new JButton("New song");
+		btnNewSong = new JButton(messages.getString("robotar.songs.new_song"));
+		btnNewSong.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newSongPressed();
+			}
+		});
 		frmBlueAhuizoteSongs.add(btnNewSong, "6, 2");
 		
-		btnEdit = new JButton("Edit");
-		frmBlueAhuizoteSongs.add(btnEdit, "10, 2");
+		btnEditSong = new JButton(messages.getString("robotar.songs.edit_song"));
+		btnEditSong.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (messages.getString("robotar.songs.done_edit_song").equals(((JButton)e.getSource()).getText())) {
+					doneEditSongPressed();
+				} else {
+					editSongPressed();
+				}
+
+			}
+		});
+		frmBlueAhuizoteSongs.add(btnEditSong, "10, 2");
 		
 		songList = new JList();
 		songList.setCellRenderer(new SongListCellRenderer());
@@ -123,16 +144,13 @@ public class RoboTarSongsPage extends JFrame {
 		songList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
-					// show song in textpane
-					JList list = (JList)e.getSource();
-					actualSong = (Song) list.getSelectedValue();
-					showSong(actualSong, textPane);
-					checkChords();
+					songSelected(e);
 				}
 			}
+			
 		});
 		
-		btnSimPedal = new JButton("Sim Pedal");
+		btnSimPedal = new JButton(messages.getString("robotar.songs.sim_pedal"));
 		btnSimPedal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				simPedalPressed();
@@ -140,10 +158,10 @@ public class RoboTarSongsPage extends JFrame {
 		});
 		frmBlueAhuizoteSongs.add(btnSimPedal, "6, 4");
 		
-		btnPlay = new JButton("Play");
+		btnPlay = new JButton(messages.getString("robotar.songs.play_song"));
 		btnPlay.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if ("Stop".equals(((JButton)e.getSource()).getText())) {
+				if (messages.getString("robotar.songs.stop_song").equals(((JButton)e.getSource()).getText())) {
 					stopSong();
 				} else {
 					playSong();
@@ -162,10 +180,80 @@ public class RoboTarSongsPage extends JFrame {
 		
 		// buttons default status
 		btnLoadDefaultSongs.setEnabled(true);
-		btnEdit.setEnabled(false);
+		btnEditSong.setEnabled(false);
+		btnNewSong.setEnabled(true);
+		btnPlay.setEnabled(false);
+		btnSimPedal.setEnabled(false);
+
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		addWindowListener(this);
+	}
+
+	protected void loadDefaultSongs() {
+		XMLSongLoader loader = new XMLSongLoader();
+		Song song = loader.load(RoboTarChordsPage.class.getResourceAsStream("/default-songs/greensleeves.xml"));
+		// other songs..
+		if (songListModel == null) {
+			songListModel = new DefaultListModel();
+			songList.setModel(songListModel);
+		}
+		int previousSize = songListModel.size();
+		songListModel.addElement(song);
+		// selects first of the default songs
+		actualSong = (Song) songListModel.get(previousSize);
+		defaultSongsLoaded = true;
+		btnLoadDefaultSongs.setEnabled(false);
+	}
+
+	protected void songSelected(ListSelectionEvent e) {
+		// show song in textpane
+		JList list = (JList)e.getSource();
+		actualSong = (Song) list.getSelectedValue();
+		showSong(actualSong, textPane);
+		checkChords();
+		btnEditSong.setEnabled(true);
+		btnNewSong.setEnabled(true);
+	}
+	
+	protected void editSongPressed() {
+		btnEditSong.setText(messages.getString("robotar.songs.done_edit_song"));
+		btnEditSong.setEnabled(true);
 		btnNewSong.setEnabled(false);
 		btnPlay.setEnabled(false);
 		btnSimPedal.setEnabled(false);
+		songList.setEnabled(false);
+		btnLoadDefaultSongs.setEnabled(false);
+		editing = true;
+	}
+
+	protected void doneEditSongPressed() {
+		btnEditSong.setText(messages.getString("robotar.songs.edit_song"));
+		btnEditSong.setEnabled(true);
+		btnNewSong.setEnabled(true);
+		btnPlay.setEnabled(true);
+		btnSimPedal.setEnabled(false);
+		songList.setEnabled(true);
+		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
+		editing = false;
+	}
+	
+	protected void newSongPressed() {
+		// dialog - title, artist
+		Song song = new Song();
+		song.setTitle("new song");
+		song.setInterpret("artist");
+		song.setInfo("empty");
+		
+		if (songListModel == null) {
+			songListModel = new DefaultListModel();
+			songList.setModel(songListModel);
+		}
+		songListModel.add(0, song);
+		actualSong = (Song)songListModel.firstElement();
+		songList.setSelectedIndex(0);
+		
+		// put into edit mode
+		editSongPressed();
 	}
 
 	/**
@@ -238,7 +326,7 @@ public class RoboTarSongsPage extends JFrame {
 		// first press Play
 		btnSimPedal.setEnabled(false); 
 		// TODO not implemented yet
-		btnEdit.setEnabled(false);
+		btnEditSong.setEnabled(false);
 		// TODO not implemented yet
 		btnNewSong.setEnabled(false);
 	}
@@ -288,15 +376,22 @@ public class RoboTarSongsPage extends JFrame {
 	 * Start to play a song.
 	 */
 	protected void playSong() {
-		btnPlay.setText("Stop");
-		btnSimPedal.setEnabled(true);
-		// select the first chord and line
-		hints.setCurrentChord(0);
-		hints.setCurrentLine(0);
-		PositionHint chordHint = hints.getChordHint();
-		PositionHint lineHint = hints.getLineHint(chordHint);
-		markCurrent(chordHint, lineHint);
-		playing = true;
+		if (hints.getChords().isEmpty()) {
+			JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.songs.no_chords_in_song"));
+		} else {
+			btnPlay.setText(messages.getString("robotar.songs.stop_song"));
+			btnSimPedal.setEnabled(true);
+			btnNewSong.setEnabled(false);
+			btnEditSong.setEnabled(false);
+			btnLoadDefaultSongs.setEnabled(false);
+			// select the first chord and line
+			hints.setCurrentChord(0);
+			hints.setCurrentLine(0);
+			PositionHint chordHint = hints.getChordHint();
+			PositionHint lineHint = hints.getLineHint(chordHint);
+			markCurrent(chordHint, lineHint);
+			playing = true;
+		}
 	}
 
 	/**
@@ -313,9 +408,11 @@ public class RoboTarSongsPage extends JFrame {
 	protected void stopIt(PositionHint oldChordHint, PositionHint oldLineHint) {
 		playing = false;
 		unmarkCurrent(oldChordHint, oldLineHint, null);
-		btnPlay.setText("Play Song");
+		btnPlay.setText(messages.getString("robotar.songs.play_song"));
 		btnSimPedal.setEnabled(false);
-		
+		btnNewSong.setEnabled(true);
+		btnEditSong.setEnabled(true);
+		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
 		// call to release servos - neutral positions
 		prepareNoChord();
 	}
@@ -379,6 +476,9 @@ public class RoboTarSongsPage extends JFrame {
 		
 		hints = new PositionHints();
 		try {
+			// clear pane
+			doc.remove(0, doc.getLength());
+			
 			// title and interpret line
 			doc.insertString(0, song.getTitle() + "     " + song.getInterpret() + "\n", titleStyle);
 			
@@ -472,6 +572,51 @@ public class RoboTarSongsPage extends JFrame {
 
 	public void setPlaying(boolean playing) {
 		this.playing = playing;
+	}
+
+	public boolean isEditing() {
+		return editing;
+	}
+
+	public void setEditing(boolean editing) {
+		this.editing = editing;
+	}
+
+	public void windowClosing(WindowEvent e) {
+	}
+	
+	@Override
+	public void windowOpened(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
+		
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+	}
+
+	public boolean isDefaultSongsLoaded() {
+		return defaultSongsLoaded;
+	}
+
+	public void setDefaultSongsLoaded(boolean defaultSongsLoaded) {
+		this.defaultSongsLoaded = defaultSongsLoaded;
 	}
 
 }

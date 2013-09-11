@@ -12,7 +12,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 import com.jgoodies.forms.factories.FormFactory;
@@ -28,6 +27,8 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.Font;
 import java.awt.Dimension;
 
@@ -52,7 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RoboTarChordsPage extends JFrame implements ActionListener,
-		ListSelectionListener {
+		ListSelectionListener, WindowListener {
 	private static final long serialVersionUID = -4977090038183485379L;
 
 	static final Logger LOG = LoggerFactory.getLogger(RoboTarChordsPage.class);
@@ -66,12 +67,18 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	private DefaultListModel chordList;
 	private JList listChords;
 	private JLabel lblChordPicture;
-	private ResourceBundle messages;
 	
 	/** reference to mainframe and chordmanager */
 	private RoboTarStartPage mainFrame;
-
+	private ResourceBundle messages;
+	
 	private ChordRadioPanel radioPanel;
+
+	private JButton btnAddToSong;
+
+	private JButton btnAddToChordList;
+
+	private JLabel activeSong;
 
 	/**
 	 * Create the frame.
@@ -80,8 +87,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 */
 	public RoboTarChordsPage(RoboTarStartPage mainFrame) {
 		this.setMainFrame(mainFrame);
-		
-		messages = ResourceBundle.getBundle("ioio.RoboTar.PCconsole.RoboTarBundle", Locale.ENGLISH);
+		messages = mainFrame.getMessages();
 		
 		setVisible(true);
 		setTitle(messages.getString("robotar.chords.title"));
@@ -115,7 +121,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		activeSongLbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		frmBlueAhuizoteChords.add(activeSongLbl, "3, 2");
 
-		JLabel activeSong = new JLabel(messages.getString("robotar.chords.no_song_selected"));
+		activeSong = new JLabel(messages.getString("robotar.chords.no_song_selected"));
 		activeSong.setForeground(Color.WHITE);
 		frmBlueAhuizoteChords.add(activeSong, "5, 2");
 		activeSong.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
@@ -163,8 +169,8 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 		});
 
-		// add chord to song button
-		JButton btnAddToSong = new JButton("");
+		// add to song button
+		btnAddToSong = new JButton("");
 		frmBlueAhuizoteChords.add(btnAddToSong, "5, 4");
 		btnAddToSong.setMinimumSize(new Dimension(20, 9));
 		btnAddToSong.setMaximumSize(new Dimension(20, 9));
@@ -172,12 +178,16 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 				.getResource("/data/ArrowUp.png")));
 		btnAddToSong.setFont(new Font("Segoe UI", Font.BOLD, 13));
 		btnAddToSong.setToolTipText(messages.getString("robotar.chords.add_chord_to_song.tooltip"));
-
+		btnAddToSong.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				addToSongActionPerformed(evt);
+			}
+		});
+		
 		radioPanel = new ChordRadioPanel(messages);
 		frmBlueAhuizoteChords.add(radioPanel, "5, 6");
 		
-		// add chord to list button
-		JButton btnAddToChordList = new JButton("");
+		btnAddToChordList = new JButton("");
 		frmBlueAhuizoteChords.add(btnAddToChordList, "5, 8, default, center");
 		btnAddToChordList.setIcon(new ImageIcon(RoboTarChordsPage.class
 				.getResource("/data/ArrowDown.png")));
@@ -252,8 +262,9 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 		/* set size of the frame */
 		setSize(800, 409);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		addWindowListener(this);
+		LOG.debug("constructed");
 	}
 
 	private void clearSelection() {
@@ -275,6 +286,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		}
 	}
 
+	public void addToSongActionPerformed(ActionEvent evt) {
+		JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.under_construction"));
+	}
+	
 	/**
 	 * If chord list selection is changed, this method is called.
 	 */
@@ -357,6 +372,40 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 	public void setMainFrame(RoboTarStartPage mainFrame) {
 		this.mainFrame = mainFrame;
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		btnAddToSong.setEnabled(mainFrame.isActiveSongEditable());
+		if (mainFrame.isActiveSongEditable()) {
+			activeSong.setText(mainFrame.getSongsPage().getActualSong().getFullTitle());
+		} else {
+			activeSong.setText(messages.getString("robotar.chords.no_song_selected"));
+		}
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
 	}
 
 }
