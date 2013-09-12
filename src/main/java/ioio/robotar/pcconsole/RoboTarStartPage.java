@@ -201,17 +201,25 @@ public class RoboTarStartPage implements ActionListener {
 	
 	public void actionPerformed(ActionEvent event) {
 		if (event.getSource() == btnChords) {
-			if (chordsPage == null) {
-				chordsPage = new RoboTarChordsPage(this);
-			}
-			getChordsPage().setVisible(true);
+			startChordsPage();
 		}
 		if (event.getSource() == btnSongs) {
-			if (songsPage == null) {
-				songsPage = new RoboTarSongsPage(this);
-			}
-			getSongsPage().setVisible(true);
+			startSongsPage();
+		}
 	}
+	
+	public void startChordsPage() {
+		if (chordsPage == null) {
+			chordsPage = new RoboTarChordsPage(this);
+		}
+		getChordsPage().setVisible(true);
+	}
+	
+	public void startSongsPage() {
+		if (songsPage == null) {
+			songsPage = new RoboTarSongsPage(this);
+		}
+		getSongsPage().setVisible(true);
 	}
 
 	public ChordManager getChordManager() {

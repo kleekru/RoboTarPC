@@ -601,9 +601,10 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		}
 	}
 
-	public Chord createChordFromRadios() {
+	public Chord createChordFromRadios(String library) {
 		Chord chord = new Chord();
 		chord.setName(getChordName());
+		chord.setId(library, chord.getName());
 		StringInfo si = getFrom("e6", radioButton_6M, radioButton_6O, radioButton_61, radioButton_62, radioButton_63, radioButton_64);
 		chord.setString(0, si);
 		si = getFrom("a", radioButton_5M, radioButton_5O, radioButton_51, radioButton_52, radioButton_53, radioButton_54);

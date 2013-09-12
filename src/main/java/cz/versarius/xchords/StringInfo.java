@@ -55,4 +55,14 @@ public class StringInfo {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public String getPlainText() {
+		if (state == StringState.DISABLED) {
+			return "X";
+		}
+		if (state == StringState.OPEN) {
+			return "0";
+		}
+		return Integer.toString(fret, 10);
+	}
 }

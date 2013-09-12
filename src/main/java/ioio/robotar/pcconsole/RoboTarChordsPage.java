@@ -202,12 +202,9 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 			private void addToChordListActionPerformed(ActionEvent evt) {
 				chordNameSend = radioPanel.getChordName();
-				if (!chordNameSend.isEmpty()) {
-					LOG.info("add chord to song... TODO");
-					/*XMLChordLoader.chordloader(chordNameSend, lowEstringSend,
-						AstringSend, DstringSend, GstringSend, BstringSend,
-						highEstringSend);*/
-					Chord chord = radioPanel.createChordFromRadios();
+				if (isValidChordName(chordNameSend)) {
+					LOG.info("add chord to chord list... TODO");
+					Chord chord = radioPanel.createChordFromRadios(getLibraryName());
 					chordList.addElement(chord);
 					radioPanel.setChordName(null);
 					clearSelection();
@@ -287,9 +284,31 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	}
 
 	public void addToSongActionPerformed(ActionEvent evt) {
-		JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.under_construction"));
+		chordNameSend = radioPanel.getChordName();
+		if (isValidChordName(chordNameSend)) {
+			LOG.info("adding chord to song chord list: {}", chordNameSend);
+			Chord chord = radioPanel.createChordFromRadios(getLibraryName());
+			if (mainFrame.getSongsPage() != null) {
+				boolean result = mainFrame.getSongsPage().addChordToUsedChords(chord);
+				if (result) {
+					radioPanel.setChordName(null);
+					radioPanel.clear();
+					clearSelection();
+				} else {
+					JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.chords.chord_already_there"));
+				}
+			} else {
+				LOG.error("no songs page!");
+			}
+		} else {
+			JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.chords.fill_chord_name"));
+		}
 	}
 	
+	private boolean isValidChordName(String chordName) {
+		return (!((chordName == null) || chordName.trim().isEmpty() || chordName.equalsIgnoreCase(messages.getString("robotar.chords.enter_chord_name"))));
+	}
+
 	/**
 	 * If chord list selection is changed, this method is called.
 	 */
@@ -341,7 +360,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 */
 	public void prepareChord() {
 		// use radio panel as source for chord, unfilled radios will be marked OPEN
-		Chord chord = radioPanel.createChordFromRadios();
+		Chord chord = radioPanel.createChordFromRadios(getLibraryName());
 		ServoSettings servos = new ServoSettings(chord);
 		mainFrame.setServoSettings(servos);
 		LEDSettings leds = new LEDSettings(chord);
@@ -350,6 +369,14 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		LOG.debug("preparing leds on chords page: {}", leds.debugOutput());
 	}
 	
+	private String getLibraryName() {
+		if (listChords.isSelectionEmpty()) {
+			return "user";
+		} else {
+			return ((Chord)listChords.getSelectedValue()).getLibrary();
+		}
+	}
+
 	public JButton getBtnNewChord() {
 		return btnNewChord;
 	}

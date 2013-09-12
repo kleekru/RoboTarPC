@@ -28,11 +28,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -41,6 +47,23 @@ import javax.swing.ListSelectionModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.FlowLayout;
+
+import javax.swing.BoxLayout;
+
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+
+import javax.swing.AbstractListModel;
+
+import java.awt.Component;
+
+import javax.swing.SwingConstants;
+
+import java.awt.Button;
+import java.awt.GridLayout;
 
 public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -7862830927381806488L;
@@ -67,6 +90,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private JTextPane textPane; 
 	private JList songList;
 	private DefaultListModel songListModel;
+	private JList chordList;
+	private DefaultListModel chordListModel;
 	
 	private JButton btnPlay;
 	private JButton btnSimPedal;
@@ -77,37 +102,33 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	/** reference to mainframe and chordmanager. */
 	private RoboTarStartPage mainFrame;
 	private ResourceBundle messages;
+	private JPanel editPanel;
+	private JButton btnNewLine;
+	private JButton btnNewVerse;
+	private JButton btnCreateChord;
+	private JButton btnAddChord;
+	private Set<Chord> usedChords;
+	private JButton btnLoadSong;
+	private JButton btnSaveSong;
 	
 	/**
 	 * Create the frame.
 	 */
-	public RoboTarSongsPage(RoboTarStartPage mainFrame) {
+	public RoboTarSongsPage(final RoboTarStartPage mainFrame) {
 		this.mainFrame = mainFrame;
 		messages = mainFrame.getMessages();
 
-		setBounds(100, 100, 630, 441);
+		setBounds(100, 100, 800, 510);
 		frmBlueAhuizoteSongs = new JPanel();
-		frmBlueAhuizoteSongs.setBackground(Color.LIGHT_GRAY);
+		frmBlueAhuizoteSongs.setBackground(Color.BLUE);
 		frmBlueAhuizoteSongs.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(frmBlueAhuizoteSongs);
-		frmBlueAhuizoteSongs.setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("default:grow"),}));
+		GridBagLayout gbl_frmBlueAhuizoteSongs = new GridBagLayout();
+		gbl_frmBlueAhuizoteSongs.columnWidths = new int[] {30, 200, 113, 200, 200, 0};
+		gbl_frmBlueAhuizoteSongs.rowHeights = new int[] {30, 30, 376, 0};
+		gbl_frmBlueAhuizoteSongs.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_frmBlueAhuizoteSongs.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		frmBlueAhuizoteSongs.setLayout(gbl_frmBlueAhuizoteSongs);
 		
 		btnLoadDefaultSongs = new JButton("Load default songs");
 		btnLoadDefaultSongs.addActionListener(new ActionListener() {
@@ -115,15 +136,16 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				loadDefaultSongs();
 			}
 		});
-		frmBlueAhuizoteSongs.add(btnLoadDefaultSongs, "4, 2");
+		GridBagConstraints gbc_btnLoadDefaultSongs = new GridBagConstraints();
+		gbc_btnLoadDefaultSongs.anchor = GridBagConstraints.NORTH;
+		gbc_btnLoadDefaultSongs.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnLoadDefaultSongs.insets = new Insets(0, 0, 5, 5);
+		gbc_btnLoadDefaultSongs.gridx = 1;
+		gbc_btnLoadDefaultSongs.gridy = 0;
+		frmBlueAhuizoteSongs.add(btnLoadDefaultSongs, gbc_btnLoadDefaultSongs);
 		
-		btnNewSong = new JButton(messages.getString("robotar.songs.new_song"));
-		btnNewSong.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				newSongPressed();
-			}
-		});
-		frmBlueAhuizoteSongs.add(btnNewSong, "6, 2");
+		// buttons default status
+		btnLoadDefaultSongs.setEnabled(true);
 		
 		btnEditSong = new JButton(messages.getString("robotar.songs.edit_song"));
 		btnEditSong.addActionListener(new ActionListener() {
@@ -133,10 +155,47 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				} else {
 					editSongPressed();
 				}
-
 			}
 		});
-		frmBlueAhuizoteSongs.add(btnEditSong, "10, 2");
+		
+		btnNewSong = new JButton(messages.getString("robotar.songs.new_song"));
+		btnNewSong.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newSongPressed();
+			}
+		});
+		
+		btnLoadSong = new JButton("Load song");
+		btnLoadSong.setVisible(false);
+		GridBagConstraints gbc_btnLoadSong = new GridBagConstraints();
+		gbc_btnLoadSong.fill = GridBagConstraints.BOTH;
+		gbc_btnLoadSong.insets = new Insets(0, 0, 5, 5);
+		gbc_btnLoadSong.gridx = 2;
+		gbc_btnLoadSong.gridy = 0;
+		btnLoadSong.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.under_construction"));
+			}
+		});
+		frmBlueAhuizoteSongs.add(btnLoadSong, gbc_btnLoadSong);
+		
+		GridBagConstraints gbc_btnNewSong = new GridBagConstraints();
+		gbc_btnNewSong.anchor = GridBagConstraints.NORTH;
+		gbc_btnNewSong.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnNewSong.insets = new Insets(0, 0, 5, 5);
+		gbc_btnNewSong.gridx = 3;
+		gbc_btnNewSong.gridy = 0;
+		frmBlueAhuizoteSongs.add(btnNewSong, gbc_btnNewSong);
+		btnNewSong.setEnabled(true);
+		
+		GridBagConstraints gbc_btnEditSong = new GridBagConstraints();
+		gbc_btnEditSong.anchor = GridBagConstraints.NORTH;
+		gbc_btnEditSong.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnEditSong.insets = new Insets(0, 0, 5, 0);
+		gbc_btnEditSong.gridx = 4;
+		gbc_btnEditSong.gridy = 0;
+		frmBlueAhuizoteSongs.add(btnEditSong, gbc_btnEditSong);
+		btnEditSong.setEnabled(false);
 		
 		songList = new JList();
 		songList.setCellRenderer(new SongListCellRenderer());
@@ -147,7 +206,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					songSelected(e);
 				}
 			}
-			
 		});
 		
 		btnSimPedal = new JButton(messages.getString("robotar.songs.sim_pedal"));
@@ -156,7 +214,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				simPedalPressed();
 			}
 		});
-		frmBlueAhuizoteSongs.add(btnSimPedal, "6, 4");
 		
 		btnPlay = new JButton(messages.getString("robotar.songs.play_song"));
 		btnPlay.addActionListener(new ActionListener() {
@@ -168,23 +225,149 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				}
 			}
 		});
-		frmBlueAhuizoteSongs.add(btnPlay, "10, 4");
-		frmBlueAhuizoteSongs.add(songList, "4, 6, fill, fill");
 		
-		JPanel panel = new JPanel();
-		frmBlueAhuizoteSongs.add(panel, "10, 6, fill, fill");
+		btnSaveSong = new JButton("Save song");
+		btnSaveSong.setVisible(false);
+		GridBagConstraints gbc_btnSaveSong = new GridBagConstraints();
+		gbc_btnSaveSong.fill = GridBagConstraints.BOTH;
+		gbc_btnSaveSong.insets = new Insets(0, 0, 5, 5);
+		gbc_btnSaveSong.gridx = 2;
+		gbc_btnSaveSong.gridy = 1;
+		btnSaveSong.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.under_construction"));
+			}
+		});
+		frmBlueAhuizoteSongs.add(btnSaveSong, gbc_btnSaveSong);
+		
+		GridBagConstraints gbc_btnPlay = new GridBagConstraints();
+		gbc_btnPlay.anchor = GridBagConstraints.NORTH;
+		gbc_btnPlay.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnPlay.insets = new Insets(0, 0, 5, 5);
+		gbc_btnPlay.gridx = 3;
+		gbc_btnPlay.gridy = 1;
+		frmBlueAhuizoteSongs.add(btnPlay, gbc_btnPlay);
+		btnPlay.setEnabled(false);
+		
+		GridBagConstraints gbc_btnSimPedal = new GridBagConstraints();
+		gbc_btnSimPedal.anchor = GridBagConstraints.NORTH;
+		gbc_btnSimPedal.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnSimPedal.insets = new Insets(0, 0, 5, 0);
+		gbc_btnSimPedal.gridx = 4;
+		gbc_btnSimPedal.gridy = 1;
+		frmBlueAhuizoteSongs.add(btnSimPedal, gbc_btnSimPedal);
+		btnSimPedal.setEnabled(false);
+		
+		GridBagConstraints gbc_songList = new GridBagConstraints();
+		gbc_songList.fill = GridBagConstraints.BOTH;
+		gbc_songList.insets = new Insets(0, 0, 0, 5);
+		gbc_songList.gridx = 1;
+		gbc_songList.gridy = 2;
+		frmBlueAhuizoteSongs.add(songList, gbc_songList);
+		
+		editPanel = new JPanel();
+		editPanel.setBackground(Color.BLUE);
+		GridBagConstraints gbc_editPanel = new GridBagConstraints();
+		gbc_editPanel.fill = GridBagConstraints.BOTH;
+		gbc_editPanel.insets = new Insets(0, 0, 0, 5);
+		gbc_editPanel.gridx = 2;
+		gbc_editPanel.gridy = 2;
+		frmBlueAhuizoteSongs.add(editPanel, gbc_editPanel);
+		
+		GridBagLayout gbl_editPanel = new GridBagLayout();
+		gbl_editPanel.columnWidths = new int[] {100, 0};
+		gbl_editPanel.rowHeights = new int[] {30, 30, 30, 30, 142, 0};
+		gbl_editPanel.columnWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_editPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		editPanel.setLayout(gbl_editPanel);
+		
+		GridBagConstraints gbc_btnTest = new GridBagConstraints();
+		gbc_btnTest.insets = new Insets(0, 0, 5, 0);
+		gbc_btnTest.gridx = 0;
+		gbc_btnTest.gridy = 0;
+		gbc_btnTest.anchor = GridBagConstraints.NORTH;
+		gbc_btnTest.fill = GridBagConstraints.BOTH;
+		btnNewVerse = new JButton(messages.getString("robotar.songs.new_verse"));
+		
+		GridBagConstraints gbc_btnNewVerse = new GridBagConstraints();
+		gbc_btnNewVerse.gridy = 0;
+		gbc_btnNewVerse.gridx = 0;
+		gbc_btnNewVerse.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewVerse.fill = GridBagConstraints.BOTH;
+		btnNewVerse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				addNewVerseToSong();
+			}
+		});
+		editPanel.add(btnNewVerse, gbc_btnNewVerse);
+		
+		btnNewLine = new JButton(messages.getString("robotar.songs.new_line"));
+		GridBagConstraints gbc_btnNewLine = new GridBagConstraints();
+		gbc_btnNewLine.fill = GridBagConstraints.BOTH;
+		gbc_btnNewLine.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewLine.gridx = 0;
+		gbc_btnNewLine.gridy = 1;
+		btnNewLine.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				addNewLineToSong();
+			}
+		});
+		editPanel.add(btnNewLine, gbc_btnNewLine);
+		
+		btnCreateChord = new JButton(messages.getString("robotar.songs.create_chord"));
+		GridBagConstraints gbc_btnCreateChord = new GridBagConstraints();
+		gbc_btnCreateChord.fill = GridBagConstraints.BOTH;
+		gbc_btnCreateChord.insets = new Insets(0, 0, 5, 0);
+		gbc_btnCreateChord.gridx = 0;
+		gbc_btnCreateChord.gridy = 2;
+		btnCreateChord.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				mainFrame.startChordsPage();
+			}
+		});
+		editPanel.add(btnCreateChord, gbc_btnCreateChord);
+		
+		btnAddChord = new JButton(messages.getString("robotar.songs.add_chord"));
+		btnAddChord.setHorizontalAlignment(SwingConstants.LEFT);
+		GridBagConstraints gbc_btnAddChord = new GridBagConstraints();
+		gbc_btnAddChord.fill = GridBagConstraints.BOTH;
+		gbc_btnAddChord.insets = new Insets(0, 0, 5, 0);
+		gbc_btnAddChord.gridx = 0;
+		gbc_btnAddChord.gridy = 3;
+		btnAddChord.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				addChordToSong();
+			}
+		});
+		editPanel.add(btnAddChord, gbc_btnAddChord);
+		
+		chordList = new JList();
+		chordList.setLayoutOrientation(JList.VERTICAL_WRAP);
+		chordList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		chordList.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+		chordList.setCellRenderer(new ChordListPlainCellRenderer());
+		chordList.setVisibleRowCount(14);
+		GridBagConstraints gbc_chordList = new GridBagConstraints();
+		gbc_chordList.anchor = GridBagConstraints.EAST;
+		gbc_chordList.fill = GridBagConstraints.BOTH;
+		gbc_chordList.gridx = 0;
+		gbc_chordList.gridy = 4;
+		editPanel.add(chordList, gbc_chordList);
+		
+		JPanel songPanel = new JPanel();
+		songPanel.setBackground(Color.WHITE);
+		GridBagConstraints gbc_songPanel = new GridBagConstraints();
+		gbc_songPanel.gridwidth = 2;
+		gbc_songPanel.fill = GridBagConstraints.BOTH;
+		gbc_songPanel.gridx = 3;
+		gbc_songPanel.gridy = 2;
+		frmBlueAhuizoteSongs.add(songPanel, gbc_songPanel);
 		
 		textPane = new JTextPane();
 		textPane.setEditable(false);
-		panel.add(textPane);
+		songPanel.add(textPane);
+		setupStyles(textPane);
 		
-		// buttons default status
-		btnLoadDefaultSongs.setEnabled(true);
-		btnEditSong.setEnabled(false);
-		btnNewSong.setEnabled(true);
-		btnPlay.setEnabled(false);
-		btnSimPedal.setEnabled(false);
-
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		addWindowListener(this);
 	}
@@ -209,13 +392,26 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		// show song in textpane
 		JList list = (JList)e.getSource();
 		actualSong = (Song) list.getSelectedValue();
-		showSong(actualSong, textPane);
-		checkChords();
+		prepareForPlaying();
 		btnEditSong.setEnabled(true);
 		btnNewSong.setEnabled(true);
 	}
 	
+	/**
+	 * Traverse through song, creates position hints to be able to mark chords when playing,
+	 * also checks if chords exist in ChordManager
+	 */
+	protected void prepareForPlaying() {
+		showSong(actualSong, textPane);
+		checkChords();
+	}
+	
 	protected void editSongPressed() {
+		setupEditMode();
+		addNewLineData();
+	}
+	
+	protected void setupEditMode() {
 		btnEditSong.setText(messages.getString("robotar.songs.done_edit_song"));
 		btnEditSong.setEnabled(true);
 		btnNewSong.setEnabled(false);
@@ -223,7 +419,61 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnSimPedal.setEnabled(false);
 		songList.setEnabled(false);
 		btnLoadDefaultSongs.setEnabled(false);
+		editPanel.setVisible(true);
+		//textPane.setEditable(true);
 		editing = true;
+		loadChordsFromSong();
+		createMarker();
+	}
+
+	protected void createMarker() {
+		StyledDocument doc = textPane.getStyledDocument();
+		int position = doc.getLength();
+		
+		Style markerStyle = doc.getStyle(MISSING_CHORD_STYLE);
+		try {
+			doc.insertString(position, "*", markerStyle);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void removeMarker() {
+		StyledDocument doc = textPane.getStyledDocument();
+		int position = doc.getLength();
+		try {
+			doc.remove(position - 1, 1);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void pruneEmptyObjects() {
+		// check empty parts
+		int lastIdx = actualSong.getParts().size() - 1;
+		if (lastIdx == -1) return;
+		for (int i = lastIdx; i >= 0; i--) {
+			Part part = actualSong.getParts().get(i);
+			if (part.getLines() == null) {
+				actualSong.getParts().remove(i);
+			} else {
+				// check empty lines
+				int lastLineIdx = part.getLines().size() - 1;
+				if (lastLineIdx == -1) {
+					actualSong.getParts().remove(i);
+				} else {
+					for (int j = lastLineIdx; j >= 0; j--) {
+						Line line = part.getLines().get(j);
+						if (line.getChords() == null) {
+							part.getLines().remove(j);
+						}
+					}
+					if (part.getLines().size() == 0) {
+						actualSong.getParts().remove(i);
+					}
+				}
+			}
+		}
 	}
 
 	protected void doneEditSongPressed() {
@@ -234,26 +484,168 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnSimPedal.setEnabled(false);
 		songList.setEnabled(true);
 		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
+		editPanel.setVisible(false);
+		//textPane.setEditable(false);
 		editing = false;
+		removeMarker();
+		pruneEmptyObjects();
+		prepareForPlaying();
+	}
+	
+	protected void loadChordsFromSong() {
+		if (chordListModel == null) {
+			chordListModel = new DefaultListModel();
+			chordList.setModel(chordListModel);
+		} else {
+			chordListModel.removeAllElements();
+		}
+		usedChords = new HashSet<Chord>();
+		for (PositionHint hint : hints.getChords()) {
+			ChordRef ref = hint.getChordRef();
+			Chord chord = ref.getChord();
+			if (chord != null && !usedChords.contains(chord)) {
+				chordListModel.addElement(chord);
+				usedChords.add(chord);
+			}
+		}
+	}
+
+	protected void addNewLineData() {
+		Part part;
+		Line line;
+		if (actualSong.getParts().isEmpty()) {
+			part = new Part();
+			actualSong.getParts().add(part);
+		} else {
+			part = actualSong.getParts().get(actualSong.getParts().size() - 1);
+		}
+		if (part.getLines() == null) {
+			part.setLines(new ArrayList<Line>());
+		}
+		// always create
+		line = new Line();
+		part.getLines().add(line);
+	}
+
+	protected void addNewLineToSong() {
+		addNewLineData();
+		
+		StyledDocument doc = textPane.getStyledDocument();
+		int position = doc.getLength() - 1;
+		
+		Style mainStyle = doc.getStyle(MAIN_STYLE);
+		try {
+			doc.insertString(position, "\n", mainStyle);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void addNewVerseToSong() {
+		StyledDocument doc = textPane.getStyledDocument();
+		int position = doc.getLength() - 1;
+		
+		Style mainStyle = doc.getStyle(MAIN_STYLE);
+		try {
+			doc.insertString(position, "\n\n", mainStyle);
+
+			Part part;
+			part = new Part();
+			actualSong.getParts().add(part);
+
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	protected void addChordToSong() {
+		Chord chord = (Chord)chordList.getSelectedValue();
+		if (chord != null) {
+			Part part;
+			Line line;
+			if (actualSong.getParts().isEmpty()) {
+				part = new Part();
+				actualSong.getParts().add(part);
+			} else {
+				part = actualSong.getParts().get(actualSong.getParts().size() - 1);
+			}
+			if (part.getLines() == null) {
+				part.setLines(new ArrayList<Line>());
+			}
+			if (part.getLines().isEmpty()) {
+				line = new Line();
+				part.getLines().add(line);
+			} else {
+				line = part.getLines().get(part.getLines().size() - 1);
+			}
+			if (line.getChords() == null) {
+				line.setChords(new ArrayList<ChordRef>());
+			}
+			int lineLength = 0;
+			for (ChordRef chr : line.getChords()) {
+				lineLength += chr.getChord().getName().length() + 1;
+			}
+			StyledDocument doc = textPane.getStyledDocument();
+			int position = doc.getLength() - 1;
+			
+			ChordRef ref = new ChordRef();
+			ref.setChordId(chord.getId());
+			// TODO - clone?
+			ref.setChord(chord);
+			// first position is 1, not 0
+			ref.setPosition(lineLength+1);
+			line.getChords().add(ref);
+		
+			Style chordStyle = doc.getStyle(CHORD_STYLE);
+			Style mainStyle = doc.getStyle(MAIN_STYLE);
+			try {
+				doc.insertString(position, chord.getName(), chordStyle);
+				doc.insertString(position + chord.getName().length(), " ", mainStyle);
+				
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	protected void newSongPressed() {
-		// dialog - title, artist
-		Song song = new Song();
-		song.setTitle("new song");
-		song.setInterpret("artist");
-		song.setInfo("empty");
+		// dialog - title, artist, info
+		NewSongDialog dialog = new NewSongDialog(this);
+		dialog.pack();
+		dialog.setTitleText(messages.getString("robotar.songs.default_song_title"));
+		dialog.setInterpretText(messages.getString("robotar.songs.default_artist_title"));
+		dialog.setInfoText("");
+		dialog.setVisible(true);
 		
-		if (songListModel == null) {
-			songListModel = new DefaultListModel();
-			songList.setModel(songListModel);
+		if (dialog.isPressedOK()) {
+			Song song = new Song();
+			song.setTitle(dialog.getTitleText());
+			song.setInterpret(dialog.getInterepretText());
+			song.setInfo(dialog.getInfoText());
+			
+			// first part and line - empty, must be there to behave correctly, if empty, they will be removed at the end
+			Part firstPart = new Part();
+			song.getParts().add(firstPart);
+			List<Line> lines = new ArrayList<Line>();
+			firstPart.setLines(lines);
+			List<ChordRef> chordrefs = new ArrayList<ChordRef>();
+			Line line = new Line();
+			line.setChords(chordrefs);
+			lines.add(line);
+			
+			if (songListModel == null) {
+				songListModel = new DefaultListModel();
+				songList.setModel(songListModel);
+			}
+			// will fire refreshing of textpane twice... :/
+			songListModel.add(0, song);
+			actualSong = (Song)songListModel.firstElement();
+			songList.setSelectedIndex(0);
+			
+			// put into edit mode
+			setupEditMode();
 		}
-		songListModel.add(0, song);
-		actualSong = (Song)songListModel.firstElement();
-		songList.setSelectedIndex(0);
-		
-		// put into edit mode
-		editSongPressed();
 	}
 
 	/**
@@ -325,10 +717,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnPlay.setEnabled(!missingChords);
 		// first press Play
 		btnSimPedal.setEnabled(false); 
-		// TODO not implemented yet
-		btnEditSong.setEnabled(false);
-		// TODO not implemented yet
-		btnNewSong.setEnabled(false);
+		btnEditSong.setEnabled(true);
+		btnNewSong.setEnabled(true);
 	}
 	
 	/**
@@ -384,6 +774,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			btnNewSong.setEnabled(false);
 			btnEditSong.setEnabled(false);
 			btnLoadDefaultSongs.setEnabled(false);
+			songList.setEnabled(false);
 			// select the first chord and line
 			hints.setCurrentChord(0);
 			hints.setCurrentLine(0);
@@ -413,6 +804,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnNewSong.setEnabled(true);
 		btnEditSong.setEnabled(true);
 		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
+		songList.setEnabled(true);
 		// call to release servos - neutral positions
 		prepareNoChord();
 	}
@@ -468,7 +860,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 */
 	protected PositionHints showSong(Song song, JTextPane pane) {
 		// prepare styles
-		setupStyles(pane);
 		StyledDocument doc = pane.getStyledDocument();
 		Style titleStyle = doc.getStyle(TITLE_STYLE);
 		Style chordStyle = doc.getStyle(CHORD_STYLE);
@@ -488,14 +879,30 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				
 				int lineNum = 0;
 				for (Line line : part.getLines()) {
-					doc.insertString(doc.getLength(), formatChords(line, hints, lineNum, doc.getLength()), chordStyle);
+					if ((line.getChords() == null) || (line.getChords().isEmpty())) {
+						if (line.getText() == null) {
+							// totally empty line
+							continue;
+						}
+					} else {
+						// put chords above the text
+						doc.insertString(doc.getLength(), formatChords(line, hints, lineNum, doc.getLength()), chordStyle);
+					}
 
 					int lineOffset = doc.getLength();
-					doc.insertString(doc.getLength(), line.getText() + "\n", mainStyle);
+					String lineText = line.getText();
+					if (lineText == null) {
+						lineText = "";
+					}
+					doc.insertString(doc.getLength(), lineText + "\n", mainStyle);
 					PositionHint lineHint = new PositionHint();
 					lineHint.setLine(lineNum);
 					lineHint.setOffset(lineOffset);
-					lineHint.setLength(line.getText().length());
+					if (line.getText() != null) {
+						lineHint.setLength(line.getText().length());
+					} else {
+						lineHint.setLength(0);
+					}
 					hints.getLines().add(lineHint);
 					
 					lineNum++;
@@ -517,7 +924,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 */
 	private String formatChords(Line line, PositionHints hints, int lineNum, int lineOffset) {
 		StringBuilder str = new StringBuilder();
-		
 		for (ChordRef ref : line.getChords()) {
 			int end = str.length() + 1;
 			int position = ref.getPosition();
@@ -603,8 +1009,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 	@Override
 	public void windowActivated(WindowEvent e) {
-		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
-		
+		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded && !editing);
+		editPanel.setVisible(editing);
 	}
 
 	@Override
@@ -619,4 +1025,12 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		this.defaultSongsLoaded = defaultSongsLoaded;
 	}
 
+	public boolean addChordToUsedChords(Chord chord) {
+		if ((usedChords != null) && (!usedChords.contains(chord))) {
+			usedChords.add(chord);
+			chordListModel.addElement(chord);
+			return true;
+		}
+		return false;
+	}
 }
