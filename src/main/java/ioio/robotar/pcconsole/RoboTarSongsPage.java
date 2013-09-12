@@ -17,9 +17,11 @@ import cz.versarius.xsong.ChordRef;
 import cz.versarius.xsong.Line;
 import cz.versarius.xsong.Part;
 import cz.versarius.xsong.Song;
+import cz.versarius.xsong.Verse;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
@@ -64,6 +66,13 @@ import javax.swing.SwingConstants;
 
 import java.awt.Button;
 import java.awt.GridLayout;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -7862830927381806488L;
@@ -166,7 +175,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		});
 		
 		btnLoadSong = new JButton("Load song");
-		btnLoadSong.setVisible(false);
 		GridBagConstraints gbc_btnLoadSong = new GridBagConstraints();
 		gbc_btnLoadSong.fill = GridBagConstraints.BOTH;
 		gbc_btnLoadSong.insets = new Insets(0, 0, 5, 5);
@@ -174,7 +182,11 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		gbc_btnLoadSong.gridy = 0;
 		btnLoadSong.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.under_construction"));
+				try {
+					loadSong();
+				} catch (FileNotFoundException e1) {
+					JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.songs.file_not_found"));
+				}
 			}
 		});
 		frmBlueAhuizoteSongs.add(btnLoadSong, gbc_btnLoadSong);
@@ -227,7 +239,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		});
 		
 		btnSaveSong = new JButton("Save song");
-		btnSaveSong.setVisible(false);
 		GridBagConstraints gbc_btnSaveSong = new GridBagConstraints();
 		gbc_btnSaveSong.fill = GridBagConstraints.BOTH;
 		gbc_btnSaveSong.insets = new Insets(0, 0, 5, 5);
@@ -235,7 +246,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		gbc_btnSaveSong.gridy = 1;
 		btnSaveSong.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.under_construction"));
+				saveSong();
 			}
 		});
 		frmBlueAhuizoteSongs.add(btnSaveSong, gbc_btnSaveSong);
@@ -372,10 +383,41 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		addWindowListener(this);
 	}
 
+	protected void loadSong() throws FileNotFoundException {
+		JFileChooser fc = new JFileChooser();
+		int returnValue = fc.showOpenDialog(this);
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            XMLSongLoader loader = new XMLSongLoader();
+            Song song = loader.load(new FileInputStream(file));
+            if (songListModel == null) {
+    			songListModel = new DefaultListModel();
+    			songList.setModel(songListModel);
+    		}
+            songListModel.add(0, song);
+		}
+	}
+
+	protected void saveSong() {
+		if (actualSong == null) {
+			JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.songs.nothing_to_save"));
+			return;
+		}
+		JFileChooser fc = new JFileChooser();
+		int returnValue = fc.showSaveDialog(this);
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            XMLSongSaver saver = new XMLSongSaver();
+            saver.save(actualSong, file);
+		}
+		
+	}
+
 	protected void loadDefaultSongs() {
 		XMLSongLoader loader = new XMLSongLoader();
 		Song song = loader.load(RoboTarChordsPage.class.getResourceAsStream("/default-songs/greensleeves.xml"));
-		// other songs..
+		// load other songs..
+		
 		if (songListModel == null) {
 			songListModel = new DefaultListModel();
 			songList.setModel(songListModel);
@@ -419,6 +461,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnSimPedal.setEnabled(false);
 		songList.setEnabled(false);
 		btnLoadDefaultSongs.setEnabled(false);
+		btnLoadSong.setEnabled(false);
+		btnSaveSong.setEnabled(false);
 		editPanel.setVisible(true);
 		//textPane.setEditable(true);
 		editing = true;
@@ -485,6 +529,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		songList.setEnabled(true);
 		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
 		editPanel.setVisible(false);
+		btnLoadSong.setEnabled(true);
+		btnSaveSong.setEnabled(true);
 		//textPane.setEditable(false);
 		editing = false;
 		removeMarker();
@@ -514,7 +560,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		Part part;
 		Line line;
 		if (actualSong.getParts().isEmpty()) {
-			part = new Part();
+			part = new Verse();
 			actualSong.getParts().add(part);
 		} else {
 			part = actualSong.getParts().get(actualSong.getParts().size() - 1);
@@ -550,7 +596,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			doc.insertString(position, "\n\n", mainStyle);
 
 			Part part;
-			part = new Part();
+			part = new Verse();
 			actualSong.getParts().add(part);
 
 		} catch (BadLocationException e) {
@@ -565,7 +611,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			Part part;
 			Line line;
 			if (actualSong.getParts().isEmpty()) {
-				part = new Part();
+				part = new Verse();
 				actualSong.getParts().add(part);
 			} else {
 				part = actualSong.getParts().get(actualSong.getParts().size() - 1);
@@ -625,7 +671,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			song.setInfo(dialog.getInfoText());
 			
 			// first part and line - empty, must be there to behave correctly, if empty, they will be removed at the end
-			Part firstPart = new Part();
+			Part firstPart = new Verse();
 			song.getParts().add(firstPart);
 			List<Line> lines = new ArrayList<Line>();
 			firstPart.setLines(lines);
@@ -775,6 +821,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			btnEditSong.setEnabled(false);
 			btnLoadDefaultSongs.setEnabled(false);
 			songList.setEnabled(false);
+			btnLoadSong.setEnabled(false);
+			btnSaveSong.setEnabled(false);
 			// select the first chord and line
 			hints.setCurrentChord(0);
 			hints.setCurrentLine(0);
@@ -805,6 +853,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnEditSong.setEnabled(true);
 		btnLoadDefaultSongs.setEnabled(!defaultSongsLoaded);
 		songList.setEnabled(true);
+		btnLoadSong.setEnabled(true);
+		btnSaveSong.setEnabled(true);
 		// call to release servos - neutral positions
 		prepareNoChord();
 	}
