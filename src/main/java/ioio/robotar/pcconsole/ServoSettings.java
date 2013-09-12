@@ -16,6 +16,30 @@ public class ServoSettings {
 	public static final float PRESSED_BOTTOM_RIGHT = 0.7f;
 	public static final float PRESSED_BOTTOM_LEFT = 1.3f;
 
+	/**
+	 * fill these corrections for each servo
+	 * they are numbered 0 to 11
+	 * first value is neutral correction
+	 * second value is muted correction
+	 * third value is normal press correction
+	 * this values are added to the original ones - at the top of this file.
+	 * you can also use negative -> -0.1f, if you need
+	 */
+	private static final float CORRECTION[][] = { 
+		{0.0f, 0.0f, 0.0f}, // servo 0
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f}, // servo 11
+		};
+	
 	// not used anymore - delete in future
 	/** this is for top 3 string right - higher numbered fret, bottom 3 strings left - also higher numbered fret */
 	//public static final float PRESSED_HIGHER = 1.3f;
@@ -52,7 +76,7 @@ public class ServoSettings {
 			if ((si == null) || (si.getState() == StringState.OPEN) || (si.getState() == null)) {
 				// neutral position
 				servos[i] = i*2;
-				values[i] = NEUTRAL;
+				values[i] = NEUTRAL + CORRECTION[i*2][0];
 			} else if (si.getState() == StringState.OK || si.getState() == StringState.OPTIONAL) {
 				// something is pressed
 				int fret = si.getFret();
@@ -62,11 +86,11 @@ public class ServoSettings {
 				float servoValue = compute(i, fret, servoNum);
 				
 				servos[i] = servoNum;
-				values[i] = servoValue;
+				values[i] = servoValue + CORRECTION[servoNum][2];
 			} else if (si.getState() == StringState.DISABLED) {
 				// muted
 				servos[i] = i*2;
-				values[i] = MUTED;
+				values[i] = MUTED + CORRECTION[i*2][1];
 			}
 		}
 		// servo and values are set..
@@ -75,7 +99,7 @@ public class ServoSettings {
 	private void neutralPosition() {
 		for (int i = 0; i < 6; i++) {
 			servos[i] = i*2;
-			values[i] = NEUTRAL;
+			values[i] = NEUTRAL + CORRECTION[i*2][0];
 		}
 	}
 	
