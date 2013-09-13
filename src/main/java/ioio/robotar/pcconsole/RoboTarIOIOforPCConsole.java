@@ -181,12 +181,18 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 							ServoSettings chordServoValues = robotarGUI.getServoSettings();
 							LEDSettings leds = robotarGUI.getLeds();
 							LOG.debug("got chord: {}", chordServoValues.debugOutput());
+							LOG.debug("leds: {}", leds);
 							long timeStart = System.currentTimeMillis();
 							for (int i = 0; i < 6; i++) {
 								int servoNumber = chordServoValues.getServos()[i];
 								float servoValue = chordServoValues.getValues()[i];
 								setServo(servoNumber, servoValue);
-								setLED(i, leds.getLeds()[i]);
+								if (leds != null) {
+									LOG.debug("leds 2: {}", leds.getLeds());
+									if (leds.getLeds() != null) {
+										setLED(i, leds.getLeds()[i]);
+									}
+								}
 							}
 							long timeEnd = System.currentTimeMillis();
 							LOG.debug("It took {} ms to execute 6 servos and LEDs", timeEnd - timeStart);
