@@ -231,7 +231,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			 */
 			public void resetAll() throws ConnectionLostException, InterruptedException {
 				stateLedOn = false;
-				for (int servo = 0; servo < 13; servo++) {
+				for (int servo = 0; servo < 12; servo++) {
 					setServo(servo, ServoSettings.getNeutral(servo));
 				}
 				turnOffFretLEDs();
