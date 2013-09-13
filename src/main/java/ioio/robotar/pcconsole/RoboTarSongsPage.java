@@ -6,11 +6,6 @@ import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
 
-import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-
 import cz.versarius.xchords.Chord;
 import cz.versarius.xchords.ChordLibrary;
 import cz.versarius.xsong.ChordRef;
@@ -39,8 +34,6 @@ import java.util.Set;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Caret;
-import javax.swing.text.DefaultCaret;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -50,29 +43,17 @@ import javax.swing.ListSelectionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.FlowLayout;
-
-import javax.swing.BoxLayout;
-
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-
-import javax.swing.AbstractListModel;
 
 import java.awt.Component;
 
 import javax.swing.SwingConstants;
 
-import java.awt.Button;
-import java.awt.GridLayout;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -7862830927381806488L;
@@ -87,6 +68,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final String MISSING_CHORD_STYLE = "MissingChordStyle";
 	
 	private JPanel frmBlueAhuizoteSongs;
+	
+	private static int counter = 1;
 	
 	private Song actualSong;
 	private boolean playing;
@@ -659,7 +642,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		// dialog - title, artist, info
 		NewSongDialog dialog = new NewSongDialog(this);
 		dialog.pack();
-		dialog.setTitleText(messages.getString("robotar.songs.default_song_title"));
+		dialog.setTitleText(generateSongName());
 		dialog.setInterpretText(messages.getString("robotar.songs.default_artist_title"));
 		dialog.setInfoText("");
 		dialog.setVisible(true);
@@ -692,6 +675,12 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			// put into edit mode
 			setupEditMode();
 		}
+	}
+
+	private String generateSongName() {
+		String name = messages.getString("robotar.songs.default_song_title") + " " + counter;
+		counter++;
+		return name;
 	}
 
 	/**
