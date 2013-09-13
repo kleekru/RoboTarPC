@@ -1,5 +1,6 @@
 package cz.versarius.xchords;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,8 @@ public class ChordLibrary {
 	public void setDesc(String desc) {
 		this.desc = desc;
 	}
-	public List<Chord> getChords() {
-		return (List)chords.values();
+	public Collection<Chord> getChords() {
+		return (Collection)chords.values();
 	}
 	public void setChords(List<Chord> chords) {
 		for (Chord chord : chords) {

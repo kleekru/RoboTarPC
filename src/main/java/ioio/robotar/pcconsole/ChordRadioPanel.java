@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.swing.ButtonGroup;
@@ -23,6 +24,7 @@ import cz.versarius.xchords.StringInfo;
 import cz.versarius.xchords.StringState;
 
 public class ChordRadioPanel extends JPanel implements ActionListener {
+	private static final ResourceBundle messages = ResourceBundle.getBundle("ioio.robotar.pcconsole.RoboTarBundle", Locale.ENGLISH); 
 	private static final long serialVersionUID = 18765864433L;
 	
 	// button groups for radio buttons
@@ -74,7 +76,7 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 	// chord name
 	private JTextField chordName;
 	
-	public ChordRadioPanel(ResourceBundle messages) {
+	public ChordRadioPanel() {
 		super();
 
 		setAlignmentY(Component.BOTTOM_ALIGNMENT);
@@ -102,8 +104,7 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		highEstring = new ButtonGroup();
 
 		// muted radio buttons
-		JLabel lblClickToMute = new JLabel(
-				messages.getString("robotar.chords.mute_string"));
+		JLabel lblClickToMute = new JLabel(messages.getString("robotar.chords.mute_string"));
 		add(lblClickToMute, "3, 1");
 		lblClickToMute.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
