@@ -96,6 +96,10 @@ public class ServoSettings {
 		// servo and values are set..
 	}
 	
+	public static float getNeutral(int servoNum) {
+		return NEUTRAL + CORRECTION[servoNum][0];
+	}
+	
 	private void neutralPosition() {
 		for (int i = 0; i < 6; i++) {
 			servos[i] = i*2;
