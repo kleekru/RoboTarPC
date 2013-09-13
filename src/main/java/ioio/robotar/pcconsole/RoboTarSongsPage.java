@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-
 import java.awt.Component;
 
 import javax.swing.SwingConstants;
@@ -740,12 +739,28 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			ChordRef ref = hint.getChordRef();
 			String libraryName = Chord.getLibraryName(ref.getChordId());
 			String chordName = Chord.getChordName(ref.getChordId());
-			ChordLibrary library = manager.getChordLibraries().get(libraryName);
-			if (library != null) {
-				Chord chord = library.findByName(chordName);
-				if (chord != null) {
-					ref.setChord(chord);
-					continue;
+			if ("user".equals(libraryName)) {
+				// look into current chord buffer on chords page
+				RoboTarChordsPage chPage = mainFrame.getChordsPage();
+				if (chPage != null) {
+					DefaultListModel model = chPage.getChordListModel();
+					if (model != null) {
+						Chord chord = findByName(model, ref.getChordId()); 
+						if (chord != null) {
+							ref.setChord(chord);
+							continue;
+						}
+					}
+				}
+			} else {
+				// known library - default robotar, ...
+				ChordLibrary library = manager.getChordLibraries().get(libraryName);
+				if (library != null) {
+					Chord chord = library.findByName(chordName);
+					if (chord != null) {
+						ref.setChord(chord);
+						continue;
+					}
 				}
 			}
 			markMissing(hint);
@@ -759,6 +774,20 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnNewSong.setEnabled(true);
 	}
 	
+	private Chord findByName(DefaultListModel model, String chordId) {
+		// user-T-1
+		String name = chordId.substring(5);
+		for (int i = 0; i<model.getSize(); i++) {
+			Chord chord = (Chord)model.get(i);
+			if (chord != null) {
+				if (name.equalsIgnoreCase(chord.getName())) {
+					return chord;
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Select this chord as missing one.
 	 */
@@ -971,7 +1000,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					str.append(" ");
 				}
 			}
-			String chordName = Chord.getChordName(ref.getChordId());
+			String chordName = Chord.getChordName2(ref.getChordId());
 			
 			PositionHint chordHint = new PositionHint();
 			chordHint.setOffset(lineOffset + position - 1);

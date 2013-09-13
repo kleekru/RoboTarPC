@@ -98,7 +98,7 @@ public class RoboTarStartPage implements ActionListener {
 		chordManager = new ChordManager();
 		servoSettings = new ServoSettings();
 		
-		messages = ResourceBundle.getBundle("ioio.RoboTar.PCconsole.RoboTarBundle", Locale.ENGLISH);
+		messages = ResourceBundle.getBundle("ioio.robotar.pcconsole.RoboTarBundle", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();
 		frmBlueAhuizote.setBackground(new Color(0, 0, 255));

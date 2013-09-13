@@ -96,4 +96,13 @@ public class Chord {
 		return Chord.getLibraryName(id);
 	}
 
+	public static String getChordName2(String chordId) {
+		String[] arr = chordId.split("-");
+		if (arr.length > 2) {
+			return arr[1] + "-" + arr[2];
+		} else {
+			return arr[1];
+		}
+	}
+
 }
