@@ -706,7 +706,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		if (chordHint != null) {
 			// visual handling
 			PositionHint lineHint = hints.getLineHint(chordHint);
-			unmarkCurrent(oldChordHint, oldLineHint, lineHint);
+			if (oldChordHint != null) {
+				// the first one chord doesn't unmark anything
+				unmarkCurrent(oldChordHint, oldLineHint, lineHint);
+			}
 			markCurrent(chordHint, lineHint);
 			
 			// TODO call IOIO to change servos
@@ -823,13 +826,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			songList.setEnabled(false);
 			btnLoadSong.setEnabled(false);
 			btnSaveSong.setEnabled(false);
-			// select the first chord and line
-			hints.setCurrentChord(0);
+			// set as start
+			hints.setCurrentChord(-1);
 			hints.setCurrentLine(0);
-			PositionHint chordHint = hints.getChordHint();
-			PositionHint lineHint = hints.getLineHint(chordHint);
-			markCurrent(chordHint, lineHint);
-			prepareChord(chordHint.getChordRef().getChord());
 			playing = true;
 		}
 	}

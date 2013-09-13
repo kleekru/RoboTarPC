@@ -34,6 +34,9 @@ public class PositionHints {
 		this.currentLine = currentLine;
 	}
 	public PositionHint getChordHint() {
+		if (currentChord < 0) {
+			return null;
+		}
 		return chords.get(currentChord);
 	}
 	public PositionHint getNextChordHint() {
@@ -45,6 +48,9 @@ public class PositionHints {
 		return chords.get(currentChord);
 	}
 	public PositionHint getLineHint(PositionHint chordHint) {
+		if (chordHint == null) {
+			return null;
+		}
 		PositionHint lineHint = lines.get(currentLine);
 		if (lineHint.getLine() != chordHint.getLine()) {
 			currentLine++;
