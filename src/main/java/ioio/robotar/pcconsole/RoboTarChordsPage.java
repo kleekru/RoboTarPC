@@ -173,12 +173,6 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 							public void actionPerformed(ActionEvent evt) {
 								newChordButtonActionPerformed(evt);
 							}
-
-							private void newChordButtonActionPerformed(ActionEvent evt) {
-								radioPanel.clear();
-								radioPanel.setChordName(messages.getString("robotar.chords.enter_chord_name"));
-								clearSelection();
-							}
 						});
 		
 				tglbtnTestChord = new JToggleButton("");
@@ -332,7 +326,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 			private void addToChordListActionPerformed(ActionEvent evt) {
 				chordNameSend = radioPanel.getChordName();
 				if (isValidChordName(chordNameSend)) {
-					LOG.info("add chord to chord list... TODO");
+					LOG.info("adding chord to chord list");
 					Chord chord = radioPanel.createChordFromRadios(getLibraryName());
 					if (chordListModel == null) {
 						chordListModel = new DefaultListModel();
@@ -366,6 +360,44 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		addWindowListener(this);
 		setVisible(true);
 		LOG.debug("constructed");
+	}
+
+	protected void newChordButtonActionPerformed(ActionEvent evt) {
+		radioPanel.clear();
+		//radioPanel.setChordName(messages.getString("robotar.chords.enter_chord_name"));
+		String generatedName = generateUnusedChordName();
+		radioPanel.setChordName(generatedName);
+		clearSelection();
+	}
+	
+	private String generateUnusedChordName() {
+		String name = "T-";
+		int counter = 1;
+		while (exists(counter)) {
+			counter++;
+		}
+		return name + Integer.toString(counter, 10);
+	}
+
+	private boolean exists(int counter) {
+		if (chordListModel == null) {
+			return false;
+		}
+		for (int i = 0; i < chordListModel.size(); i++) {
+			Chord chord = (Chord)chordListModel.get(i);
+			String name = chord.getName();
+			if (name.contains("-")) {
+				// use this prepared parser
+				String number = Chord.getChordName(chord.getName());
+				if (number != null) {
+					int num = Integer.parseInt(number, 10);
+					if (num == counter) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	protected void clearChords(ActionEvent evt) {
