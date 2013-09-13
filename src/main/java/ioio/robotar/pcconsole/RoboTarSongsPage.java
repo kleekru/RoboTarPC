@@ -829,6 +829,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			PositionHint chordHint = hints.getChordHint();
 			PositionHint lineHint = hints.getLineHint(chordHint);
 			markCurrent(chordHint, lineHint);
+			prepareChord(chordHint.getChordRef().getChord());
 			playing = true;
 		}
 	}
