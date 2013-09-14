@@ -21,30 +21,26 @@ public class ServoSettings {
 	 * they are numbered 0 to 11
 	 * first value is neutral correction
 	 * second value is muted correction
-	 * third value is normal press correction
+	 * third value is normal press correction for LEFT
+	 * fourth value is normal press correction for RIGHT
+	 * see compute() method for futher explanation of left/right
 	 * this values are added to the original ones - at the top of this file.
 	 * you can also use negative -> -0.1f, if you need
 	 */
 	private static final float CORRECTION[][] = { 
-		{0.0f, 0.0f, 0.0f}, // servo 0
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f}, // servo 11
+		{0.0f, 0.0f, 0.0f, 0.0f}, // servo 0
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f}, // servo 11
 		};
-	
-	// not used anymore - delete in future
-	/** this is for top 3 string right - higher numbered fret, bottom 3 strings left - also higher numbered fret */
-	//public static final float PRESSED_HIGHER = 1.3f;
-	/** exact opposite :) */
-	//public static final float PRESSED_LOWER = 0.7f;
 	
 	private int[] servos = new int[6];
 	private float[] values = new float[6];
@@ -86,7 +82,7 @@ public class ServoSettings {
 				float servoValue = compute(i, fret, servoNum);
 				
 				servos[i] = servoNum;
-				values[i] = servoValue + CORRECTION[servoNum][2];
+				values[i] = servoValue;
 			} else if (si.getState() == StringState.DISABLED) {
 				// muted
 				servos[i] = i*2;
@@ -107,26 +103,32 @@ public class ServoSettings {
 		}
 	}
 	
+	/* old way:
+	 * Top 3 strings right = 1.5, left = 0.0
+	 * Bottom 3 strings right = 0.0, left = 1.5
+	 */
 	private float compute(int string, int fret, int servoNum) {
-		  /* Top 3 strings right = 1.5, left = 0.0
-         * Bottom 3 strings right = 0.0, left = 1.5
-             */
-		// higher also known as right one :)
+		// higher means - closer to the body of guitar:
+		// there are 4 frets, 1, 2, 3, 4. 4 is higher than 3, 2 is higher than 1
 		int higher = (fret - 1) % 2;
 		if (higher == 1) {
+			// frets 2 or 4
 			if (string < 3) {
-				return PRESSED_TOP_RIGHT;
+				// e6, a, d
+				return PRESSED_TOP_RIGHT + CORRECTION[servoNum][3];
 			} else {
-				return PRESSED_BOTTOM_RIGHT;
+				// g, b, e1
+				return PRESSED_BOTTOM_RIGHT + CORRECTION[servoNum][3];
 			}
-			//return PRESSED_HIGHER;
 		} else {
+			// fret 1 or 3
 			if (string < 3) {
-				return PRESSED_TOP_LEFT;
+				// e6, a, d
+				return PRESSED_TOP_LEFT + CORRECTION[servoNum][2];
 			} else {
-				return PRESSED_BOTTOM_LEFT;
+				// g, b, e1
+				return PRESSED_BOTTOM_LEFT + CORRECTION[servoNum][2];
 			}
-			//return PRESSED_LOWER;
 		}
 	}
 	
