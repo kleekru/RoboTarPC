@@ -27,7 +27,7 @@ public class ServoSettings {
 	 * this values are added to the original ones - at the top of this file.
 	 * you can also use negative -> -0.1f, if you need
 	 */
-	private static final float CORRECTION[][] = { 
+	private float CORRECTION[][] = { 
 		{0.0f, 0.0f, 0.0f, 0.0f}, // servo 0
 		{0.0f, 0.0f, 0.0f, 0.0f},
 		{0.0f, 0.0f, 0.0f, 0.0f},
@@ -92,7 +92,15 @@ public class ServoSettings {
 		// servo and values are set..
 	}
 	
-	public static float getNeutral(int servoNum) {
+	public void setCorrections(float[][] settings) {
+		CORRECTION = settings;
+	}
+	
+	public float[][] getCorrections() {
+		return CORRECTION;
+	}
+	
+	public float getNeutral(int servoNum) {
 		return NEUTRAL + CORRECTION[servoNum][0];
 	}
 	

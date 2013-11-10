@@ -522,6 +522,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		radioPanel.setupRadios(chord);
 		showChordImage(chord);
 		prepareChord();
+		LOG.info("chordid: {}", chord.getId());
 	}
 	
 	/**

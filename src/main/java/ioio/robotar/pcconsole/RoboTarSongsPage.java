@@ -43,6 +43,7 @@ import javax.swing.ListSelectionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -53,6 +54,9 @@ import javax.swing.SwingConstants;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+
+import javax.swing.JScrollPane;
+import javax.swing.JScrollBar;
 
 public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -7862830927381806488L;
@@ -356,9 +360,13 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		gbc_songPanel.gridy = 2;
 		frmBlueAhuizoteSongs.add(songPanel, gbc_songPanel);
 		
+		
 		textPane = new JTextPane();
 		textPane.setEditable(false);
+		//JScrollPane scrollPane = new JScrollPane(textPane);
+		//setPreferredSize(new Dimension(450, 110));
 		songPanel.add(textPane);
+		
 		setupStyles(textPane);
 		
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);

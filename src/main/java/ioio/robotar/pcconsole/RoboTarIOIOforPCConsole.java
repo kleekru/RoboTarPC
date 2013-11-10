@@ -237,8 +237,9 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 			 */
 			public void resetAll() throws ConnectionLostException, InterruptedException {
 				stateLedOn = false;
+				ServoSettings sett = robotarGUI.getServoSettings();
 				for (int servo = 0; servo < 12; servo++) {
-					setServo(servo, ServoSettings.getNeutral(servo));
+					setServo(servo, sett.getNeutral(servo));
 				}
 				turnOffFretLEDs();
 				LOG.info("Servos in neutral position default");

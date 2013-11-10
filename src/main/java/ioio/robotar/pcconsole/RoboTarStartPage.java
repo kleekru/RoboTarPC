@@ -28,7 +28,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JMenu;
@@ -39,6 +41,11 @@ import javax.swing.SwingConstants;
 import java.awt.Point;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 /**
  * RoboTar GUI main window.
@@ -170,7 +177,12 @@ public class RoboTarStartPage implements ActionListener {
 		JMenuItem mntmAbout = new JMenuItem("About RoboTar");
 		mnNewMenu.add(mntmAbout);
 		
-		JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
+		JMenuItem mntmNewMenuItem = new JMenuItem(new AbstractAction("Exit") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frmBlueAhuizote.dispose();
+			}
+		});
 		mnNewMenu.add(mntmNewMenuItem);
 		mntmNewMenuItem.setName("Exit");
 		
@@ -189,6 +201,14 @@ public class RoboTarStartPage implements ActionListener {
 		JMenu mnUtilities = new JMenu("Utilities");
 		menuBar.add(mnUtilities);
 		
+		JMenuItem corr = new JMenuItem(new AbstractAction("Servo corrections") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showCorrectionsDialog(e);
+			}
+		});
+		mnUtilities.add(corr);
+		
 		JMenuItem mntmTunercomingSoon = new JMenuItem("Tuner (Coming Soon)");
 		mnUtilities.add(mntmTunercomingSoon);
 		
@@ -198,6 +218,13 @@ public class RoboTarStartPage implements ActionListener {
 		JMenuItem mntmSongDownloadscomingSoon = new JMenuItem("Song Downloads(Coming Soon)");
 		mnUtilities.add(mntmSongDownloadscomingSoon);
 	}
+	
+	protected void showCorrectionsDialog(ActionEvent evt) {
+		CorrectionsDialog dlg = new CorrectionsDialog(this);
+		dlg.setVisible(true);
+	}
+	
+	
 	
 	public void actionPerformed(ActionEvent event) {
 		if (event.getSource() == btnChords) {
