@@ -27,6 +27,9 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -36,6 +39,7 @@ import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
 import java.awt.Point;
@@ -98,6 +102,30 @@ public class RoboTarStartPage implements ActionListener {
 		initialize();
 	}
 
+	private void closingMethod() {
+		int confirm = JOptionPane.showOptionDialog(frmBlueAhuizote,
+                "Are You sure to close RoboTar?",
+                "Exit confirmation", JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (confirm == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
+    }
+	
+	private class ExitListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            closingMethod();
+        }
+    }
+	
+	private class ExitAdapter extends WindowAdapter {
+        @Override
+        public void windowClosing(WindowEvent e) {
+            closingMethod();
+        }
+    }
+    
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -111,7 +139,7 @@ public class RoboTarStartPage implements ActionListener {
 		frmBlueAhuizote.setBackground(new Color(0, 0, 255));
 		frmBlueAhuizote.setBounds(100, 100, 800, 600);
 		frmBlueAhuizote.getContentPane().setBackground(new Color(30, 144, 255));
-		frmBlueAhuizote.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmBlueAhuizote.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frmBlueAhuizote.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JLabel lblNewLabel = new JLabel("");
@@ -168,6 +196,8 @@ public class RoboTarStartPage implements ActionListener {
 		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
 		frmBlueAhuizote.getContentPane().add(lblNewLabel_2, BorderLayout.SOUTH);
 		
+        frmBlueAhuizote.addWindowListener(new ExitAdapter());
+        
 		JMenuBar menuBar = new JMenuBar();
 		frmBlueAhuizote.setJMenuBar(menuBar);
 		
@@ -177,12 +207,8 @@ public class RoboTarStartPage implements ActionListener {
 		JMenuItem mntmAbout = new JMenuItem("About RoboTar");
 		mnNewMenu.add(mntmAbout);
 		
-		JMenuItem mntmNewMenuItem = new JMenuItem(new AbstractAction("Exit") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				frmBlueAhuizote.dispose();
-			}
-		});
+		JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
+		mntmNewMenuItem.addActionListener(new ExitListener());
 		mnNewMenu.add(mntmNewMenuItem);
 		mntmNewMenuItem.setName("Exit");
 		
