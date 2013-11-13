@@ -2,8 +2,6 @@ package ioio.robotar.pcconsole;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,12 +14,20 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import cz.versarius.xchords.Chord;
+import cz.versarius.xchords.ChordBag;
 import cz.versarius.xchords.StringInfo;
 import cz.versarius.xchords.StringState;
 
 public class XMLChordLoader3 {
 
-	public List<Chord> load(InputStream stream) {
+	/** 
+	 * Load from inputstream into the given chord bag.
+	 * 
+	 * @param stream
+	 * @param bag
+	 * @return
+	 */
+	public ChordBag loadChords(InputStream stream, ChordBag bag) {
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
@@ -31,8 +37,8 @@ public class XMLChordLoader3 {
 
 			if (doc.hasChildNodes()) {
 				// going into <chordlibrary> element
-				List<Chord> chords = readList(doc.getChildNodes().item(0).getChildNodes());
-				return chords;
+				readChordList(doc.getChildNodes().item(0).getChildNodes(), bag);
+				return bag;
 			}
 			
 		} catch (IOException e) {
@@ -45,8 +51,7 @@ public class XMLChordLoader3 {
 		throw new RuntimeException("todo...never do this :)");
 	}
 
-	private List<Chord> readList(NodeList nodeList) {
-		List<Chord> chords = new ArrayList<Chord>();
+	protected ChordBag readChordList(NodeList nodeList, ChordBag bag) {
 		for (int count = 0; count < nodeList.getLength(); count++) {
 			Node tempNode = nodeList.item(count);
 			// make sure it's element node.
@@ -55,7 +60,7 @@ public class XMLChordLoader3 {
 					if (tempNode.hasChildNodes()) {
 						// loop through properties
 						Chord chord = readChord(tempNode.getChildNodes());
-						chords.add(chord);
+						bag.add(chord);
 						
 						// set id
 						if (tempNode.hasAttributes()) {
@@ -67,7 +72,7 @@ public class XMLChordLoader3 {
 				}
 			}
 		}
-		return chords;
+		return bag;
 	}
 	
 	private Chord readChord(NodeList nodeList) {

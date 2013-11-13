@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import cz.versarius.xchords.Chord;
+import cz.versarius.xchords.ChordBag;
 import cz.versarius.xchords.ChordLibrary;
 
 import javax.swing.JLabel;
@@ -388,7 +389,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 			String name = chord.getName();
 			if (name.contains("-")) {
 				// use this prepared parser
-				String number = Chord.getChordName(chord.getName());
+				String number = Chord.getChordNameSimple(chord.getName());
 				if (number != null) {
 					int num = Integer.parseInt(number, 10);
 					if (num == counter) {
@@ -413,12 +414,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
             File file = fc.getSelectedFile();
             XMLChordSaver saver = new XMLChordSaver();
             ChordLibrary lib = new ChordLibrary();
-            List<Chord> chords = new ArrayList<Chord>();
             for (int i=0; i<chordListModel.size(); i++) {
             	Chord chord = (Chord)chordListModel.get(i);
-            	chords.add(chord);
+            	lib.add(chord);
             }
-            lib.setChords(chords);
             saver.save(lib, file);
 		}
 		
@@ -430,10 +429,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             XMLChordLoader3 loader = new XMLChordLoader3();
-            List<Chord> chords = loader.load(new FileInputStream(file));
+            ChordBag bag = loader.loadChords(new FileInputStream(file), new ChordBag());
             // throwing away any previously set chords
    			chordListModel = new DefaultListModel();
-   			for (Chord chord : chords) {
+   			for (Chord chord : bag.getChords()) {
    				chordListModel.addElement(chord);
    			}
    			listChords.setModel(chordListModel);
@@ -444,9 +443,9 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	protected void loadDefaultChords(ActionEvent evt) {
 		// populate the list based on XML file load.
 		XMLChordLoader3 loader = new XMLChordLoader3();
-		List<Chord> chords = loader.load(RoboTarChordsPage.class.getResourceAsStream("/default-chords/robotar-default.xml"));
+		ChordBag bag = loader.loadChords(RoboTarChordsPage.class.getResourceAsStream("/default-chords/robotar-default.xml"), new ChordBag());
 		chordListModel = new DefaultListModel();
-		for (Chord chord : chords) {
+		for (Chord chord : bag.getChords()) {
 			chordListModel.addElement(chord);
 		}
 		listChords.setModel(chordListModel);

@@ -1,5 +1,11 @@
 package cz.versarius.xchords;
 
+/**
+ * All needed info about a particular string.
+ * 
+ * @author miira
+ *
+ */
 public class StringInfo {
 	private StringState state;
 	private int fret;

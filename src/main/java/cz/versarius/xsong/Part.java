@@ -2,6 +2,13 @@ package cz.versarius.xsong;
 
 import java.util.List;
 
+/**
+ * Part of song, consists of lines.
+ * Can be Chorus or Verse.
+ * 
+ * @author miira
+ *
+ */
 public abstract class Part {
 	private List<Line> lines;
 

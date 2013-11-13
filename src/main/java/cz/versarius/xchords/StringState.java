@@ -1,5 +1,18 @@
 package cz.versarius.xchords;
 
+/**
+ * Possible states of string mark.
+ * 
+ * OK - pressed normally
+ * DISABLED - this string should not be played
+ * OPTIONAL - this string may be pressed, if you want, may sound better
+ * OPEN - this string is not pressed at all
+ * 
+ * It is possible to create chord only with OK states, OPEN states will be calculated.
+ * 
+ * @author miira
+ *
+ */
 public enum StringState {
 	OK("ok"), DISABLED("no"), OPTIONAL("opt"), OPEN("open");
 

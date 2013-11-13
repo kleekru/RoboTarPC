@@ -1,6 +1,8 @@
 package cz.versarius.xchords;
 
 /**
+ * Chord object itself.
+ * 
  * These classes (Chord, StringInfo, StringState...) will be enhanced, this is
  * just quick concept
  * 
@@ -40,7 +42,23 @@ public class Chord {
 		return strings[idx];
 	}
 
-	public static String getChordName(String text) {
+	public static String getChordName(String chordId) {
+		String[] arr = chordId.split("-");
+		if (arr.length > 2) {
+			// for multiple '-'s in the name of chord
+			StringBuilder sb = new StringBuilder(5);
+			sb.append(arr[1]);
+			for (int i = 2; i < arr.length; i++) {
+				sb.append("-");
+				sb.append(arr[i]);
+			}
+			return sb.toString();
+		} else {
+			return arr[1];
+		}
+	}
+	
+	public static String getChordNameSimple(String text) {
 		return text.split("-")[1];
 	}
 
@@ -94,15 +112,6 @@ public class Chord {
 
 	public String getLibrary() {
 		return Chord.getLibraryName(id);
-	}
-
-	public static String getChordName2(String chordId) {
-		String[] arr = chordId.split("-");
-		if (arr.length > 2) {
-			return arr[1] + "-" + arr[2];
-		} else {
-			return arr[1];
-		}
 	}
 
 }

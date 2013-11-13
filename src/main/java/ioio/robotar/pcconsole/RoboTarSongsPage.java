@@ -7,6 +7,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 
 import cz.versarius.xchords.Chord;
+import cz.versarius.xchords.ChordBag;
 import cz.versarius.xchords.ChordLibrary;
 import cz.versarius.xsong.ChordRef;
 import cz.versarius.xsong.Line;
@@ -43,7 +44,6 @@ import javax.swing.ListSelectionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -54,9 +54,6 @@ import javax.swing.SwingConstants;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
-import javax.swing.JScrollPane;
-import javax.swing.JScrollBar;
 
 public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -7862830927381806488L;
@@ -379,7 +376,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             XMLSongLoader loader = new XMLSongLoader();
-            Song song = loader.load(new FileInputStream(file));
+            Song song = loader.loadSong(new FileInputStream(file));
             if (songListModel == null) {
     			songListModel = new DefaultListModel();
     			songList.setModel(songListModel);
@@ -405,7 +402,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 	protected void loadDefaultSongs() {
 		XMLSongLoader loader = new XMLSongLoader();
-		Song song = loader.load(RoboTarChordsPage.class.getResourceAsStream("/default-songs/greensleeves.xml"));
+		Song song = loader.loadSong(RoboTarChordsPage.class.getResourceAsStream("/default-songs/greensleeves.xml"));
 		// load other songs..
 		
 		if (songListModel == null) {
@@ -431,7 +428,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	
 	/**
 	 * Traverse through song, creates position hints to be able to mark chords when playing,
-	 * also checks if chords exist in ChordManager
+	 * also checks if all referenced chords exists in usedchords section.
 	 */
 	protected void prepareForPlaying() {
 		showSong(actualSong, textPane);
@@ -535,6 +532,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		} else {
 			chordListModel.removeAllElements();
 		}
+		// todo - maybe can be done simpler, this is now double checking
 		usedChords = new HashSet<Chord>();
 		for (PositionHint hint : hints.getChords()) {
 			ChordRef ref = hint.getChordRef();
@@ -632,7 +630,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			// first position is 1, not 0
 			ref.setPosition(lineLength+1);
 			line.getChords().add(ref);
-		
+			// add to used chords section
+			actualSong.getUsedChords().add(chord);
+			
 			Style chordStyle = doc.getStyle(CHORD_STYLE);
 			Style mainStyle = doc.getStyle(MAIN_STYLE);
 			try {
@@ -739,35 +739,61 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	}
 	
 	/**
-	 * Checks, if all the chords in the song exists in chordManager (set of chord libraries)
+	 * Checks, if all the chords in the song exists in usedchords section.
+	 * for each chord:
+	 * If chord exists in usedchords, set it to chordref and try to put it to chordmanager, 
+	 * 		into the appropriate library (if already exists there = nothing - even if not the same TODO)
+	 * If chord doesn't exist in used chords, try to load it from chordmanager,
+	 *      from the appropriate library (based on id of chord ('library-chord')) 
+	 *      and set to chordref and put into the usedchords section.
+	 *      If it doesn't exist, mark as missing.
 	 */
 	protected void checkChords() {
 		ChordManager manager = mainFrame.getChordManager();
+		ChordBag used = actualSong.getUsedChords();
 		for (PositionHint hint : hints.getChords()) {
 			ChordRef ref = hint.getChordRef();
 			String libraryName = Chord.getLibraryName(ref.getChordId());
 			String chordName = Chord.getChordName(ref.getChordId());
-			if ("user".equals(libraryName)) {
-				// look into current chord buffer on chords page
-				RoboTarChordsPage chPage = mainFrame.getChordsPage();
-				if (chPage != null) {
-					DefaultListModel model = chPage.getChordListModel();
-					if (model != null) {
-						Chord chord = findByName(model, ref.getChordId()); 
-						if (chord != null) {
-							ref.setChord(chord);
-							continue;
-						}
-					}
+			Chord chord = used.findByName(chordName);
+			if (chord != null) {
+				ref.setChord(chord);
+				ChordLibrary lib = manager.findByName(libraryName);
+				if (lib == null) {
+					lib = new ChordLibrary(libraryName);
 				}
+				Chord existing = lib.findByName(chordName);
+				if (existing == null) {
+					lib.add(chord);
+				} else {
+					// TODO - compare the two.. now left the older one as is...
+				}
+				continue;
 			} else {
-				// known library - default robotar, ...
+				// chord was not in usedchords section
 				ChordLibrary library = manager.getChordLibraries().get(libraryName);
 				if (library != null) {
-					Chord chord = library.findByName(chordName);
-					if (chord != null) {
-						ref.setChord(chord);
+					Chord existing = library.findByName(chordName);
+					if (existing != null) {
+						ref.setChord(existing);
+						used.add(existing);
 						continue;
+					}
+				}
+				
+				if ("user".equals(libraryName)) {
+					// look into current chord buffer on chords page
+					RoboTarChordsPage chPage = mainFrame.getChordsPage();
+					if (chPage != null) {
+						DefaultListModel model = chPage.getChordListModel();
+						if (model != null) {
+							Chord existing = findByName(model, ref.getChordId()); 
+							if (existing != null) {
+								ref.setChord(existing);
+								used.add(existing);
+								continue;
+							}
+						}
 					}
 				}
 			}
@@ -1008,7 +1034,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					str.append(" ");
 				}
 			}
-			String chordName = Chord.getChordName2(ref.getChordId());
+			String chordName = Chord.getChordName(ref.getChordId());
 			
 			PositionHint chordHint = new PositionHint();
 			chordHint.setOffset(lineOffset + position - 1);

@@ -1,33 +1,32 @@
 package cz.versarius.xchords;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class ChordLibrary {
-	private Map<String, Chord> chords = new HashMap<String, Chord>();
+/**
+ * Named chord set/bag.
+ * 
+ * @author miira
+ *
+ */
+public class ChordLibrary extends ChordBag {
 	private String desc;
 	private String name;
 	private String path;
+	
+	public ChordLibrary() {
+	}
+	
+	public ChordLibrary(String name) {
+		this.name = name;
+	}
+	
+	public ChordLibrary(ChordBag bag) {
+		super(bag);
+	}
 	
 	public String getDesc() {
 		return desc;
 	}
 	public void setDesc(String desc) {
 		this.desc = desc;
-	}
-	public Collection<Chord> getChords() {
-		return (Collection)chords.values();
-	}
-	public void setChords(List<Chord> chords) {
-		for (Chord chord : chords) {
-			this.chords.put(chord.getName(), chord);
-		}
-	}
-	
-	public Chord findByName(String chordName) {
-		return chords.get(chordName);
 	}
 	public String getName() {
 		return name;

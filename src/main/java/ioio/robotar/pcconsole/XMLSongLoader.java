@@ -22,8 +22,8 @@ import cz.versarius.xsong.Song;
 import cz.versarius.xsong.Verse;
 import cz.versarius.xsong.Chorus;
 
-public class XMLSongLoader {
-	public Song load(InputStream stream) {
+public class XMLSongLoader extends XMLChordLoader3 {
+	public Song loadSong(InputStream stream) {
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
@@ -61,6 +61,8 @@ public class XMLSongLoader {
 					readPart(song, new Verse(), aNode.getChildNodes());
 				} else if ("chorus".equals(aNode.getNodeName())) {
 					readPart(song, new Chorus(), aNode.getChildNodes());
+				} else if ("usedchords".equals(aNode.getNodeName())) {
+					readChordList(aNode.getChildNodes(), song.getUsedChords());
 				}
 			}
 		}
@@ -89,14 +91,14 @@ public class XMLSongLoader {
 				if ("text".equals(sNode.getNodeName())) {
 					line.setText(sNode.getTextContent());
 				} else if ("chords".equals(sNode.getNodeName())) {
-					line.setChords(readChords(sNode.getChildNodes()));
+					line.setChords(readRefChords(sNode.getChildNodes()));
 				}
 			}
 		}
 		return line;
 	}
 
-	private List<ChordRef> readChords(NodeList nodeList) {
+	private List<ChordRef> readRefChords(NodeList nodeList) {
 		List<ChordRef> chords = new ArrayList<ChordRef>();
 		for (int count = 0; count < nodeList.getLength(); count++) {
 			Node sNode = nodeList.item(count);

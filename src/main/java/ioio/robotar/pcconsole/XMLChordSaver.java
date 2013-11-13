@@ -15,13 +15,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import cz.versarius.xchords.Chord;
+import cz.versarius.xchords.ChordBag;
 import cz.versarius.xchords.ChordLibrary;
 import cz.versarius.xchords.StringInfo;
 import cz.versarius.xchords.StringState;
-import cz.versarius.xsong.ChordRef;
-import cz.versarius.xsong.Line;
-import cz.versarius.xsong.Part;
-import cz.versarius.xsong.Song;
 
 public class XMLChordSaver extends XMLSaver {
 	public void save(ChordLibrary chords, File file) {
@@ -61,10 +58,14 @@ public class XMLChordSaver extends XMLSaver {
 		// header
 		buildTextNode(doc, "desc", chords.getDesc(), root);
 		
+		buildChords(doc, root, chords);
+	}
+	
+	protected void buildChords(Document doc, Element where, ChordBag chords) {
 		for (Chord chord : chords.getChords()) {
 			// filtering? maybe no, because it's only temporary, it will be different in future...
 			// ok, save whole chord library
-			Element chordElement = buildChord(doc, chord, root);
+			Element chordElement = buildChord(doc, chord, where);
 			buildTextNode(doc, "name", chord.getName(), chordElement);
 			Element positionElement = buildPosition(doc, chord, chordElement);
 			for (StringInfo si : chord.getStrings()) {

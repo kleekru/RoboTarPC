@@ -1,7 +1,6 @@
 package ioio.robotar.pcconsole;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import cz.versarius.xchords.Chord;
@@ -19,6 +18,10 @@ public class ChordManager {
 		this.chordLibraries = chordLibraries;
 	}
 
+	public ChordLibrary findByName(String name) {
+		return chordLibraries.get(name);
+	}
+	
 	public boolean isInitialized() {
 		return initialized;
 	}
@@ -30,15 +33,23 @@ public class ChordManager {
 	public synchronized void initialize() {
 		XMLChordLoader3 loader = new XMLChordLoader3();
 		loadLibrary(loader, "/default-chords/robotar-default.xml");
+		// TODO watch for problems when loading...
 		initialized = true;
 	}
 	
-	private void loadLibrary(XMLChordLoader3 loader, String path) {
+	private boolean loadLibrary(XMLChordLoader3 loader, String path) {
 		ChordLibrary library = new ChordLibrary();
-		List<Chord> chords = loader.load(ChordManager.class.getResourceAsStream(path));
-		library.setChords(chords);
-		library.setName(Chord.getLibraryName(chords.get(0).getId()));
+		loader.loadChords(ChordManager.class.getResourceAsStream(path), library);
+		if (library.isEmpty()) {
+			// TODO
+			// log
+			return false;
+		}
+		
+		library.setName(Chord.getLibraryName(library.getFirst().getId()));
 		library.setPath(path);
 		chordLibraries.put(library.getName(), library);
+		return true;
 	}
+	
 }

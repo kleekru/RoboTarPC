@@ -19,7 +19,7 @@ import cz.versarius.xsong.Line;
 import cz.versarius.xsong.Part;
 import cz.versarius.xsong.Song;
 
-public class XMLSongSaver extends XMLSaver {
+public class XMLSongSaver extends XMLChordSaver {
 	public void save(Song song, File file) {
 		try {
 
@@ -59,6 +59,7 @@ public class XMLSongSaver extends XMLSaver {
 		buildTextNode(doc, "interpret", song.getInterpret(), root);
 		buildTextNode(doc, "info", song.getInfo(), root);
 		
+		// structure
 		for (Part part : song.getParts()) {
 			Element partElement = buildContainer(doc, part.getTypeName(), root);
 			for (Line line : part.getLines()) {
@@ -70,6 +71,9 @@ public class XMLSongSaver extends XMLSaver {
 				}
 			}
 		}
+		
+		Element usedChordsElement = buildContainer(doc, "usedchords", root);
+		buildChords(doc, usedChordsElement, song.getUsedChords());
 	}
 	
 	protected Element buildChordRef(Document doc, String name, ChordRef chref,
