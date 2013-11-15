@@ -16,8 +16,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import cz.versarius.xchords.Chord;
@@ -359,8 +357,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		setSize(840, 410);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		addWindowListener(this);
+		
+		pack();
+		setLocationByPlatform(true);
 		setVisible(true);
-		LOG.debug("constructed");
 	}
 
 	protected void newChordButtonActionPerformed(ActionEvent evt) {

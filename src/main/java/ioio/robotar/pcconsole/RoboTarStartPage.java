@@ -29,11 +29,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JMenu;
@@ -43,18 +42,14 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
 import java.awt.Point;
+import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 /**
  * RoboTar GUI main window.
  */
-public class RoboTarStartPage implements ActionListener {
+public class RoboTarStartPage {
 
 	private JFrame frmBlueAhuizote;
 	public JButton btnChords;
@@ -86,7 +81,8 @@ public class RoboTarStartPage implements ActionListener {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					//RoboTarStartPage window = new RoboTarStartPage();
+					frmBlueAhuizote.pack();
+					frmBlueAhuizote.setLocationByPlatform(true);
 					frmBlueAhuizote.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -131,8 +127,7 @@ public class RoboTarStartPage implements ActionListener {
 	 */
 	public void initialize() {
 		chordManager = new ChordManager();
-		servoSettings = new ServoSettings();
-		
+		servoSettings = ServoSettings.loadCorrectionsFrom(new File("corrections.xml"));
 		messages = ResourceBundle.getBundle("ioio.robotar.pcconsole.RoboTarBundle", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();
@@ -154,8 +149,9 @@ public class RoboTarStartPage implements ActionListener {
 		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
 		frmBlueAhuizote.getContentPane().add(lblNewLabel, BorderLayout.WEST);
 		
+		Action startChordsAction = new StartChordsPageAction(messages.getString("robotar.menu.chords"), KeyEvent.VK_C);
 		btnChords = new JButton("");
-		btnChords.addActionListener(this);
+		btnChords.addActionListener(startChordsAction);
 		btnChords.setForeground(Color.BLUE);
 		btnChords.setMinimumSize(new Dimension(100, 100));
 		btnChords.setMaximumSize(new Dimension(100, 100));
@@ -167,18 +163,17 @@ public class RoboTarStartPage implements ActionListener {
 		btnChords.setRolloverIcon(null);
 		btnChords.setToolTipText("Create or Browse Chords");
 		btnChords.setRolloverSelectedIcon(null);
-		btnChords.setMnemonic(KeyEvent.VK_C);
 		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
 		frmBlueAhuizote.getContentPane().add(btnChords, BorderLayout.CENTER);
 		
+		Action startSongsAction = new StartSongsPageAction(messages.getString("robotar.menu.songs"), KeyEvent.VK_S);
 		btnSongs = new JButton("");
-		btnSongs.addActionListener(this);
+		btnSongs.addActionListener(startSongsAction);
 		btnSongs.setBorderPainted(false);
 		btnSongs.setBackground(Color.BLUE);
 		btnSongs.setForeground(Color.BLUE);
 		btnSongs.setMargin(new Insets(0, 0, 0, 0));
 		btnSongs.setToolTipText("Select or Create Songs");
-		btnSongs.setMnemonic(KeyEvent.VK_S);
 		btnSongs.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/SheetMusic.png")));
 		btnSongs.setName("SongsButton");
 		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
@@ -201,66 +196,95 @@ public class RoboTarStartPage implements ActionListener {
 		JMenuBar menuBar = new JMenuBar();
 		frmBlueAhuizote.setJMenuBar(menuBar);
 		
-		JMenu mnNewMenu = new JMenu("File");
-		menuBar.add(mnNewMenu);
+		JMenu mnFileMenu = new JMenu(messages.getString("robotar.menu.file"));
+		menuBar.add(mnFileMenu);
 		
-		JMenuItem mntmAbout = new JMenuItem("About RoboTar");
-		mnNewMenu.add(mntmAbout);
+		JMenuItem mntmAbout = new JMenuItem(messages.getString("robotar.menu.about"));
+		mntmAbout.setEnabled(false);
+		mnFileMenu.add(mntmAbout);
 		
-		JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
-		mntmNewMenuItem.addActionListener(new ExitListener());
-		mnNewMenu.add(mntmNewMenuItem);
-		mntmNewMenuItem.setName("Exit");
+		JMenuItem mntmExit = new JMenuItem(messages.getString("robotar.menu.exit"));
+		mntmExit.addActionListener(new ExitListener());
+		mntmExit.setMnemonic(KeyEvent.VK_X);
+		mnFileMenu.add(mntmExit);
 		
-		JMenu mnChordLauncher = new JMenu("Chord Launcher");
+		JMenu mnChordLauncher = new JMenu(messages.getString("robotar.menu.chord_launcher"));
 		menuBar.add(mnChordLauncher);
 		
-		JMenuItem mntmChords = new JMenuItem("Chords");
+		JMenuItem mntmChords = new JMenuItem(startChordsAction);
 		mnChordLauncher.add(mntmChords);
 		
-		JMenuItem mntmSongs = new JMenuItem("Songs");
+		JMenuItem mntmSongs = new JMenuItem(startSongsAction);
 		mnChordLauncher.add(mntmSongs);
 		
-		JMenuItem mntmSongPlayer = new JMenuItem("Song Player");
+		JMenuItem mntmSongPlayer = new JMenuItem(messages.getString("robotar.menu.song_player"));
+		mntmSongPlayer.setEnabled(false);
 		mnChordLauncher.add(mntmSongPlayer);
 		
-		JMenu mnUtilities = new JMenu("Utilities");
+		JMenu mnUtilities = new JMenu(messages.getString("robotar.menu.utilities"));
 		menuBar.add(mnUtilities);
 		
-		JMenuItem corr = new JMenuItem(new AbstractAction("Servo corrections") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				showCorrectionsDialog(e);
-			}
-		});
+		JMenuItem corr = new JMenuItem(new CorrectionsAction(messages.getString("robotar.menu.servo_corrections"), KeyEvent.VK_R));
 		mnUtilities.add(corr);
 		
-		JMenuItem mntmTunercomingSoon = new JMenuItem("Tuner (Coming Soon)");
-		mnUtilities.add(mntmTunercomingSoon);
+		JMenuItem mntmTuner = new JMenuItem(messages.getString("robotar.menu.tuner"));
+		mntmTuner.setEnabled(false);
+		mnUtilities.add(mntmTuner);
 		
-		JMenuItem mntmMetronomecomingSoon = new JMenuItem("Metronome (Coming Soon)");
-		mnUtilities.add(mntmMetronomecomingSoon);
+		JMenuItem mntmMetronome = new JMenuItem(messages.getString("robotar.menu.metronome"));
+		mntmMetronome.setEnabled(false);
+		mnUtilities.add(mntmMetronome);
 		
-		JMenuItem mntmSongDownloadscomingSoon = new JMenuItem("Song Downloads(Coming Soon)");
-		mnUtilities.add(mntmSongDownloadscomingSoon);
+		JMenuItem mntmSongDownloads = new JMenuItem(messages.getString("robotar.menu.song_downloads"));
+		mntmSongDownloads.setEnabled(false);
+		mnUtilities.add(mntmSongDownloads);
 	}
 	
 	protected void showCorrectionsDialog(ActionEvent evt) {
 		CorrectionsDialog dlg = new CorrectionsDialog(this);
 		dlg.setVisible(true);
 	}
+
+	private abstract class MyAction extends AbstractAction {
+		public MyAction(String text, int mnemonic) {
+			super(text);
+		    putValue(MNEMONIC_KEY, mnemonic);
+		}
+	}
 	
-	
-	
-	public void actionPerformed(ActionEvent event) {
-		if (event.getSource() == btnChords) {
+	private class StartChordsPageAction extends MyAction {
+		public StartChordsPageAction(String text, int mnemonic) {
+	       super(text, mnemonic);
+	    }
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
 			startChordsPage();
 		}
-		if (event.getSource() == btnSongs) {
+	}
+	
+	private class StartSongsPageAction extends MyAction {
+		public StartSongsPageAction(String text, int mnemonic) {
+	       super(text, mnemonic);
+	    }
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
 			startSongsPage();
 		}
 	}
 	
+	private class CorrectionsAction extends MyAction {
+		public CorrectionsAction(String text, int mnemonic) {
+			super(text, mnemonic);
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			showCorrectionsDialog(e);
+		}
+	};
+		
 	public void startChordsPage() {
 		if (chordsPage == null) {
 			chordsPage = new RoboTarChordsPage(this);
@@ -331,4 +355,5 @@ public class RoboTarStartPage implements ActionListener {
 	public void setMessages(ResourceBundle messages) {
 		this.messages = messages;
 	}
+	
 }

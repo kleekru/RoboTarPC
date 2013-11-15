@@ -3,7 +3,6 @@ package ioio.robotar.pcconsole;
 import javax.swing.JDialog;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
 
 import java.awt.GridBagLayout;
@@ -13,27 +12,45 @@ import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ResourceBundle;
 
 public class CorrectionsDialog extends JDialog {
+	private static final Logger LOG = LoggerFactory.getLogger(CorrectionsDialog.class);
+	
 	private RoboTarStartPage page;
+	private ResourceBundle messages;
 	
 	private float VAL = 0.0f;
-	private float MIN = -2.0f;
-	private float MAX = 2.0f;
-	private float STEP = 0.1f;
+	private float MIN = -0.2f;
+	private float MAX = 0.2f;
+	private float STEP = 0.001f;
 	
 	JSpinner[][] spinners;
 	
-	public CorrectionsDialog(RoboTarStartPage page) {
+	public CorrectionsDialog(final RoboTarStartPage page) {
 		setResizable(false);
 		setSize(440, 370);
 		this.page = page;
+		this.messages = page.getMessages();
+		setTitle(messages.getString("robotar.corrections.title"));
 		
+		this.addWindowListener(new WindowAdapter() {
+		    @Override
+		    public void windowClosing(WindowEvent e) {
+		    	LOG.debug("closing");
+		    	CorrectionsDialog.this.page.getServoSettings().setCorrections(getValues());
+		    	ServoSettings.saveCorrectionsAs(new File("corrections.xml"), page.getServoSettings());
+		    }
+		});
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] {80, 80, 80, 80, 80};
 		gridBagLayout.rowHeights = new int[]{23, 0, 0, 0};
@@ -42,7 +59,7 @@ public class CorrectionsDialog extends JDialog {
 		getContentPane().setLayout(gridBagLayout);
 
 		// load button
-		JButton btnLoadCorrections = new JButton("Load corrections");
+		JButton btnLoadCorrections = new JButton(messages.getString("robotar.corrections.load_from"));
 		btnLoadCorrections.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -60,7 +77,7 @@ public class CorrectionsDialog extends JDialog {
 		getContentPane().add(btnLoadCorrections, gbc_btnLoadButton);
 		
 		// save button
-		JButton btnSaveCorrections = new JButton("Save corrections");
+		JButton btnSaveCorrections = new JButton(messages.getString("robotar.corrections.save_as"));
 		btnSaveCorrections.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				saveCorrections(e);
@@ -74,8 +91,9 @@ public class CorrectionsDialog extends JDialog {
 		getContentPane().add(btnSaveCorrections, gbc_btnSaveButton);
 
 		// labels
+		String prefix = messages.getString("robotar.corrections.servo") + " ";
 		for (int i=0; i<12; i++) {
-			JLabel lblServo = new JLabel("Servo " + i);
+			JLabel lblServo = new JLabel(prefix + i);
 			GridBagConstraints gbc_lblServo = new GridBagConstraints();
 			gbc_lblServo.insets = new Insets(0, 0, 5, 5);
 			gbc_lblServo.gridx = 0;
@@ -103,6 +121,10 @@ public class CorrectionsDialog extends JDialog {
 
 		// display values from actual settings
 		updateControls(page.getServoSettings().getCorrections());
+		
+		pack();
+		setLocationByPlatform(true);
+		setVisible(true);
 	}
 
 	protected void loadCorrections(ActionEvent evt) throws FileNotFoundException {
@@ -110,34 +132,35 @@ public class CorrectionsDialog extends JDialog {
 		int returnValue = fc.showOpenDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            XMLSettingLoader loader = new XMLSettingLoader();
-            page.setServoSettings(loader.load(new FileInputStream(file)));
-            float [][] v = page.getServoSettings().getCorrections();
-            updateControls(v);
-            
-            // debug
-            for (int i=0; i<12; i++) {
-            	for (int j=0; j<4; j++) {
-            		System.out.println(v[i][j]);
-            	}
-            }
+            ServoSettings sett = ServoSettings.loadCorrectionsFrom(file);
+            page.setServoSettings(sett);
+            updateControls(page.getServoSettings().getCorrections());
 		}
 	}
 	
 	protected void updateControls(float[][] v) {
 		for (int i=0; i<12; i++) {
 			for (int j=0; j<4; j++) {
-				spinners[i][j].setValue(v[i][j]);
+				spinners[i][j].setValue(checkLimit(v[i][j]));
 			}
 		}
 	}
 	
+	private float checkLimit(float value) {
+		if (value < MIN) {
+			return MIN;
+		} else if (value > MAX) {
+			return MAX;
+		} else {
+			return value;
+		}
+	}
 	protected float[][] getValues() {
 		float [][] vals = new float[12][];
 		for (int i=0; i<12; i++) {
 			vals[i] = new float[4];
 			for (int j=0; j<4; j++) {
-				vals[i][j] = ((Number) spinners[i][j].getValue()).floatValue();
+				vals[i][j] = checkLimit(((Number) spinners[i][j].getValue()).floatValue());
 			}
 		}
 		return vals;
@@ -148,11 +171,8 @@ public class CorrectionsDialog extends JDialog {
 		int returnValue = fc.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            XMLSettingSaver saver = new XMLSettingSaver();
-            float[][]vals = getValues();
-            saver.save(vals, file);
-            
-            page.getServoSettings().setCorrections(vals);
+            page.getServoSettings().setCorrections(getValues());
+            ServoSettings.saveCorrectionsAs(file, page.getServoSettings());
 		}
 		
 	}

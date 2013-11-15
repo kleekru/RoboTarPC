@@ -22,27 +22,18 @@ import org.xml.sax.SAXException;
  *
  */
 public class XMLSettingLoader {
-	public ServoSettings load(InputStream stream) {
-		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(stream);
-			doc.getDocumentElement().normalize();
+	public ServoSettings load(InputStream stream) throws IOException, ParserConfigurationException, SAXException {
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory
+				.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(stream);
+		doc.getDocumentElement().normalize();
 
-			if (doc.hasChildNodes()) {
-				ServoSettings sett = readSetting(doc.getChildNodes().item(0));
-				return sett;
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
+		if (doc.hasChildNodes()) {
+			ServoSettings sett = readSetting(doc.getChildNodes().item(0));
+			return sett;
 		}
-		throw new RuntimeException("todo...never do this :)");
+		throw new IOException("empty/corrupted file");	
 	}
 	
 	private ServoSettings readSetting(Node node) {

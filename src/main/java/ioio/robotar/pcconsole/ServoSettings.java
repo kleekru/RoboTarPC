@@ -1,5 +1,17 @@
 package ioio.robotar.pcconsole;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
+
 import cz.versarius.xchords.Chord;
 import cz.versarius.xchords.StringInfo;
 import cz.versarius.xchords.StringState;
@@ -9,6 +21,8 @@ import cz.versarius.xchords.StringState;
  * Can translate XChord into the values for RoboTar device.
  */
 public class ServoSettings {
+	private static final Logger LOG = LoggerFactory.getLogger(RoboTarChordsPage.class);
+
 	public static final float NEUTRAL = 1.0f;
 	public static final float MUTED = 0.9f;
 	public static final float PRESSED_TOP_RIGHT = 1.3f;
@@ -165,6 +179,28 @@ public class ServoSettings {
 
 	public void setValues(float[] values) {
 		this.values = values;
+	}
+
+	public static ServoSettings loadCorrectionsFrom(File file) {
+		XMLSettingLoader loader = new XMLSettingLoader();
+		try {
+			LOG.debug("loading corrections from file: {}", file.getAbsolutePath());
+			return loader.load(new FileInputStream(file));
+		} catch (IOException e) {
+			LOG.error("loadfrom.ioexception", e);
+		} catch (ParserConfigurationException e) {
+			LOG.error("loadfrom.parseconfigurationexception", e);
+		} catch (SAXException e) {
+			LOG.error("loadfrom.saxexception", e);
+		}
+		// empty settings
+		return new ServoSettings();
+	}
+
+	public static void saveCorrectionsAs(File file, ServoSettings sett) {
+		XMLSettingSaver saver = new XMLSettingSaver();
+		LOG.debug("saving corrections to file: {}", file.getAbsolutePath());
+		saver.save(sett.getCorrections(), file);
 	}
 	
 	//////////TODO delete after validating, all works
@@ -425,6 +461,5 @@ public class ServoSettings {
 		ServoSettings.highEStringPosition = highEStringPosition;
 	}
 
-			
 	
 }// End Class

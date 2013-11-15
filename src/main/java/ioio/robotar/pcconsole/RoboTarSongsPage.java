@@ -368,6 +368,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		addWindowListener(this);
+		
+		pack();
+		setLocationByPlatform(true);
+		setVisible(true);
 	}
 
 	protected void loadSong() throws FileNotFoundException {
