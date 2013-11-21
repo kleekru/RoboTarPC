@@ -358,7 +358,8 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		addWindowListener(this);
 		
-		pack();
+		// this is causing problems with layout
+		//pack();
 		setLocationByPlatform(true);
 		setVisible(true);
 	}

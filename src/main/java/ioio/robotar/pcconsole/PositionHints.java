@@ -58,4 +58,11 @@ public class PositionHints {
 		}
 		return lineHint;
 	}
+	public int lookAhead(PositionHint lineHint) {
+		int ahead = currentLine + 2;
+		if (lines.size() <= ahead) {
+			return -1;
+		}
+		return lines.get(ahead).getOffset();
+	}
 }

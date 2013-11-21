@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
 import java.awt.event.ActionListener;
@@ -44,10 +45,13 @@ import javax.swing.ListSelectionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Adjustable;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Component;
+import java.awt.Rectangle;
 
 import javax.swing.SwingConstants;
 
@@ -79,7 +83,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	
 	// where are chords and lines in the text pane - to be able to select them during play
 	private PositionHints hints;
-	private JTextPane textPane; 
+	private JTextPane textPane;
+	private JScrollPane scrollPane;
 	private JList songList;
 	private DefaultListModel songListModel;
 	private JList chordList;
@@ -360,10 +365,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		
 		textPane = new JTextPane();
 		textPane.setEditable(false);
-		//JScrollPane scrollPane = new JScrollPane(textPane);
-		//setPreferredSize(new Dimension(450, 110));
-		songPanel.add(textPane);
-		
+		scrollPane = new JScrollPane(textPane);
+		scrollPane.setPreferredSize(new Dimension(450, 370));
+		songPanel.add(scrollPane);
+		//getContentPane().add(scrollPane);
 		setupStyles(textPane);
 		
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -847,6 +852,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		
 		doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), markedStyle, false);
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), markedChordStyle, false);
+		
+		int ahead = hints.lookAhead(lineHint);
+		scrollTo(ahead);
 	}
 
 	/**
@@ -856,6 +864,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 * @param newLineHint
 	 */
 	protected void unmarkCurrent(PositionHint chordHint, PositionHint lineHint, PositionHint newLineHint) {
+		if (chordHint == null) {
+			// not even first chord displayed
+			return;
+		}
 		StyledDocument doc = textPane.getStyledDocument();
 		Style chordStyle = doc.getStyle(CHORD_STYLE);
 		Style mainStyle = doc.getStyle(MAIN_STYLE);
@@ -885,10 +897,30 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			// set as start
 			hints.setCurrentChord(-1);
 			hints.setCurrentLine(0);
+			scrollTo(0);
 			playing = true;
 		}
 	}
 
+	/** 
+	 * Scroll to some position in song.
+	 * 
+	 * @param position
+	 */
+	protected void scrollTo(int position) {
+		if (position == -1) {
+			position = textPane.getDocument().getLength();
+		}
+		LOG.debug("position: {}", position);
+		textPane.setCaretPosition(position);
+		if (position == 0) {
+			textPane.setCaretPosition(1);
+			/*Rectangle vis = textPane.getVisibleRect();
+			vis.x = 0;
+			textPane.scrollRectToVisible(vis);*/
+		}
+	}
+	
 	/**
 	 * Stop to play a song.
 	 */
@@ -911,6 +943,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		songList.setEnabled(true);
 		btnLoadSong.setEnabled(true);
 		btnSaveSong.setEnabled(true);
+		scrollTo(0);
 		// call to release servos - neutral positions
 		prepareNoChord();
 	}
@@ -1015,6 +1048,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				}
 	            
 			}
+			// scroll to top
+			scrollTo(0); 
 		} catch (BadLocationException e1) {
 			e1.printStackTrace(); //TODO
 		}
