@@ -41,8 +41,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
-import net.infotrek.util.prefs.FilePreferencesFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +49,6 @@ import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 
 /**
  * RoboTar GUI main window.
@@ -86,6 +83,10 @@ public class RoboTarStartPage {
 	/** per user preferences */
 	private RoboTarPreferences preferences = RoboTarPreferences.load();
 	
+	public RoboTarPreferences getPreferences() {
+		return preferences;
+	}
+
 	/**
 	 * Launch the application.
 	 */

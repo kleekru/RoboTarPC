@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
 public class CorrectionsDialog extends JDialog {
+
 	private static final Logger LOG = LoggerFactory.getLogger(CorrectionsDialog.class);
 	
 	private RoboTarStartPage page;
@@ -48,7 +49,7 @@ public class CorrectionsDialog extends JDialog {
 		    public void windowClosing(WindowEvent e) {
 		    	LOG.debug("closing");
 		    	CorrectionsDialog.this.page.getServoSettings().setCorrections(getValues());
-		    	ServoSettings.saveCorrectionsAs(new File("corrections.xml"), page.getServoSettings());
+		    	ServoSettings.saveCorrectionsAs(new File(page.getPreferences().getCorrectionsFile()), page.getServoSettings());
 		    }
 		});
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -147,6 +148,7 @@ public class CorrectionsDialog extends JDialog {
 	}
 	
 	private float checkLimit(float value) {
+		//LOG.debug("checking value: {}", value);
 		if (value < MIN) {
 			return MIN;
 		} else if (value > MAX) {

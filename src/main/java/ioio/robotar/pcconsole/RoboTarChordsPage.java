@@ -555,20 +555,18 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		if (tglbtnTestChord.isSelected()) {
 			// use radio panel as source for chord, unfilled radios will be marked OPEN
 			Chord chord = radioPanel.createChordFromRadios(getLibraryName());
-			ServoSettings servos = new ServoSettings(chord);
-			mainFrame.setServoSettings(servos);
+			mainFrame.getServoSettings().setChord(chord);
 			LEDSettings leds = new LEDSettings(chord);
 			mainFrame.setLeds(leds);
-			LOG.debug("preparing servos Values on chords page: {}", servos.debugOutput());
+			LOG.debug("preparing servos Values on chords page: {}", mainFrame.getServoSettings().debugOutput());
 			LOG.debug("preparing leds on chords page: {}", leds.debugOutput());
 		} else {
 			// release
-			ServoSettings servos = new ServoSettings();
-			mainFrame.setServoSettings(servos);
+			mainFrame.getServoSettings().setInitialPosition();
 			LEDSettings leds = new LEDSettings();
 			mainFrame.setLeds(leds);
 			LOG.debug("releasing all");
-			LOG.debug("releasing servos: {}", servos.debugOutput());
+			LOG.debug("releasing servos: {}", mainFrame.getServoSettings().debugOutput());
 			LOG.debug("turning off LEDs: {}", leds.debugOutput());
 		}
 	}

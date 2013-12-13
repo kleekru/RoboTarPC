@@ -245,7 +245,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 				stateLedOn = false;
 				ServoSettings sett = robotarGUI.getServoSettings();
 				for (int servo = 0; servo < 12; servo++) {
-					setServo(servo, sett.getNeutral(servo));
+					setServo(servo, sett.getInitial(servo));
 				}
 				turnOffFretLEDs();
 				LOG.info("Servos in neutral position default");

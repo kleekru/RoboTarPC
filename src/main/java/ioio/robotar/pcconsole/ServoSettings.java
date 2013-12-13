@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -60,10 +64,10 @@ public class ServoSettings {
 	private float[] values = new float[6];
 	
 	/**
-	 * Instantiates servos to neutral positions.
+	 * Instantiates servos to initial positions.
 	 */
 	public ServoSettings() {
-		neutralPosition();
+		setInitialPosition();
 	}
 	
 	/**
@@ -81,12 +85,21 @@ public class ServoSettings {
 	 * @param chord
 	 */
 	public ServoSettings(Chord chord) {
+		setChord(chord);
+	}
+	
+	/**
+	 * everything is assumed to be set - either in neutral position or values from corrections dialog.
+	 * only set servos based on this chord + corrections
+	 * @param chord
+	 */
+	public void setChord(Chord chord) {
 		for (int i = 0; i < 6; i++) {
 			StringInfo si = chord.getString(i);
 			if ((si == null) || (si.getState() == StringState.OPEN) || (si.getState() == null)) {
 				// neutral position
 				servos[i] = i*2;
-				values[i] = NEUTRAL + CORRECTION[i*2][0];
+				values[i] = roundFloat(NEUTRAL + CORRECTION[i*2][0]);
 			} else if (si.getState() == StringState.OK || si.getState() == StringState.OPTIONAL) {
 				// something is pressed
 				int fret = si.getFret();
@@ -96,14 +109,23 @@ public class ServoSettings {
 				float servoValue = compute(i, fret, servoNum);
 				
 				servos[i] = servoNum;
-				values[i] = servoValue;
+				values[i] = roundFloat(servoValue);
 			} else if (si.getState() == StringState.DISABLED) {
 				// muted
 				servos[i] = i*2;
-				values[i] = MUTED + CORRECTION[i*2][1];
+				values[i] = roundFloat(MUTED + CORRECTION[i*2][1]);
 			}
 		}
 		// servo and values are set..
+	}
+	
+	// TODO it may not work correctly because of float representation... 
+	// if it does not work - rewrite to DecimalFormat usage...
+	private float roundFloat(float val) {
+		BigDecimal bd = new BigDecimal(Float.toString(val));
+		bd = bd.setScale(3, BigDecimal.ROUND_HALF_UP);
+		LOG.debug("val {} -> formatted {}", val, bd.floatValue());
+		return bd.floatValue();
 	}
 	
 	public void setCorrections(float[][] settings) {
@@ -114,14 +136,14 @@ public class ServoSettings {
 		return CORRECTION;
 	}
 	
-	public float getNeutral(int servoNum) {
-		return NEUTRAL + CORRECTION[servoNum][0];
+	public float getInitial(int servoNum) {
+		return roundFloat(NEUTRAL + CORRECTION[servoNum][0]);
 	}
 	
-	private void neutralPosition() {
+	public void setInitialPosition() {
 		for (int i = 0; i < 6; i++) {
 			servos[i] = i*2;
-			values[i] = NEUTRAL + CORRECTION[i*2][0];
+			values[i] = roundFloat(NEUTRAL + CORRECTION[i*2][0]);
 		}
 	}
 	
