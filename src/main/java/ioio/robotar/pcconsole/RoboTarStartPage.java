@@ -41,16 +41,25 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
+import net.infotrek.util.prefs.FilePreferencesFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Point;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 /**
  * RoboTar GUI main window.
  */
 public class RoboTarStartPage {
 
+	private static final Logger LOG = LoggerFactory.getLogger(RoboTarStartPage.class);
+	
 	private JFrame frmBlueAhuizote;
 	public JButton btnChords;
 	public JButton btnSongs;
@@ -73,6 +82,9 @@ public class RoboTarStartPage {
 	private RoboTarSongsPage songsPage;
 	
 	private ResourceBundle messages;
+
+	/** per user preferences */
+	private RoboTarPreferences preferences = RoboTarPreferences.load();
 	
 	/**
 	 * Launch the application.
@@ -95,7 +107,12 @@ public class RoboTarStartPage {
 	 * Create the application.
 	 */
 	public RoboTarStartPage() {
-		initialize();
+		try {
+			initialize();
+		} catch (BackingStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void closingMethod() {
@@ -124,10 +141,11 @@ public class RoboTarStartPage {
     
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws BackingStoreException 
 	 */
-	public void initialize() {
+	public void initialize() throws BackingStoreException {
 		chordManager = new ChordManager();
-		servoSettings = ServoSettings.loadCorrectionsFrom(new File("corrections.xml"));
+		servoSettings = ServoSettings.loadCorrectionsFrom(new File(preferences.getCorrectionsFile()));
 		messages = ResourceBundle.getBundle("ioio.robotar.pcconsole.RoboTarBundle", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();

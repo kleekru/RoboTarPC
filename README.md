@@ -1,5 +1,5 @@
-RoboTarIOIOforPCConsole
-=======================
+# RoboTarIOIOforPCConsole #
+===========================
 
 RoboTar robotic guitar assistant - Code for PC version
 
@@ -32,3 +32,18 @@ TODO:
  -      If there is an error sending to RoboTar
  -      If there is a problem with a specific chord (in a song but not in the library).
  -    Need to look at performance over bluetooth vs. attached via USB.  So far Bluetooth might be too slow.
+
+ ## how to install ##
+ 
+ - java jdk 1.7, eclipse kepler, m2eclipse plugin (won't be needed in future)
+ - in eclipse Import maven project - robotar
+ - project properties add jar libraries from lib folder on Libraries tab
+ - git clone https://github.com/ytai/ioio
+ - import general project - ioio/software/IOIOlib/target as root dir, choose pc
+ - in project properties of Robotar add Project dependency to IOIOLibPC
+ - then mvn install from eclipse works - build success
+ - copy corrections.template.xml to corrections.xml
+ - then right click on project - run as - java application - should run
+ 
+ - download android platform - not needed for pc version
+ 

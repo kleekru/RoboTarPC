@@ -15,6 +15,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import net.infotrek.util.prefs.FilePreferencesFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,10 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 
 	// Boilerplate main(). Copy-paste this code into any IOIOapplication.
 	public static void main(String[] args) throws Exception {
+		// set preferences factory implementation and filename
+		System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
+	    System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, ".robotar.properties");
+	 
 		new RoboTarIOIOforPCConsole().go(args);
 	}
 
