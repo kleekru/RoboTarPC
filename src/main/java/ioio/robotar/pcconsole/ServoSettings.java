@@ -65,6 +65,10 @@ public class ServoSettings {
 	
 	/**
 	 * Instantiates servos to initial positions.
+	 * 
+	 * BEWARE: constructor resets CORRECTIONS structure!!
+	 * use the instance in mainFrame (RoboTarStartPage.servoSettings)
+	 * and setInitialPosition() and setChord(chord) of ServoSettings.
 	 */
 	public ServoSettings() {
 		setInitialPosition();
@@ -82,6 +86,9 @@ public class ServoSettings {
 	 * the value by pushing the pedal and plucking the note that is being trimmed 
 	 * to ensure the proper pressure is on the string.
 	 * 
+	 * BEWARE: constructor resets CORRECTIONS structure!!
+	 * use the instance in mainFrame (RoboTarStartPage.servoSettings)
+	 * and setInitialPosition() and setChord(chord) of ServoSettings.
 	 * @param chord
 	 */
 	public ServoSettings(Chord chord) {
@@ -140,6 +147,9 @@ public class ServoSettings {
 		return roundFloat(NEUTRAL + CORRECTION[servoNum][0]);
 	}
 	
+	/** 
+	 * it means - without chord. 
+	 */
 	public void setInitialPosition() {
 		for (int i = 0; i < 6; i++) {
 			servos[i] = i*2;

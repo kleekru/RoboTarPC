@@ -728,18 +728,13 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	}
 
 	public void prepareChord(Chord chord) {
-		prepareServoValues(new ServoSettings(chord));
+		mainFrame.getServoSettings().setChord(chord);
 		prepareLEDs(new LEDSettings(chord));
 	}
 
 	public void prepareNoChord() {
-		prepareServoValues(new ServoSettings());
+		mainFrame.getServoSettings().setInitialPosition();
 		prepareLEDs(new LEDSettings());
-	}
-	
-	protected void prepareServoValues(ServoSettings servos) {
-		mainFrame.setServoSettings(servos);
-		LOG.debug("preparing servos Values on songs page: {}", servos.debugOutput());
 	}
 	
 	protected void prepareLEDs(LEDSettings leds) {
