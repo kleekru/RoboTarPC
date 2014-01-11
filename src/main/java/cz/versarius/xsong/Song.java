@@ -19,6 +19,8 @@ public class Song {
 	private List<Part> parts = new ArrayList<Part>();
 	/** List of all used chords. */
 	private ChordBag usedChords = new ChordBag();
+	/** used in UI, as flag */
+	private transient boolean changed;
 	
 	public List<Part> getParts() {
 		return parts;
@@ -48,6 +50,10 @@ public class Song {
 		return title;
 	}
 
+	public String getTitleWithMark() {
+		return (changed ? title + " *": title);
+	}
+	
 	public void setTitle(String title) {
 		this.title = title;
 	}
@@ -66,6 +72,14 @@ public class Song {
 
 	public void setUsedChords(ChordBag chords) {
 		this.usedChords = chords;
+	}
+
+	public boolean isChanged() {
+		return changed;
+	}
+
+	public void setChanged(boolean changed) {
+		this.changed = changed;
 	}
 	
 	

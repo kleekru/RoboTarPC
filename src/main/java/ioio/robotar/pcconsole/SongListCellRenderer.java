@@ -28,7 +28,7 @@ public class SongListCellRenderer extends DefaultListCellRenderer {
 		super.getListCellRendererComponent(list, value, index, iss, chf);
 
 		Song song = (Song) list.getModel().getElementAt(index);
-		setText(song.getTitle());
+		setText(song.getTitleWithMark());
 
 		return this;
 	}

@@ -80,6 +80,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private boolean editing;
 	private boolean missingChords;
 	private boolean defaultSongsLoaded;
+	/** probably something modified. we cannot compare songs for diffs. */
+	private int modifiedCount;
 	
 	// where are chords and lines in the text pane - to be able to select them during play
 	private PositionHints hints;
@@ -403,6 +405,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		int returnValue = fc.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
+            if (actualSong.isChanged()) {
+            	actualSong.setChanged(false);
+            	modifiedCount--;
+            }
             XMLSongSaver saver = new XMLSongSaver();
             saver.save(actualSong, file);
 		}
@@ -464,6 +470,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		editing = true;
 		loadChordsFromSong();
 		createMarker();
+		if (!actualSong.isChanged()) {
+			actualSong.setChanged(true);
+			modifiedCount++;
+		}
 	}
 
 	protected void createMarker() {
@@ -1173,5 +1183,13 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			return true;
 		}
 		return false;
+	}
+
+	public int getModifiedCount() {
+		return modifiedCount;
+	}
+
+	public void setModifiedCount(int modified) {
+		this.modifiedCount = modified;
 	}
 }

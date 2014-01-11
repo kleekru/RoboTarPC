@@ -124,7 +124,11 @@ public class RoboTarStartPage {
 		if (chordsPage != null && chordsPage.isUnsavedChords()) {
 			sb.append("There are unsaved chords on Chords page!\n");
 		}
-		// TODO songs
+		if (songsPage != null && songsPage.getModifiedCount() > 0) {
+			sb.append("There may be unsaved songs (");
+			sb.append(songsPage.getModifiedCount());
+			sb.append(") on Songs page!\n");
+		}
 		sb.append("Are You sure to close RoboTar?");
 		int confirm = JOptionPane.showOptionDialog(frmBlueAhuizote,
                 sb.toString(),
