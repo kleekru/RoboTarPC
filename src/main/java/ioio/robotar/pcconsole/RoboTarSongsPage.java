@@ -956,17 +956,20 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	    StyleConstants.setBackground(mainStyle, Color.WHITE);
 	    StyleConstants.setBold(mainStyle, true);
 	    StyleConstants.setFontFamily(mainStyle, "monospaced");
-	    StyleConstants.setFontSize(mainStyle, 12);
+	    StyleConstants.setFontSize(mainStyle, mainFrame.getPreferences().getMainSize());
+	    
 	    
 	    Style chordStyle = sc.addStyle(CHORD_STYLE, mainStyle);
 		
 	    Style markedStyle = sc.addStyle(MARKED_STYLE, mainStyle);
-		StyleConstants.setForeground(markedStyle, Color.BLUE);
+	    StyleConstants.setForeground(markedStyle, mainFrame.getPreferences().getMarkedColor());
 		StyleConstants.setBackground(markedStyle, Color.YELLOW);
-
+		StyleConstants.setFontSize(markedStyle, mainFrame.getPreferences().getMarkedSize());
+	    
 		Style markedChordStyle = sc.addStyle(MARKED_CHORD_STYLE, mainStyle);
-		StyleConstants.setForeground(markedChordStyle, Color.BLUE);
+		StyleConstants.setForeground(markedChordStyle, mainFrame.getPreferences().getMarkedChordColor());
 		StyleConstants.setBackground(markedChordStyle, Color.YELLOW);
+		StyleConstants.setFontSize(markedChordStyle, mainFrame.getPreferences().getMarkedChordSize());
 
 		Style missingChordStyle = sc.addStyle(MISSING_CHORD_STYLE, mainStyle);
 		StyleConstants.setForeground(missingChordStyle, Color.RED);
