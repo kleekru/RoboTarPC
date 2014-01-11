@@ -1,11 +1,16 @@
 package ioio.robotar.pcconsole;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cz.versarius.xchords.ChordLibrary;
 
 /**
  * Per user preferences
@@ -32,6 +37,12 @@ public class RoboTarPreferences {
 	/** Active chord color, in 0xRRGGBB format, XX: 00-FF. */
 	private Color markedChordColor;
 	
+	/** recent chord libraries */
+	private List<String> libraries = new ArrayList<String>();
+	
+	/** last chosen library */
+	private String chosenLibrary;
+	
 	// TODO add other preferences, recent files (chords, songs)...
 	
 	/**
@@ -45,6 +56,15 @@ public class RoboTarPreferences {
 		markedColor = decodeColor(p, "markedColor", "0x0000ff");
 		markedChordSize = p.getInt("markedChordSize", 16);
 		markedChordColor = decodeColor(p, "markedChordColor", "0x0000ff");
+		// recent chord files - generally only 1 is visible in chords page
+		chosenLibrary = p.get("chosenLibrary", ChordManager.DEFAULT_ROBOTAR); //?
+		int i = 2;
+		String fileName = p.get("chordLibraryFile1", null);
+		while (fileName != null) {
+			libraries.add(fileName);
+			fileName = p.get("chordLibraryFile" + Integer.toString(i, 10), null);
+			i++;
+		}
 		// after load, save them again (useful in first run, but not needed)
 		update(p);
 		flush(p);
@@ -97,7 +117,13 @@ public class RoboTarPreferences {
 		p.put("markedSize", Integer.toString(getMarkedSize(), 10));
 		p.put("markedChordColor", encodeColor(getMarkedChordColor()));
 		p.put("markedChordSize", Integer.toString(getMarkedChordSize(), 10));
-		
+		// recent chord files - generally only 1 is visible in chords page
+		p.put("chosenLibrary", chosenLibrary);
+		int i = 1;
+		for (String lib : libraries) {
+			p.put("chordLibraryFile" + Integer.toString(i, 10), lib);
+			i++;
+		}
 	}
 	
 	private void flush(Preferences p) {
@@ -134,6 +160,22 @@ public class RoboTarPreferences {
 
 	public int getMarkedChordSize() {
 		return markedChordSize;
+	}
+
+	public List<String> getLibraries() {
+		return libraries;
+	}
+
+	public void setLibraries(List<String> libraries) {
+		this.libraries = libraries;
+	}
+
+	public String getChosenLibrary() {
+		return chosenLibrary;
+	}
+
+	public void setChosenLibrary(String chosenLibrary) {
+		this.chosenLibrary = chosenLibrary;
 	}
 
 }

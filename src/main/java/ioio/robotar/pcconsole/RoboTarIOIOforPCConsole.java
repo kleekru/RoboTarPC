@@ -43,7 +43,7 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 	@Override
 	protected void run(String[] args) throws IOException {
 		robotarGUI = new RoboTarStartPage();
-		robotarGUI.mainstart(args);
+		robotarGUI.mainstart(this, args);
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {

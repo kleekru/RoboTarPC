@@ -74,7 +74,7 @@ public class RoboTarStartPage {
 	/**
 	 * This will hold all chord libraries loaded in one instance.
 	 */
-	private ChordManager chordManager;
+	private ChordManager chordManager = new ChordManager();
 	private RoboTarChordsPage chordsPage;
 	private RoboTarSongsPage songsPage;
 	
@@ -83,6 +83,8 @@ public class RoboTarStartPage {
 	/** per user preferences */
 	private RoboTarPreferences preferences = RoboTarPreferences.load();
 	
+	//private RoboTarIOIOforPCConsole console;
+	
 	public RoboTarPreferences getPreferences() {
 		return preferences;
 	}
@@ -90,10 +92,11 @@ public class RoboTarStartPage {
 	/**
 	 * Launch the application.
 	 */
-	public void mainstart(String[] args) {
+	public void mainstart(RoboTarIOIOforPCConsole console, String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					//this.console = console;
 					frmBlueAhuizote.pack();
 					frmBlueAhuizote.setLocationByPlatform(true);
 					frmBlueAhuizote.setVisible(true);
@@ -117,11 +120,20 @@ public class RoboTarStartPage {
 	}
 
 	private void closingMethod() {
+		StringBuilder sb = new StringBuilder(100);
+		if (chordsPage != null && chordsPage.isUnsavedChords()) {
+			sb.append("There are unsaved chords on Chords page!\n");
+		}
+		// TODO songs
+		sb.append("Are You sure to close RoboTar?");
 		int confirm = JOptionPane.showOptionDialog(frmBlueAhuizote,
-                "Are You sure to close RoboTar?",
+                sb.toString(),
                 "Exit confirmation", JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE, null, null, null);
         if (confirm == JOptionPane.YES_OPTION) {
+        	// save all needed information for next start
+        	preferences.save();
+        	// and exit
             System.exit(0);
         }
     }
@@ -145,7 +157,7 @@ public class RoboTarStartPage {
 	 * @throws BackingStoreException 
 	 */
 	public void initialize() throws BackingStoreException {
-		chordManager = new ChordManager();
+		getChordManager();
 		servoSettings = ServoSettings.loadCorrectionsFrom(new File(preferences.getCorrectionsFile()));
 		messages = ResourceBundle.getBundle("ioio.robotar.pcconsole.RoboTarBundle", Locale.ENGLISH);
 		
@@ -321,7 +333,7 @@ public class RoboTarStartPage {
 	public ChordManager getChordManager() {
 		// TODO rewrite to better use of singleton pattern - synchronize!
 		if (!chordManager.isInitialized()) {
-			chordManager.initialize();
+			chordManager.initialize(preferences);
 		}
 		return chordManager;
 	}

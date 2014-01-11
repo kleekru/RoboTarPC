@@ -16,6 +16,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import cz.versarius.xchords.Chord;
@@ -94,6 +97,8 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 	private JToggleButton tglbtnTestChord;
 
+	private boolean unsavedChords;
+	
 	/**
 	 * Create the frame.
 	 * 
@@ -109,7 +114,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		setIconImage(Toolkit.getDefaultToolkit().getImage(
 				RoboTarChordsPage.class
 						.getResource("/data/BlueAhuizoteIcon.png")));
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		//setBounds(100, 100, 800, 400);
 		
 		frmBlueAhuizoteChords = new JPanel();
@@ -326,7 +331,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 				chordNameSend = radioPanel.getChordName();
 				if (isValidChordName(chordNameSend)) {
 					LOG.info("adding chord to chord list");
-					Chord chord = radioPanel.createChordFromRadios(getLibraryName());
+					Chord chord = radioPanel.createChordFromRadios(getLibraryName(true));
 					if (chordListModel == null) {
 						chordListModel = new DefaultListModel();
 						listChords.setModel(chordListModel);
@@ -334,6 +339,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 					chordListModel.addElement(chord);
 					radioPanel.setChordName(null);
 					clearSelection();
+					unsavedChords = true;
 				} else {
 					JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.chords.fill_chord_name"));
 				}
@@ -355,8 +361,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 		/* set size of the frame */
 		setSize(840, 410);
-		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		addWindowListener(this);
+		
+		// initialize with recent chord library, robotar by default
+		reloadChordList(mainFrame.getChordManager().getChosenLibrary());
 		
 		// this is causing problems with layout
 		//pack();
@@ -409,6 +417,49 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	}
 
 	protected void saveChords(ActionEvent evt) {
+		// better condition?
+		if ((chordListModel == null) || 
+				(chordListModel != null && chordListModel.isEmpty())) {
+			JOptionPane.showMessageDialog(this,
+        		    "Empty list of chords, nothing to save.",
+        		    "Saving chords",
+        		    JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		
+		// first check, if it is already in chord manager.
+		// if so, use existing file, without asking.
+		if (chordListModel != null && !chordListModel.isEmpty()) {
+			Chord chord = (Chord)chordListModel.get(0);
+			if (chord != null) {
+				String libraryName = Chord.getLibraryName(chord.getId());
+				if (libraryName != null) {
+					ChordManager mng = mainFrame.getChordManager();
+					ChordLibrary lib = mng.findByName(libraryName);
+					if (lib != null) {
+						// adjust all chords in library to the current state of left list of chords!
+						// add new, remove old, modify existing - the easiest is just copy everything
+						// to the library again
+						List<Chord> list = new ArrayList<Chord>();
+						for (int i=0; i<chordListModel.size(); i++) {
+			            	Chord c = (Chord)chordListModel.get(i);
+			            	list.add(c);
+			            }
+						lib.setChords(list);
+						
+						// save to existing file
+						XMLChordSaver saver = new XMLChordSaver();
+						saver.save(lib, new File(lib.getPath()));
+						
+						// mark and save recent
+						mng.setChosenLibrary(libraryName);
+			            unsavedChords = false;
+			            return;
+					}
+				}
+			}
+		}
+		// if it is new set of chords, ask for file
 		JFileChooser fc = new JFileChooser();
 		int returnValue = fc.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -420,6 +471,20 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
             	lib.add(chord);
             }
             saver.save(lib, file);
+            // add to recent files - trick, and also validation of the xml
+            ChordManager mng = mainFrame.getChordManager();
+            String libName = mng.loadLibrary(file);
+            if (libName == null) {
+            	LOG.error("Cannot load currently saved chord library file! path: {}, abspath: {} ", file.getPath(), file.getAbsolutePath());
+            	// msg
+            	JOptionPane.showMessageDialog(this,
+            		    "Could not load currently saved file. See log console.",
+            		    "Chord library validation loading",
+            		    JOptionPane.ERROR_MESSAGE);
+            	return;
+            }
+            mng.setChosenLibrary(libName);
+            unsavedChords = false;
 		}
 		
 	}
@@ -429,27 +494,43 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		int returnValue = fc.showOpenDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            XMLChordLoader3 loader = new XMLChordLoader3();
-            ChordBag bag = loader.loadChords(new FileInputStream(file), new ChordBag());
-            // throwing away any previously set chords
-   			chordListModel = new DefaultListModel();
-   			for (Chord chord : bag.getChords()) {
-   				chordListModel.addElement(chord);
-   			}
-   			listChords.setModel(chordListModel);
+            ChordManager mng = mainFrame.getChordManager();
+            String libName = mng.loadLibrary(file);
+            if (libName == null) {
+            	JOptionPane.showMessageDialog(this,
+            		    "Could not load chosen file. Is it chord library? See log console.",
+            		    "Chord library loading",
+            		    JOptionPane.ERROR_MESSAGE);
+            	return;
+            } 
+            reloadChordList(libName);
+            
 		}
 	}
 
+	/** 
+	 * Reload current list of chords with chosen library from chordmanager.
+	 * @param libName
+	 */
+	protected void reloadChordList(String libName) {
+		ChordBag bag = mainFrame.getChordManager().findByName(libName);
+        // throwing away any previously set chords // TODO more libraries should be possible?
+		//////////////////////////////////////////////////////////////////
+		if (bag == null) {
+			LOG.error("Cannot find chord library: '{}' in chord manager", libName);
+		} else {
+			chordListModel = new DefaultListModel();
+			for (Chord chord : bag.getChords()) {
+				chordListModel.addElement(chord);
+			}
+			listChords.setModel(chordListModel);
+			mainFrame.getChordManager().setChosenLibrary(libName);
+		}
+	}
 
 	protected void loadDefaultChords(ActionEvent evt) {
-		// populate the list based on XML file load.
-		XMLChordLoader3 loader = new XMLChordLoader3();
-		ChordBag bag = loader.loadChords(RoboTarChordsPage.class.getResourceAsStream("/default-chords/robotar-default.xml"), new ChordBag());
-		chordListModel = new DefaultListModel();
-		for (Chord chord : bag.getChords()) {
-			chordListModel.addElement(chord);
-		}
-		listChords.setModel(chordListModel);
+		// populate the list with default chords set
+		reloadChordList(ChordManager.DEFAULT_ROBOTAR);
 	}
 
 	private void clearSelection() {
@@ -475,7 +556,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		chordNameSend = radioPanel.getChordName();
 		if (isValidChordName(chordNameSend)) {
 			LOG.info("adding chord to song chord list: {}", chordNameSend);
-			Chord chord = radioPanel.createChordFromRadios(getLibraryName());
+			Chord chord = radioPanel.createChordFromRadios(getLibraryName(false));
 			if (mainFrame.getSongsPage() != null) {
 				boolean result = mainFrame.getSongsPage().addChordToUsedChords(chord);
 				if (result) {
@@ -554,7 +635,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	public void prepareChord() {
 		if (tglbtnTestChord.isSelected()) {
 			// use radio panel as source for chord, unfilled radios will be marked OPEN
-			Chord chord = radioPanel.createChordFromRadios(getLibraryName());
+			Chord chord = radioPanel.createChordFromRadios(getLibraryName(false));
 			mainFrame.getServoSettings().setChord(chord);
 			LEDSettings leds = new LEDSettings(chord);
 			mainFrame.setLeds(leds);
@@ -571,11 +652,43 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		}
 	}
 	
-	private String getLibraryName() {
-		if (listChords.isSelectionEmpty()) {
-			return "user";
+	
+	
+	private String getLibraryName(boolean askUserIfNotDefault) {
+		DefaultListModel model = (DefaultListModel)listChords.getModel();
+		if (model == null || model.isEmpty()) {
+		//if (listChords.isSelectionEmpty()) {
+			// chord list is empty - choose new name of the library
+			// prepare default name
+			ChordManager mng = mainFrame.getChordManager();
+			int i = 0;
+			String defName;
+			do {
+				i++;
+				defName = ChordManager.USER_PREFIX + Integer.toString(i);
+			} while (!mng.isNameAvailable(defName));
+			
+			// let user change the name of library
+			String name = defName;
+			
+			if (askUserIfNotDefault) {
+				boolean nameOK = true;
+				do {
+					name = JOptionPane.showInputDialog(this, "Enter the name of the new chord library:", defName);
+					nameOK = mng.isNameAvailable(name);
+					if (!nameOK) {
+						// msg box
+						JOptionPane.showMessageDialog(this, "The name is already used in currently loaded chord libraries files!");
+					}
+				} while (!nameOK);
+			}
+			
+			// finally we have valid name
+			return name;
 		} else {
-			return ((Chord)listChords.getSelectedValue()).getLibrary();
+			// adding to existing library = take the same name as the chords there
+			return ((Chord)listChords.getModel().getElementAt(0)).getLibrary();
+			//return ((Chord)listChords.getSelectedValue()).getLibrary();
 		}
 	}
 
@@ -635,6 +748,14 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+	}
+
+	public boolean isUnsavedChords() {
+		return unsavedChords;
+	}
+
+	public void setUnsavedChords(boolean unsavedChords) {
+		this.unsavedChords = unsavedChords;
 	}
 
 }

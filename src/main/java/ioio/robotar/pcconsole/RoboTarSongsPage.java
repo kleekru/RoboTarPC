@@ -771,6 +771,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					lib.add(chord);
 				} else {
 					// TODO - compare the two.. now left the older one as is...
+					// can happen?
+					LOG.error("checking chords - ? {}, {}", libraryName, chordName);
 				}
 				continue;
 			} else {
@@ -785,7 +787,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					}
 				}
 				
-				if ("user".equals(libraryName)) {
+				if (libraryName.startsWith(ChordManager.USER_PREFIX)) {
 					// look into current chord buffer on chords page
 					RoboTarChordsPage chPage = mainFrame.getChordsPage();
 					if (chPage != null) {
