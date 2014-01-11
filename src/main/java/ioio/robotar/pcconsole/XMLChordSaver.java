@@ -98,7 +98,9 @@ public class XMLChordSaver extends XMLSaver {
 			child.setAttribute("state", "no");	
 		} else {
 			child.setAttribute("fret", Integer.toString(si.getFret(), 10));
-			child.setAttribute("finger", si.getFinger());
+			if (si.getFinger() != null && !"".equals(si.getFinger().trim())) {
+				child.setAttribute("finger", si.getFinger());
+			}
 		}
 		parent.appendChild(child);
 		return child;
