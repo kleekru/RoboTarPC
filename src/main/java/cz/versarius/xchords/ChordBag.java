@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Easy structure for managing several chords together.
@@ -13,7 +14,7 @@ import java.util.Map;
  *
  */
 public class ChordBag {
-	private Map<String, Chord> chords = new HashMap<String, Chord>();
+	private Map<String, Chord> chords = new TreeMap<String, Chord>();
 	
 	public ChordBag() {
 	}
@@ -30,6 +31,7 @@ public class ChordBag {
 	}
 	
 	public void setChords(List<Chord> chords) {
+		this.chords.clear();
 		for (Chord chord : chords) {
 			this.chords.put(chord.getName(), chord);
 		}
