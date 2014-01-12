@@ -122,12 +122,12 @@ public class RoboTarStartPage {
 	private void closingMethod() {
 		StringBuilder sb = new StringBuilder(100);
 		if (chordsPage != null && chordsPage.isUnsavedChords()) {
-			sb.append("There are unsaved chords on Chords page!\n");
+			sb.append("There are unsaved chords on Chords page!\n\n");
 		}
 		if (songsPage != null && songsPage.getModifiedCount() > 0) {
 			sb.append("There may be unsaved songs (");
 			sb.append(songsPage.getModifiedCount());
-			sb.append(") on Songs page!\n");
+			sb.append(") on Songs page!\n\n");
 		}
 		sb.append("Are You sure to close RoboTar?");
 		int confirm = JOptionPane.showOptionDialog(frmBlueAhuizote,
@@ -137,6 +137,7 @@ public class RoboTarStartPage {
         if (confirm == JOptionPane.YES_OPTION) {
         	// save all needed information for next start
         	preferences.save();
+        	LOG.info("RoboTar finished with dialog message: {}", sb.toString());
         	// and exit
             System.exit(0);
         }

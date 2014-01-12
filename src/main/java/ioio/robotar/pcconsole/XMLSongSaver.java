@@ -11,6 +11,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,6 +22,8 @@ import cz.versarius.xsong.Part;
 import cz.versarius.xsong.Song;
 
 public class XMLSongSaver extends XMLChordSaver {
+	private static final Logger LOG = LoggerFactory.getLogger(XMLSongSaver.class);
+
 	public void save(Song song, File file) {
 		try {
 
@@ -46,6 +50,7 @@ public class XMLSongSaver extends XMLChordSaver {
 
 			transformer.transform(source, result);
 
+			LOG.info("Song '{}' saved to '{}'", song.getFullTitle(), file.getPath());
 		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
 		} catch (TransformerException tfe) {

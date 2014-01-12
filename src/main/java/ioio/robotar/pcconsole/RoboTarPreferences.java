@@ -43,7 +43,8 @@ public class RoboTarPreferences {
 	/** last chosen library */
 	private String chosenLibrary;
 	
-	// TODO add other preferences, recent files (chords, songs)...
+	/** recent song list */
+	private List<String> songs = new ArrayList<String>();
 	
 	/**
 	 * Loads and saves preferences.
@@ -64,6 +65,14 @@ public class RoboTarPreferences {
 			libraries.add(fileName);
 			fileName = p.get("chordLibraryFile" + Integer.toString(i, 10), null);
 			i++;
+		}
+		// recent songs list
+		int si = 2;
+		String songFileName = p.get("songFile1", null);
+		while (songFileName != null) {
+			songs.add(songFileName);
+			songFileName = p.get("songFile" + Integer.toString(si, 10), null);
+			si++;
 		}
 		// after load, save them again (useful in first run, but not needed)
 		update(p);
@@ -124,6 +133,12 @@ public class RoboTarPreferences {
 			p.put("chordLibraryFile" + Integer.toString(i, 10), lib);
 			i++;
 		}
+		// recent song list
+		int si = 1;
+		for (String song : songs) {
+			p.put("songFile" + Integer.toString(si, 10), song);
+			si++;
+		}
 	}
 	
 	private void flush(Preferences p) {
@@ -176,6 +191,14 @@ public class RoboTarPreferences {
 
 	public void setChosenLibrary(String chosenLibrary) {
 		this.chosenLibrary = chosenLibrary;
+	}
+
+	public List<String> getSongs() {
+		return songs;
+	}
+
+	public void setSongs(List<String> songs) {
+		this.songs = songs;
 	}
 
 }

@@ -21,6 +21,10 @@ public class Song {
 	private ChordBag usedChords = new ChordBag();
 	/** used in UI, as flag */
 	private transient boolean changed;
+	/** default songs for RoboTar flag */
+	private transient boolean robotarDefault;
+	/** path from where it was loaded */
+	private transient String path;
 	
 	public List<Part> getParts() {
 		return parts;
@@ -80,6 +84,22 @@ public class Song {
 
 	public void setChanged(boolean changed) {
 		this.changed = changed;
+	}
+
+	public boolean isRobotarDefault() {
+		return robotarDefault;
+	}
+
+	public void setRobotarDefault(boolean robotarDefault) {
+		this.robotarDefault = robotarDefault;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 	
 	

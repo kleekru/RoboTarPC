@@ -1,5 +1,8 @@
 package ioio.robotar.pcconsole;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -9,6 +12,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -23,7 +28,25 @@ import cz.versarius.xsong.Verse;
 import cz.versarius.xsong.Chorus;
 
 public class XMLSongLoader extends XMLChordLoader3 {
-	public Song loadSong(InputStream stream) {
+	private static final Logger LOG = LoggerFactory.getLogger(XMLSongLoader.class);
+
+	public Song loadSong(File file) {
+		try {
+			Song song = loadSong(new FileInputStream(file));
+			if (song != null) {
+				LOG.info("Song {} loaded from {}", song.getFullTitle(), file.getPath());
+				song.setPath(file.getPath());
+				return song;
+			}
+			LOG.error("Exception when loading {}", file.getPath());
+		} catch (FileNotFoundException e) {
+			LOG.error("Song was not loaded. Can not find {}. ", file.getPath());
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	protected Song loadSong(InputStream stream) {
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
@@ -37,13 +60,13 @@ public class XMLSongLoader extends XMLChordLoader3 {
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 		} catch (SAXException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 		}
-		throw new RuntimeException("todo...never do this :)");
+		return null;
 	}
 	
 	private Song readSong(Node node) {

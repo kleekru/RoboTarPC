@@ -28,6 +28,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -45,18 +47,15 @@ import javax.swing.ListSelectionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Adjustable;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Component;
-import java.awt.Rectangle;
 
 import javax.swing.SwingConstants;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class RoboTarSongsPage extends JFrame implements WindowListener {
@@ -109,6 +108,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private Set<Chord> usedChords;
 	private JButton btnLoadSong;
 	private JButton btnSaveSong;
+	private RoboTarPreferences pref;
 	
 	/**
 	 * Create the frame.
@@ -376,23 +376,64 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		addWindowListener(this);
 		
+		loadRecent(mainFrame.getPreferences());
+		
 		pack();
 		setLocationByPlatform(true);
 		setVisible(true);
 	}
 
+	private void loadRecent(RoboTarPreferences pref) {
+		this.pref = pref;
+		XMLSongLoader loader = new XMLSongLoader();
+		initSongModel();
+		for (String fileName : pref.getSongs()) {
+			File file = new File(fileName);
+			Song song = loader.loadSong(file);
+			if (song != null) {
+				songListModel.add(songListModel.getSize(), song);
+			}
+		}
+		// TODO sort?
+	}
+
+	private void saveRecent() {
+		pref.setSongs(getSongsList(songListModel.elements()));
+	}
+	
+	/** generate list of used songs without robotar-default-songs. */
+	public List<String> getSongsList(Enumeration<Song> songs) {
+		List<String> list = new ArrayList<String>();
+		while (songs.hasMoreElements()) {
+			Song song = songs.nextElement();
+			if (!song.isRobotarDefault()) {
+				list.add(song.getPath());
+			}
+		}
+		return list;
+	}
+	
+	private void initSongModel() {
+		if (songListModel == null) {
+			songListModel = new DefaultListModel();
+			songList.setModel(songListModel);
+		}
+	}
+	
 	protected void loadSong() throws FileNotFoundException {
 		JFileChooser fc = new JFileChooser();
 		int returnValue = fc.showOpenDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             XMLSongLoader loader = new XMLSongLoader();
-            Song song = loader.loadSong(new FileInputStream(file));
-            if (songListModel == null) {
-    			songListModel = new DefaultListModel();
-    			songList.setModel(songListModel);
-    		}
+            Song song = loader.loadSong(file);
+            if (song == null) {
+            	return ;
+            }
+            song.setPath(file.getPath());
+            initSongModel();
             songListModel.add(0, song);
+            saveRecent();
 		}
 	}
 
@@ -401,29 +442,42 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.songs.nothing_to_save"));
 			return;
 		}
-		JFileChooser fc = new JFileChooser();
-		int returnValue = fc.showSaveDialog(this);
-		if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            if (actualSong.isChanged()) {
+		if (!actualSong.isRobotarDefault() && actualSong.getPath() != null) {
+			// default files may be saved into other file
+			File file = new File(actualSong.getPath());
+			if (actualSong.isChanged()) {
             	actualSong.setChanged(false);
             	modifiedCount--;
             }
             XMLSongSaver saver = new XMLSongSaver();
             saver.save(actualSong, file);
+		} else { 
+			// choose where
+			JFileChooser fc = new JFileChooser();
+			int returnValue = fc.showSaveDialog(this);
+			if (returnValue == JFileChooser.APPROVE_OPTION) {
+	            File file = fc.getSelectedFile();
+	            if (actualSong.isChanged()) {
+	            	actualSong.setChanged(false);
+	            	modifiedCount--;
+	            }
+	            XMLSongSaver saver = new XMLSongSaver();
+	            saver.save(actualSong, file);
+	            // for new songs, just saved for the first time:
+	            actualSong.setPath(file.getPath());
+	            saveRecent();
+	            repaint();
+			}
 		}
-		
 	}
 
 	protected void loadDefaultSongs() {
 		XMLSongLoader loader = new XMLSongLoader();
 		Song song = loader.loadSong(RoboTarChordsPage.class.getResourceAsStream("/default-songs/greensleeves.xml"));
+		song.setRobotarDefault(true);
 		// load other songs..
 		
-		if (songListModel == null) {
-			songListModel = new DefaultListModel();
-			songList.setModel(songListModel);
-		}
+		initSongModel();
 		int previousSize = songListModel.size();
 		songListModel.addElement(song);
 		// selects first of the default songs
@@ -689,10 +743,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			line.setChords(chordrefs);
 			lines.add(line);
 			
-			if (songListModel == null) {
-				songListModel = new DefaultListModel();
-				songList.setModel(songListModel);
-			}
+			initSongModel();
 			// will fire refreshing of textpane twice... :/
 			songListModel.add(0, song);
 			actualSong = (Song)songListModel.firstElement();
@@ -780,9 +831,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				if (existing == null) {
 					lib.add(chord);
 				} else {
-					// TODO - compare the two.. now left the older one as is...
-					// can happen?
-					LOG.error("checking chords - ? {}, {}", libraryName, chordName);
+					// TODO - compare the two.. now left the one in library as is...
+					LOG.debug("should check content equality of chords - ? {}, {}", libraryName, chordName);
 				}
 				continue;
 			} else {
