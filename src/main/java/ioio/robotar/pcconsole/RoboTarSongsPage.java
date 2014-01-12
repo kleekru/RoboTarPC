@@ -17,18 +17,20 @@ import cz.versarius.xsong.Verse;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -207,6 +209,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				if (!e.getValueIsAdjusting()) {
 					songSelected(e);
 				}
+				
 			}
 		});
 		
@@ -378,6 +381,20 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		
 		loadRecent(mainFrame.getPreferences());
 		
+		// delete chords
+		songList.registerKeyboardAction(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				DefaultListModel model = (DefaultListModel) songList.getModel();
+				int selectedIndex = songList.getSelectedIndex();
+				if (selectedIndex != -1) {
+				    model.remove(selectedIndex);
+				    repaint();
+				}
+			}
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_FOCUSED);
+				
 		pack();
 		setLocationByPlatform(true);
 		setVisible(true);
@@ -489,10 +506,24 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	protected void songSelected(ListSelectionEvent e) {
 		// show song in textpane
 		JList list = (JList)e.getSource();
-		actualSong = (Song) list.getSelectedValue();
-		prepareForPlaying();
-		btnEditSong.setEnabled(true);
-		btnNewSong.setEnabled(true);
+		DefaultListModel model = (DefaultListModel) list.getModel();
+		int selIdx = (int) list.getSelectedIndex();
+		if (selIdx < 0) {
+			if (model.getSize() > 0) {
+				list.setSelectedIndex(0);
+			} else {
+				clearPane(textPane);
+				actualSong = null;
+				btnEditSong.setEnabled(false);
+				btnPlay.setEnabled(false);
+			}
+		} else {
+			Song song = (Song) model.get(selIdx);
+			actualSong = (Song) list.getSelectedValue();
+			prepareForPlaying();
+			btnEditSong.setEnabled(true);
+			btnNewSong.setEnabled(true);
+		}
 	}
 	
 	/**
@@ -940,6 +971,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 * Start to play a song.
 	 */
 	protected void playSong() {
+		if (actualSong == null) {
+			JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.songs.nothing_to_play"));
+			return;
+		}
 		if (hints.getChords().isEmpty()) {
 			JOptionPane.showMessageDialog(RoboTarSongsPage.this, messages.getString("robotar.songs.no_chords_in_song"));
 		} else {
@@ -1052,6 +1087,16 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		doc.addStyle(MISSING_CHORD_STYLE, missingChordStyle);
 	}
 
+	protected void clearPane(JTextPane pane) {
+		// clear pane
+		StyledDocument doc = pane.getStyledDocument();
+		try {
+			doc.remove(0, doc.getLength());
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Prepare song for display
 	 * @param song

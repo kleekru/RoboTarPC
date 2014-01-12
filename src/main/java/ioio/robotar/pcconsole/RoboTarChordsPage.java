@@ -3,11 +3,13 @@ package ioio.robotar.pcconsole;
 
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
@@ -30,6 +32,7 @@ import javax.swing.JLabel;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.Font;
@@ -366,6 +369,22 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		// initialize with recent chord library, robotar by default
 		reloadChordList(mainFrame.getChordManager().getChosenLibrary());
 		
+		// delete chords
+		listChords.registerKeyboardAction(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String chosenLib = getMainFrame().getChordManager().getChosenLibrary();
+				if (!ChordManager.DEFAULT_ROBOTAR.equals(chosenLib)) {
+					DefaultListModel model = (DefaultListModel) listChords.getModel();
+					int selectedIndex = listChords.getSelectedIndex();
+					if (selectedIndex != -1) {
+					    model.remove(selectedIndex);
+					}
+				}
+			}
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_FOCUSED);
+		
 		// this is causing problems with layout
 		//pack();
 		setLocationByPlatform(true);
@@ -513,19 +532,26 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 * @param libName
 	 */
 	protected void reloadChordList(String libName) {
-		ChordBag bag = mainFrame.getChordManager().findByName(libName);
+		ChordManager mng = mainFrame.getChordManager();
+		ChordLibrary lib = mng.findByName(libName);
         // throwing away any previously set chords // TODO more libraries should be possible?
 		//////////////////////////////////////////////////////////////////
-		if (bag == null) {
+		if (lib == null) {
 			LOG.error("Cannot find chord library: '{}' in chord manager", libName);
-		} else {
-			chordListModel = new DefaultListModel();
-			for (Chord chord : bag.getChords()) {
-				chordListModel.addElement(chord);
+			if (mng.getLibrariesCount() > 0) {
+				lib = mng.getAny();
+				libName = lib.getName();
+			} else {
+				LOG.error("Chord manager is empty! Cannot load anything.");
+				return;
 			}
-			listChords.setModel(chordListModel);
-			mainFrame.getChordManager().setChosenLibrary(libName);
 		}
+		chordListModel = new DefaultListModel();
+		for (Chord chord : lib.getChords()) {
+			chordListModel.addElement(chord);
+		}
+		listChords.setModel(chordListModel);
+		mng.setChosenLibrary(libName);
 	}
 
 	protected void loadDefaultChords(ActionEvent evt) {

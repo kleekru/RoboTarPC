@@ -44,6 +44,23 @@ public class ChordManager {
 		return chordLibraries;
 	}
 
+	public int getLibrariesCount() {
+		return chordLibraries.size();
+	}
+	
+	public ChordLibrary getAny() {
+		if (!chordLibraries.isEmpty()) {
+			ChordLibrary lib = chordLibraries.get(DEFAULT_ROBOTAR);
+			if (lib == null) {
+				String libName = chordLibraries.keySet().iterator().next();
+				return chordLibraries.get(libName);
+			} else {
+				return lib;
+			}
+		}
+		return null;
+	}
+	
 	public void setChordLibraries(Map<String, ChordLibrary> chordLibraries) {
 		this.chordLibraries = chordLibraries;
 		this.initialized = true;
