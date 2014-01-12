@@ -452,7 +452,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 			Chord chord = (Chord)chordListModel.get(0);
 			if (chord != null) {
 				String libraryName = Chord.getLibraryName(chord.getId());
-				if (libraryName != null) {
+				if (libraryName != null && !ChordManager.DEFAULT_ROBOTAR.equals(libraryName)) {
 					ChordManager mng = mainFrame.getChordManager();
 					ChordLibrary lib = mng.findByName(libraryName);
 					if (lib != null) {
@@ -475,6 +475,13 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 			            unsavedChords = false;
 			            return;
 					}
+				} else if (ChordManager.DEFAULT_ROBOTAR.equals(libraryName)) {
+					// user tries to save modified 'robotar' library
+					JOptionPane.showMessageDialog(this,
+		        		    "It is currently not possible to modify default chords for RoboTar, sorry.",
+		        		    "Saving default chords",
+		        		    JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 			}
 		}
