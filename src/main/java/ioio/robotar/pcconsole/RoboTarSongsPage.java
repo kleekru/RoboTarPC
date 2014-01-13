@@ -49,6 +49,7 @@ import javax.swing.ListSelectionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -358,22 +359,22 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		gbc_chordList.gridy = 4;
 		editPanel.add(chordList, gbc_chordList);
 		
-		JPanel songPanel = new JPanel();
+		JPanel songPanel = new JPanel(new BorderLayout());
 		songPanel.setBackground(Color.WHITE);
 		GridBagConstraints gbc_songPanel = new GridBagConstraints();
 		gbc_songPanel.gridwidth = 2;
 		gbc_songPanel.fill = GridBagConstraints.BOTH;
 		gbc_songPanel.gridx = 3;
 		gbc_songPanel.gridy = 2;
+		gbc_songPanel.weightx = 1.0;
+		gbc_songPanel.weighty = 1.0;
 		frmBlueAhuizoteSongs.add(songPanel, gbc_songPanel);
-		
 		
 		textPane = new JTextPane();
 		textPane.setEditable(false);
 		scrollPane = new JScrollPane(textPane);
 		scrollPane.setPreferredSize(new Dimension(450, 370));
 		songPanel.add(scrollPane);
-		//getContentPane().add(scrollPane);
 		setupStyles(textPane);
 		
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -396,6 +397,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_FOCUSED);
 				
 		pack();
+		//setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        
 		setLocationByPlatform(true);
 		setVisible(true);
 	}
