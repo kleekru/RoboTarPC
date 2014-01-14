@@ -53,7 +53,7 @@ public class RoboTarPreferences {
 	protected RoboTarPreferences(Preferences p) {
 		correctionsFile = p.get("correctionsFile", "corrections.xml");
 		mainSize = p.getInt("mainSize", 12);
-		markedSize = p.getInt("markedSize", 16);
+		markedSize = p.getInt("markedSize", 18);
 		markedColor = decodeColor(p, "markedColor", "0x0000ff");
 		markedChordSize = p.getInt("markedChordSize", 16);
 		markedChordColor = decodeColor(p, "markedChordColor", "0x0000ff");

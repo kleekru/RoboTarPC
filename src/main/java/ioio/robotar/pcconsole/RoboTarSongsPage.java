@@ -71,6 +71,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final String MARKED_STYLE = "MarkedStyle";
 	private static final String CHORD_STYLE = "ChordStyle";
 	private static final String MARKED_CHORD_STYLE = "MarkedChordStyle";
+	private static final String MARKED_CHORD_LINE_STYLE = "MarkedChordLineStyle";
 	private static final String MISSING_CHORD_STYLE = "MissingChordStyle";
 	
 	private JPanel frmBlueAhuizoteSongs;
@@ -120,7 +121,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		this.mainFrame = mainFrame;
 		messages = mainFrame.getMessages();
 
-		setBounds(100, 100, 800, 510);
+		setBounds(100, 100, 1200, 510);
 		frmBlueAhuizoteSongs = new JPanel();
 		frmBlueAhuizoteSongs.setBackground(Color.BLUE);
 		frmBlueAhuizoteSongs.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -373,7 +374,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		textPane = new JTextPane();
 		textPane.setEditable(false);
 		scrollPane = new JScrollPane(textPane);
-		scrollPane.setPreferredSize(new Dimension(450, 370));
+		scrollPane.setPreferredSize(new Dimension(750, 370));
 		songPanel.add(scrollPane);
 		setupStyles(textPane);
 		
@@ -940,8 +941,13 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		StyledDocument doc = textPane.getStyledDocument();
 		Style markedStyle = doc.getStyle(MARKED_STYLE);
 		Style markedChordStyle = doc.getStyle(MARKED_CHORD_STYLE);
-		
+		Style markedChordLineStyle = doc.getStyle(MARKED_CHORD_LINE_STYLE);
+
+		// active text line
 		doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), markedStyle, false);
+		// active chord line
+		doc.setCharacterAttributes(lineHint.getOffset() - lineHint.getLength(), lineHint.getLength(), markedChordLineStyle, false);
+		// active chord
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), markedChordStyle, false);
 		
 		int ahead = hints.lookAhead(lineHint);
@@ -965,7 +971,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), chordStyle, true);
 		if (newLineHint == null || lineHint != newLineHint) {
+			// unmark line
 			doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), mainStyle, true);
+			// unmark chord line
+			doc.setCharacterAttributes(lineHint.getOffset() - lineHint.getLength(), lineHint.getLength(), mainStyle, true);
 		}
 
 	}
@@ -1071,6 +1080,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		StyleConstants.setBackground(markedChordStyle, Color.YELLOW);
 		StyleConstants.setFontSize(markedChordStyle, mainFrame.getPreferences().getMarkedChordSize());
 
+		Style markedChordLineStyle = sc.addStyle(MARKED_CHORD_LINE_STYLE, mainStyle);
+		StyleConstants.setFontSize(markedChordLineStyle, mainFrame.getPreferences().getMarkedChordSize());
+
 		Style missingChordStyle = sc.addStyle(MISSING_CHORD_STYLE, mainStyle);
 		StyleConstants.setForeground(missingChordStyle, Color.RED);
 		StyleConstants.setBackground(missingChordStyle, Color.WHITE);
@@ -1087,6 +1099,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		doc.addStyle(TITLE_STYLE, titleStyle);
 		doc.addStyle(MARKED_STYLE, markedStyle);
 		doc.addStyle(MARKED_CHORD_STYLE, markedChordStyle);
+		doc.addStyle(MARKED_CHORD_LINE_STYLE, markedChordLineStyle);
 		doc.addStyle(MISSING_CHORD_STYLE, missingChordStyle);
 	}
 
@@ -1192,7 +1205,13 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			
 			str.append(chordName);	
 		}
-		
+		// append spaces at the end of chords line - easier when playing and formatting:
+		int extra = line.getText().length() - str.length() - 1;
+		if (extra > 0) {
+			for (int i = 0; i < extra; i++) {
+				str.append(" ");
+			}
+		}
 		str.append("\n");
 		return str.toString();
 	}
