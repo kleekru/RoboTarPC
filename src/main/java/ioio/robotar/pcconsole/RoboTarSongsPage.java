@@ -1185,13 +1185,13 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 * @return
 	 */
 	private String formatChords(Line line, PositionHints hints, int lineNum, int lineOffset) {
-		StringBuilder str = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		for (ChordRef ref : line.getChords()) {
-			int end = str.length() + 1;
+			int end = sb.length() + 1;
 			int position = ref.getPosition();
 			if (end < position) {
 				for (int i = 0; i< position-end; i++) {
-					str.append(" ");
+					sb.append(" ");
 				}
 			}
 			String chordName = Chord.getChordName(ref.getChordId());
@@ -1203,17 +1203,32 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			chordHint.setChordRef(ref);
 			hints.getChords().add(chordHint);
 			
-			str.append(chordName);	
+			sb.append(chordName);	
 		}
-		// append spaces at the end of chords line - easier when playing and formatting:
-		int extra = line.getText().length() - str.length() - 1;
-		if (extra > 0) {
+		
+		if (line.getText() == null) {
+			line.setText(" ");
+		}
+		if (line.getText().length() > sb.length() - 1) {
+			// chord line is shorter than text line
+			// append spaces at the end of chords line - easier when playing and formatting:
+			// note !! the spaces in chord line exists only in text pane, not in song xml!!
+			int extra = line.getText().length() - sb.length() - 1;
 			for (int i = 0; i < extra; i++) {
-				str.append(" ");
+				sb.append(" ");
 			}
-		}
-		str.append("\n");
-		return str.toString();
+		} else if (line.getText().length() < sb.length() - 1) {
+			// text line is shorter than chord line
+			// append spaces at the end of text line
+			int extra = sb.length() - 1 - line.getText().length();
+			StringBuilder spaces = new StringBuilder(extra);
+			for (int i = 0; i < extra; i++) {
+				spaces.append(" ");
+			}
+			line.setText(line.getText() + spaces.toString());
+		} // else, the length will be same, with \n appended on the next line
+		sb.append("\n");
+		return sb.toString();
 	}
 
 	public JPanel getFrmBlueAhuizoteSongs() {
