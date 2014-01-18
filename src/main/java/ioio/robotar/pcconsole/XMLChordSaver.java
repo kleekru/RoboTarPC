@@ -95,11 +95,16 @@ public class XMLChordSaver extends XMLSaver {
 		Element child = doc.createElement("string");
 		child.setAttribute("name", si.getName());
 		if (si.getState() == StringState.DISABLED) {
-			child.setAttribute("state", "no");	
+			child.setAttribute("state", StringState.DISABLED.getValue());	
 		} else {
-			child.setAttribute("fret", Integer.toString(si.getFret(), 10));
-			if (si.getFinger() != null && !"".equals(si.getFinger().trim())) {
-				child.setAttribute("finger", si.getFinger());
+			if (si.getFret() == 0) {
+				child.setAttribute("state", StringState.OPEN.getValue());
+			} else {
+				// state == ok, we don't need to set&save state
+				child.setAttribute("fret", Integer.toString(si.getFret(), 10));
+				if (si.getFinger() != null && !"".equals(si.getFinger().trim())) {
+					child.setAttribute("finger", si.getFinger());
+				}
 			}
 		}
 		parent.appendChild(child);

@@ -103,12 +103,16 @@ public class ServoSettings {
 	public void setChord(Chord chord) {
 		for (int i = 0; i < 6; i++) {
 			StringInfo si = chord.getString(i);
-			if ((si == null) || (si.getState() == StringState.OPEN) || (si.getState() == null)) {
+			if ((si == null) || (si.getState() == StringState.OPEN) || (si.getState() == null)
+					|| ((si.getState() == StringState.OK ) && (si.getFret() == 0))) {
 				// neutral position
 				servos[i] = i*2;
 				values[i] = roundFloat(NEUTRAL + CORRECTION[i*2][0]);
 			} else if (si.getState() == StringState.OK || si.getState() == StringState.OPTIONAL) {
-				// something is pressed
+				if (si.getFret() == 0) {
+					LOG.error("wrong value fret==0, chord name: {}, string name: {}", chord.getId(), si.getName());
+				}
+				// something is pressed and fret > 0
 				int fret = si.getFret();
 				
 				// compute values for servos
