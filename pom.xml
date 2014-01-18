@@ -47,7 +47,7 @@
 							<manifest>
 								<addClasspath>true</addClasspath>
 								<!-- classpathPrefix>dependency</classpathPrefix-->
-								<mainClass>ioio.RoboTar.PCconsole.RoboTarIOIOforPCConsole</mainClass>
+								<mainClass>ioio.robotar.pcconsole.RoboTarIOIOforPCConsole</mainClass>
 								<classpathLayoutType>custom</classpathLayoutType>
 								<customClasspathLayout>dependency/slf4j-api-1.7.5.jar dependency/logback-classic-1.0.13.jar dependency/logback-core-1.0.13.jar dependency/jgoodies-forms-1.6.0.jar dependency/jgoodies-common-1.4.0.jar dependency/ .</customClasspathLayout>
 							</manifest>
