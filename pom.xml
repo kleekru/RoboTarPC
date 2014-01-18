@@ -16,11 +16,11 @@
 			<artifactId>logback-classic</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
-		<!-- dependency>
+		<!-- <dependency>
 			<groupId>com.jgoodies</groupId>
 			<artifactId>forms</artifactId>
 			<version>${jgoodies.version}</version>
-		</dependency-->
+		</dependency> -->
 	 	<!-- dependency> <groupId>org.ioio</groupId> <artifactId>ioio-lib</artifactId> 
 			<version>1.0</version> </dependency> <dependency> <groupId>org.ioio</groupId> 
 			<artifactId>android</artifactId> <version>1.0</version> </dependency> <dependency> 
@@ -30,7 +30,7 @@
 	<properties>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.13</logback.version>
-		<jgoodies.version>1.4.0</jgoodies.version>
+		<jgoodies.version>1.3.0</jgoodies.version>
 	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
@@ -49,7 +49,7 @@
 								<!-- classpathPrefix>dependency</classpathPrefix-->
 								<mainClass>ioio.robotar.pcconsole.RoboTarIOIOforPCConsole</mainClass>
 								<classpathLayoutType>custom</classpathLayoutType>
-								<customClasspathLayout>dependency/slf4j-api-1.7.5.jar dependency/logback-classic-1.0.13.jar dependency/logback-core-1.0.13.jar dependency/jgoodies-forms-1.6.0.jar dependency/jgoodies-common-1.4.0.jar dependency/ .</customClasspathLayout>
+								<customClasspathLayout>dependency/slf4j-api-1.7.5.jar dependency/logback-classic-1.0.13.jar dependency/logback-core-1.0.13.jar dependency/forms-1.3.0.jar dependency/ .</customClasspathLayout>
 							</manifest>
 						</archive>
 					</configuration>
