@@ -34,6 +34,15 @@ public class Song {
 		this.parts = parts;
 	}
 
+	public boolean hasAnyChords() {
+		for (Part p : parts) {
+			if (p.hasAnyChords()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public String getInfo() {
 		return info;
 	}

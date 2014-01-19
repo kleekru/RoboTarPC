@@ -28,4 +28,8 @@ public class Line {
 	public void setChords(List<ChordRef> chords) {
 		this.chords = chords;
 	}
+	
+	public boolean hasAnyChords() {
+		return !((chords == null) || (chords.isEmpty()));
+	}
 }

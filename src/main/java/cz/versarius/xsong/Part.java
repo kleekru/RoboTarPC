@@ -20,5 +20,14 @@ public abstract class Part {
 		this.lines = lines;
 	}
 	
+	public boolean hasAnyChords() {
+		for (Line line : lines) {
+			if (line.hasAnyChords()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public abstract String getTypeName();
 }
