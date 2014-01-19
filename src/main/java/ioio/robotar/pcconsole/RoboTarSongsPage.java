@@ -15,6 +15,8 @@ import cz.versarius.xsong.Part;
 import cz.versarius.xsong.Song;
 import cz.versarius.xsong.Verse;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -37,6 +39,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.BadLocationException;
@@ -55,6 +59,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Component;
+import java.awt.Rectangle;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.SwingConstants;
 
@@ -64,15 +70,6 @@ import java.io.FileNotFoundException;
 public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -7862830927381806488L;
 	static final Logger LOG = LoggerFactory.getLogger(RoboTarSongsPage.class);
-	
-	/** style constants */
-	private static final String TITLE_STYLE = "TitleStyle";
-	private static final String MAIN_STYLE = "MainStyle";
-	private static final String MARKED_STYLE = "MarkedStyle";
-	private static final String CHORD_STYLE = "ChordStyle";
-	private static final String MARKED_CHORD_STYLE = "MarkedChordStyle";
-	private static final String MARKED_CHORD_LINE_STYLE = "MarkedChordLineStyle";
-	private static final String MISSING_CHORD_STYLE = "MissingChordStyle";
 	
 	private JPanel frmBlueAhuizoteSongs;
 	
@@ -113,6 +110,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private JButton btnLoadSong;
 	private JButton btnSaveSong;
 	private RoboTarPreferences pref;
+	
+	/** editing properties */
+	private boolean editMarkerDisplayed;
+	private int editMarkerPosition;
 	
 	/**
 	 * Create the frame.
@@ -397,6 +398,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			}
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), JComponent.WHEN_FOCUSED);
 				
+		initEditing();
 		pack();
 		//setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
         
@@ -404,6 +406,54 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		setVisible(true);
 	}
 
+	/** big attempt */
+	private void initEditing() {
+		initKeys();
+		initCaret();
+	}
+	
+	private void initKeys() {
+		//textPane.registerEditorKitForContentType  later.... proper way of handling whole song editing.. 
+		//LOG.info("kit {}", textPane.getEditorKit());
+		//textPane.get
+		// left keystroke
+		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
+		textPane.getActionMap().put("left", new LeftAction());
+		// right keystroke
+		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "right");
+		textPane.getActionMap().put("right", new RightAction());
+		
+	}
+	
+	private void initCaret() {
+		textPane.addCaretListener(new CaretListener() {
+			String newline = "\n";
+			@Override
+			public void caretUpdate(CaretEvent e) {
+				int dot = e.getDot();
+			    int mark = e.getMark();
+			    if (dot == mark) {  // no selection
+			        try {
+			            Rectangle caretCoords = textPane.modelToView(dot);
+			            //Convert it to view coordinates
+			            LOG.info("caret: text position: " + dot +
+			                    ", view location = [" +
+			                    caretCoords.x + ", " + caretCoords.y + "]" +
+			                    newline);
+			        } catch (BadLocationException ble) {
+			            LOG.info("caret: text position: " + dot + newline);
+			        }
+			     } else if (dot < mark) {
+			        LOG.info("selection from: " + dot + " to " + mark + newline);
+			     } else {
+			        LOG.info("selection from: " + mark + " to " + dot + newline);
+			     }
+				
+			}
+			
+		});
+	}
+	
 	private void loadRecent(RoboTarPreferences pref) {
 		this.pref = pref;
 		XMLSongLoader loader = new XMLSongLoader();
@@ -558,20 +608,25 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		//textPane.setEditable(true);
 		editing = true;
 		loadChordsFromSong();
-		createMarker();
+		int last = textPane.getStyledDocument().getLength();
+		textPane.setCaretPosition(last);
+		createMarker(last);
+		textPane.requestFocusInWindow();
 		if (!actualSong.isChanged()) {
 			actualSong.setChanged(true);
 			modifiedCount++;
 		}
 	}
 
-	protected void createMarker() {
+	protected void createMarker(int position) {
 		StyledDocument doc = textPane.getStyledDocument();
-		int position = doc.getLength();
 		
-		Style markerStyle = doc.getStyle(MISSING_CHORD_STYLE);
+		Style markerStyle = doc.getStyle(Styles.MISSING_CHORD_STYLE);
 		try {
+			scrollTo(position);
 			doc.insertString(position, "*", markerStyle);
+			editMarkerDisplayed = true;
+			editMarkerPosition = position;
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -579,9 +634,11 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	
 	protected void removeMarker() {
 		StyledDocument doc = textPane.getStyledDocument();
-		int position = doc.getLength();
 		try {
-			doc.remove(position - 1, 1);
+			if (editMarkerDisplayed) { // to be sure
+				doc.remove(editMarkerPosition, 1);
+			}
+			editMarkerDisplayed = false;
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -675,7 +732,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		StyledDocument doc = textPane.getStyledDocument();
 		int position = doc.getLength() - 1;
 		
-		Style mainStyle = doc.getStyle(MAIN_STYLE);
+		Style mainStyle = doc.getStyle(Styles.MAIN_STYLE);
 		try {
 			doc.insertString(position, "\n", mainStyle);
 		} catch (BadLocationException e) {
@@ -687,7 +744,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		StyledDocument doc = textPane.getStyledDocument();
 		int position = doc.getLength() - 1;
 		
-		Style mainStyle = doc.getStyle(MAIN_STYLE);
+		Style mainStyle = doc.getStyle(Styles.MAIN_STYLE);
 		try {
 			doc.insertString(position, "\n\n", mainStyle);
 
@@ -741,8 +798,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			// add to used chords section
 			actualSong.getUsedChords().add(chord);
 			
-			Style chordStyle = doc.getStyle(CHORD_STYLE);
-			Style mainStyle = doc.getStyle(MAIN_STYLE);
+			Style chordStyle = doc.getStyle(Styles.CHORD_STYLE);
+			Style mainStyle = doc.getStyle(Styles.MAIN_STYLE);
 			try {
 				doc.insertString(position, chord.getName(), chordStyle);
 				doc.insertString(position + chord.getName().length(), " ", mainStyle);
@@ -928,7 +985,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 */
 	protected void markMissing(PositionHint chordHint) {
 		StyledDocument doc = textPane.getStyledDocument();
-		Style missingChordStyle = doc.getStyle(MISSING_CHORD_STYLE);
+		Style missingChordStyle = doc.getStyle(Styles.MISSING_CHORD_STYLE);
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), missingChordStyle, false);
 	}
 	
@@ -939,9 +996,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 */
 	protected void markCurrent(PositionHint chordHint, PositionHint lineHint) {
 		StyledDocument doc = textPane.getStyledDocument();
-		Style markedStyle = doc.getStyle(MARKED_STYLE);
-		Style markedChordStyle = doc.getStyle(MARKED_CHORD_STYLE);
-		Style markedChordLineStyle = doc.getStyle(MARKED_CHORD_LINE_STYLE);
+		Style markedStyle = doc.getStyle(Styles.MARKED_STYLE);
+		Style markedChordStyle = doc.getStyle(Styles.MARKED_CHORD_STYLE);
+		Style markedChordLineStyle = doc.getStyle(Styles.MARKED_CHORD_LINE_STYLE);
 
 		// active text line
 		doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), markedStyle, false);
@@ -966,8 +1023,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			return;
 		}
 		StyledDocument doc = textPane.getStyledDocument();
-		Style chordStyle = doc.getStyle(CHORD_STYLE);
-		Style mainStyle = doc.getStyle(MAIN_STYLE);
+		Style chordStyle = doc.getStyle(Styles.CHORD_STYLE);
+		Style mainStyle = doc.getStyle(Styles.MAIN_STYLE);
 
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), chordStyle, true);
 		if (newLineHint == null || lineHint != newLineHint) {
@@ -1060,7 +1117,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		StyleContext sc = new StyleContext();
 		Style defaultStyle = sc.getStyle(StyleContext.DEFAULT_STYLE);
 
-		Style mainStyle = sc.addStyle(MAIN_STYLE, null);
+		Style mainStyle = sc.addStyle(Styles.MAIN_STYLE, null);
 	    StyleConstants.setForeground(mainStyle, Color.BLACK);
 	    StyleConstants.setBackground(mainStyle, Color.WHITE);
 	    StyleConstants.setBold(mainStyle, true);
@@ -1068,39 +1125,47 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	    StyleConstants.setFontSize(mainStyle, mainFrame.getPreferences().getMainSize());
 	    
 	    
-	    Style chordStyle = sc.addStyle(CHORD_STYLE, mainStyle);
+	    Style chordStyle = sc.addStyle(Styles.CHORD_STYLE, mainStyle);
 		
-	    Style markedStyle = sc.addStyle(MARKED_STYLE, mainStyle);
+	    Style markedStyle = sc.addStyle(Styles.MARKED_STYLE, mainStyle);
 	    StyleConstants.setForeground(markedStyle, mainFrame.getPreferences().getMarkedColor());
 		StyleConstants.setBackground(markedStyle, Color.YELLOW);
 		StyleConstants.setFontSize(markedStyle, mainFrame.getPreferences().getMarkedSize());
 	    
-		Style markedChordStyle = sc.addStyle(MARKED_CHORD_STYLE, mainStyle);
+		Style markedChordStyle = sc.addStyle(Styles.MARKED_CHORD_STYLE, mainStyle);
 		StyleConstants.setForeground(markedChordStyle, mainFrame.getPreferences().getMarkedChordColor());
 		StyleConstants.setBackground(markedChordStyle, Color.YELLOW);
 		StyleConstants.setFontSize(markedChordStyle, mainFrame.getPreferences().getMarkedChordSize());
 
-		Style markedChordLineStyle = sc.addStyle(MARKED_CHORD_LINE_STYLE, mainStyle);
+		Style markedChordLineStyle = sc.addStyle(Styles.MARKED_CHORD_LINE_STYLE, mainStyle);
 		StyleConstants.setFontSize(markedChordLineStyle, mainFrame.getPreferences().getMarkedChordSize());
 
-		Style missingChordStyle = sc.addStyle(MISSING_CHORD_STYLE, mainStyle);
+		Style missingChordStyle = sc.addStyle(Styles.MISSING_CHORD_STYLE, mainStyle);
 		StyleConstants.setForeground(missingChordStyle, Color.RED);
 		StyleConstants.setBackground(missingChordStyle, Color.WHITE);
 
-	    Style titleStyle = sc.addStyle(TITLE_STYLE, defaultStyle);
+	    Style titleStyle = sc.addStyle(Styles.TITLE_STYLE, defaultStyle);
 		StyleConstants.setForeground(titleStyle, Color.BLACK);
 		StyleConstants.setBackground(titleStyle, Color.WHITE);
 		StyleConstants.setBold(titleStyle, true);
 		StyleConstants.setFontSize(titleStyle, 18);
 		
+		Style editMarkedChordStyle = sc.addStyle(Styles.EDIT_MARKED_CHORD_STYLE, mainStyle);
+		StyleConstants.setForeground(editMarkedChordStyle, mainFrame.getPreferences().getEditMarkedChordColor());
+		
+		Style editMarkedLineStyle = sc.addStyle(Styles.EDIT_MARKED_LINE_STYLE, mainStyle);
+		StyleConstants.setForeground(editMarkedLineStyle, Color.GREEN);
+		
 		StyledDocument doc = pane.getStyledDocument();
-		doc.addStyle(CHORD_STYLE, chordStyle);
-		doc.addStyle(MAIN_STYLE, mainStyle);
-		doc.addStyle(TITLE_STYLE, titleStyle);
-		doc.addStyle(MARKED_STYLE, markedStyle);
-		doc.addStyle(MARKED_CHORD_STYLE, markedChordStyle);
-		doc.addStyle(MARKED_CHORD_LINE_STYLE, markedChordLineStyle);
-		doc.addStyle(MISSING_CHORD_STYLE, missingChordStyle);
+		doc.addStyle(Styles.CHORD_STYLE, chordStyle);
+		doc.addStyle(Styles.MAIN_STYLE, mainStyle);
+		doc.addStyle(Styles.TITLE_STYLE, titleStyle);
+		doc.addStyle(Styles.MARKED_STYLE, markedStyle);
+		doc.addStyle(Styles.MARKED_CHORD_STYLE, markedChordStyle);
+		doc.addStyle(Styles.MARKED_CHORD_LINE_STYLE, markedChordLineStyle);
+		doc.addStyle(Styles.MISSING_CHORD_STYLE, missingChordStyle);
+		doc.addStyle(Styles.EDIT_MARKED_CHORD_STYLE, editMarkedChordStyle);
+		doc.addStyle(Styles.EDIT_MARKED_LINE_STYLE, editMarkedLineStyle);
 	}
 
 	protected void clearPane(JTextPane pane) {
@@ -1121,9 +1186,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	protected PositionHints showSong(Song song, JTextPane pane) {
 		// prepare styles
 		StyledDocument doc = pane.getStyledDocument();
-		Style titleStyle = doc.getStyle(TITLE_STYLE);
-		Style chordStyle = doc.getStyle(CHORD_STYLE);
-		Style mainStyle = doc.getStyle(MAIN_STYLE);
+		Style titleStyle = doc.getStyle(Styles.TITLE_STYLE);
+		Style chordStyle = doc.getStyle(Styles.CHORD_STYLE);
+		Style mainStyle = doc.getStyle(Styles.MAIN_STYLE);
 		
 		hints = new PositionHints();
 		try {
@@ -1134,12 +1199,12 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			doc.insertString(0, song.getTitle() + "     " + song.getInterpret() + "\n", titleStyle);
 			
 			// process parts
+			int lineNum = 0;
 			for (Part part : song.getParts()) {
 				doc.insertString(doc.getLength(), "\n", null);
 				
-				int lineNum = 0;
 				for (Line line : part.getLines()) {
-					if ((line.getChords() == null) || (line.getChords().isEmpty())) {
+					if (!line.hasAnyChords()) {
 						if (line.getText() == null) {
 							// totally empty line
 							continue;
@@ -1323,5 +1388,153 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 	public void setModifiedCount(int modified) {
 		this.modifiedCount = modified;
+	}
+	
+	/**
+	 * Select current chord 
+	 * @param chordHint
+	 * @param lineHint
+	 */
+	protected void markCurrentEditedChord(PositionHint chordHint) {
+		StyledDocument doc = textPane.getStyledDocument();
+		Style editMarkedChordStyle = doc.getStyle(Styles.EDIT_MARKED_CHORD_STYLE);
+		// active chord
+		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), editMarkedChordStyle, false);
+		// select in used chords list
+		chordList.setSelectedValue(chordHint.getChordRef().getChord(), true);
+	}
+
+	/**
+	 * Unselect current chord and line.
+	 * @param chordHint
+	 * @param lineHint
+	 * @param newLineHint
+	 */
+	protected void unmarkCurrentEditedChord(PositionHint chordHint) {
+		// unselect in used chords list
+		chordList.clearSelection();
+		/*if (chordHint == null) {
+			// not even first chord displayed
+			return;
+		}*/
+		StyledDocument doc = textPane.getStyledDocument();
+		Style chordStyle = doc.getStyle(Styles.CHORD_STYLE);
+		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), chordStyle, true);
+	}
+
+	/////////////////////////////
+	// editing actions
+	class LeftAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (!editing) {
+				return;
+			}
+			
+			if (editMarkerDisplayed) {
+				// B section 
+				// check if there are any chords in song
+				//if (!actualSong.hasAnyChords()) {
+					//return;
+				//}
+				// the same condition as above
+				if (hints.getChords().size() == 0) {
+					return;
+				}
+				if (hints.getLastSelectedChord() != null) {
+					// hide *
+					removeMarker();
+					PositionHint lastChordHint = hints.getLastSelectedChord();
+					// mark the chord
+					markCurrentEditedChord(lastChordHint);
+					// scroll to
+					int ensurePrevTextLineVisible = hints.getPrevLineOffset(lastChordHint, 0);
+					scrollTo(ensurePrevTextLineVisible);
+				} else {
+					// find last chord before current position
+					PositionHint prevChordHint = hints.findChordBefore(editMarkerPosition);
+					if (prevChordHint == null) {
+						// at the beginning, with * -> nothing
+						return;
+					} else {
+						removeMarker();
+						markCurrentEditedChord(prevChordHint);
+						hints.setLastSelectedChord(prevChordHint);
+					}
+				}
+			} else {
+				// A section
+				PositionHint lastChordHint = hints.getLastSelectedChord();
+				PositionHint prevChordHint = hints.getPrevChordHint(lastChordHint);
+				if (prevChordHint != null) {
+					// unmark
+					unmarkCurrentEditedChord(lastChordHint);
+					markCurrentEditedChord(prevChordHint);
+					hints.setLastSelectedChord(prevChordHint);
+					
+					// scrollto
+					int ensurePrevTextLineVisible = hints.getPrevLineOffset(prevChordHint, 0);
+					scrollTo(ensurePrevTextLineVisible);
+				}
+			}
+		}
+	}
+	
+	class RightAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (!editing) {
+				return;
+			}
+			
+			if (editMarkerDisplayed) {
+				// B section 
+				// check if there are any chords in song
+				//if (!actualSong.hasAnyChords()) {
+					//return;
+				//}
+				// the same condition as above
+				if (hints.getChords().size() == 0) {
+					return;
+				}
+				if (hints.getLastSelectedChord() != null) {
+					// hide *
+					removeMarker();
+					PositionHint lastChordHint = hints.getLastSelectedChord();
+					// mark the chord
+					markCurrentEditedChord(lastChordHint);
+					// scroll to
+					int ensureTextLineVisible = hints.getNextLineOffset(lastChordHint, textPane.getStyledDocument().getLength());
+					scrollTo(ensureTextLineVisible);
+				} else {
+					// find last chord after current position
+					PositionHint nextChordHint = hints.findChordAfter(editMarkerPosition);
+					if (nextChordHint == null) {
+						// at the end, with * -> nothing
+						return;
+					} else {
+						removeMarker();
+						markCurrentEditedChord(nextChordHint);
+						hints.setLastSelectedChord(nextChordHint);
+					}
+				}
+			} else {
+				// A section
+				PositionHint lastChordHint = hints.getLastSelectedChord();
+				PositionHint nextChordHint = hints.getNextChordHint(lastChordHint);
+				if (nextChordHint != null) {
+					// unmark
+					unmarkCurrentEditedChord(lastChordHint);
+					markCurrentEditedChord(nextChordHint);
+					hints.setLastSelectedChord(nextChordHint);
+					
+					// scrollto
+					int ensureTextLineVisible = hints.getNextLineOffset(nextChordHint, textPane.getStyledDocument().getLength());
+					scrollTo(ensureTextLineVisible);
+				}
+			}
+		}
 	}
 }
