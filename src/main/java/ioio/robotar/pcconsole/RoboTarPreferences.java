@@ -37,6 +37,10 @@ public class RoboTarPreferences {
 	/** Active chord color, in 0xRRGGBB format, XX: 00-FF. */
 	private Color markedChordColor;
 	
+	/** Active chord color when in editing mode, in 0xRRGGBB format, XX : 00-FF. 
+	 * Size remains on default mainSize */
+	private Color editMarkedChordColor;
+	
 	/** recent chord libraries */
 	private List<String> libraries = new ArrayList<String>();
 	
@@ -45,6 +49,7 @@ public class RoboTarPreferences {
 	
 	/** recent song list */
 	private List<String> songs = new ArrayList<String>();
+	
 	
 	/**
 	 * Loads and saves preferences.
@@ -57,6 +62,7 @@ public class RoboTarPreferences {
 		markedColor = decodeColor(p, "markedColor", "0x0000ff");
 		markedChordSize = p.getInt("markedChordSize", 16);
 		markedChordColor = decodeColor(p, "markedChordColor", "0x0000ff");
+		editMarkedChordColor = decodeColor(p, "editMarkedChordColor", "0x00ff00");
 		// recent chord files - generally only 1 is visible in chords page
 		chosenLibrary = p.get("chosenLibrary", ChordManager.DEFAULT_ROBOTAR); //?
 		int i = 2;
@@ -126,6 +132,7 @@ public class RoboTarPreferences {
 		p.put("markedSize", Integer.toString(getMarkedSize(), 10));
 		p.put("markedChordColor", encodeColor(getMarkedChordColor()));
 		p.put("markedChordSize", Integer.toString(getMarkedChordSize(), 10));
+		p.put("editMarkedChordColor", encodeColor(getEditMarkedChordColor()));
 		// recent chord files - generally only 1 is visible in chords page
 		p.put("chosenLibrary", chosenLibrary);
 		int i = 1;
@@ -199,6 +206,14 @@ public class RoboTarPreferences {
 
 	public void setSongs(List<String> songs) {
 		this.songs = songs;
+	}
+
+	public Color getEditMarkedChordColor() {
+		return editMarkedChordColor;
+	}
+
+	public void setEditMarkedChordColor(Color editMarkedChordColor) {
+		this.editMarkedChordColor = editMarkedChordColor;
 	}
 
 }
