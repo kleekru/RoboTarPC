@@ -3,6 +3,8 @@ package ioio.robotar.pcconsole;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.versarius.xsong.ChordRef;
+
 public class PositionHints {
 	private List<PositionHint> chords = new ArrayList<PositionHint>();
 	private List<PositionHint> lines = new ArrayList<PositionHint>();
@@ -73,7 +75,7 @@ public class PositionHints {
 		return chords.get(curr);
 	}
 	
-	public PositionHint getLineHint(PositionHint chordHint) {
+	public PositionHint getLineHintCurr(PositionHint chordHint) {
 		if (chordHint == null) {
 			return null;
 		}
@@ -83,6 +85,9 @@ public class PositionHints {
 			lineHint = lines.get(currentLine);
 		}
 		return lineHint;
+	}
+	public PositionHint getLineHint(PositionHint chordHint) {
+		return lines.get(chordHint.getLine());
 	}
 	public int getLineOffset(PositionHint chordHint) {
 		return lines.get(chordHint.getLine()).getOffset();
@@ -157,5 +162,39 @@ public class PositionHints {
 		} else {
 			return null;
 		}
+	}
+	/**
+	 * Move all chords position from lastHint till the end of line.
+	 * if needed only!
+	 * @param diff
+	 * @param lastHint
+	 */
+	public void moveChords(int diff, PositionHint lastHint) {
+		if (diff < 0) {
+			return; // we can not shrink, we don't know by how much
+		}
+		int idx = chords.indexOf(lastHint);
+		int line = lastHint.getLine();
+		boolean done = false;
+		PositionHint prev = lastHint;
+		while ((idx < (chords.size() - 1)) && !done) {
+			idx++;
+			PositionHint chord = chords.get(idx);
+			if (chord.getLine() != line) {
+				// done
+				done = true;
+			} else {
+				ChordRef ref = chord.getChordRef();
+				int maxLen = ref.getPosition() - prev.getChordRef().getPosition() - 1; // one space betweeen
+				int prevLen = prev.getChordRef().getChord().getName().length();
+				if (prevLen > maxLen) {
+					chord.setOffset(chord.getOffset() + prevLen - maxLen);
+					ref.setPosition(ref.getPosition() + prevLen - maxLen);
+					prev = chord;
+				} else {
+					done = true;
+				}
+			}
+	}
 	}
 }

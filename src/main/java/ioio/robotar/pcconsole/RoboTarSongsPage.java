@@ -440,6 +440,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		// down keystroke
 		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "down");
 		textPane.getActionMap().put("down", new DownAction());
+		// space keystroke
+		// backspace keystroke
+		// delete keystroke
 		
 	}
 	
@@ -618,21 +621,19 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 						// if the values differ, it means, user clicked in the used chord list and changed the chord
 						LOG.info("changing {}, {}", last.getId(), selChord.getId());
 						//int pos = lastHint.getChordRef().getPosition();
-						//int oldLength = lastHint.getChordRef().getChord().getName().length();
+						int oldLength = lastHint.getChordRef().getChord().getName().length();
 						int newLength = selChord.getName().length();
 						textPane.requestFocusInWindow();
-						/*StyledDocument doc = textPane.getStyledDocument();
-						Style editMarkedChordStyle = doc.getStyle(Styles.EDIT_MARKED_CHORD_STYLE);
-						try {
-							doc.insertString(pos, selChord.getName(), editMarkedChordStyle);
-							doc.remove(pos+newLength, oldLength);
-						} catch (BadLocationException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}*/
+						
 						// through references, set it in underlying Song object
 						lastHint.getChordRef().setChordId(selChord.getId());
 						lastHint.getChordRef().setChord(selChord);
+						
+						// process rest of chord names on the same line!
+						int diff = newLength - oldLength;
+						if (diff != 0) {
+							hints.moveChords(diff, lastHint);
+						}
 						//RefreshDocument rdoc = (RefreshDocument)doc;
 						//rdoc.refresh();
 						//textPane.repaint();
@@ -935,12 +936,12 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 */
 	protected void simPedalPressed() {
 		PositionHint oldChordHint = hints.getChordHint();
-		PositionHint oldLineHint = hints.getLineHint(oldChordHint);
+		PositionHint oldLineHint = hints.getLineHintCurr(oldChordHint);
 		
 		PositionHint chordHint = hints.getNextChordHint();
 		if (chordHint != null) {
 			// visual handling
-			PositionHint lineHint = hints.getLineHint(chordHint);
+			PositionHint lineHint = hints.getLineHintCurr(chordHint);
 			if (oldChordHint != null) {
 				// the first one chord doesn't unmark anything
 				unmarkCurrent(oldChordHint, oldLineHint, lineHint);
@@ -1164,7 +1165,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	 */
 	protected void stopSong() {
 		PositionHint oldChordHint = hints.getChordHint();
-		PositionHint oldLineHint = hints.getLineHint(oldChordHint);
+		PositionHint oldLineHint = hints.getLineHintCurr(oldChordHint);
 		
 		stopIt(oldChordHint, oldLineHint);
 	}
