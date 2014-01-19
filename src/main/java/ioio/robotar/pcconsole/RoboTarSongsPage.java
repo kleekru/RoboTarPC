@@ -634,6 +634,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 						if (diff != 0) {
 							hints.moveChords(diff, lastHint);
 						}
+						// add to used (map)
+						actualSong.getUsedChords().add(selChord);
 						//RefreshDocument rdoc = (RefreshDocument)doc;
 						//rdoc.refresh();
 						//textPane.repaint();
@@ -765,9 +767,29 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		editing = false;
 		removeMarker();
 		pruneEmptyObjects();
+		pruneNotUsedChords();
 		prepareForPlaying();
 	}
 	
+	private void pruneNotUsedChords() {
+		ChordBag usedChordBag = new ChordBag();
+		int partsSize = actualSong.getParts().size();
+		if (partsSize <= 0) return;
+		for (Part part : actualSong.getParts()) {
+			// check empty lines
+			int linesSize = part.getLines().size();
+			for (Line line : part.getLines()) {
+				if (line.getChords() != null) {
+					for (ChordRef ref : line.getChords()) {
+						usedChordBag.add(ref.getChord());
+					}
+				}
+			}
+		}
+		// set used chords - because after editing, there may be chords, which are not used 
+		actualSong.setUsedChords(usedChordBag);
+	}
+
 	protected void loadChordsFromSong() {
 		if (chordListModel == null) {
 			chordListModel = new DefaultListModel();
