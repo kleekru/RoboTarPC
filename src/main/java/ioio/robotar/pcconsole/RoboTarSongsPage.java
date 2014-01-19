@@ -1533,6 +1533,14 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					// scrollto
 					int ensureTextLineVisible = hints.getNextLineOffset(nextChordHint, textPane.getStyledDocument().getLength());
 					scrollTo(ensureTextLineVisible);
+				} else {
+					// go back to * insert style at the end only
+					unmarkCurrentEditedChord(lastChordHint);
+					int last = textPane.getStyledDocument().getLength();
+					createMarker(last);
+					editMarkerDisplayed = true;
+					editMarkerPosition = last;
+					hints.setLastSelectedChord(null);
 				}
 			}
 		}
