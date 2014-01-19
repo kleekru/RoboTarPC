@@ -2,7 +2,6 @@ package ioio.robotar.pcconsole;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -10,13 +9,12 @@ import java.util.prefs.Preferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.versarius.xchords.ChordLibrary;
-
 /**
  * Per user preferences
  *
  */
 public class RoboTarPreferences {
+	
 	private static final Logger LOG = LoggerFactory.getLogger(RoboTarPreferences.class);
 	
 	/** where the corrections file is - correction values for servos */
@@ -50,34 +48,45 @@ public class RoboTarPreferences {
 	/** recent song list */
 	private List<String> songs = new ArrayList<String>();
 	
+	// keys in preferences file 
+	private static final String CORRECTIONS_FILE = "correctionsFile";
+	private static final String MAIN_SIZE = "mainSize";
+	private static final String SONG_FILE = "songFile";
+	private static final String CHORD_LIBRARY_FILE = "chordLibraryFile";
+	private static final String CHOSEN_LIBRARY = "chosenLibrary";
+	private static final String EDIT_MARKED_CHORD_COLOR = "editMarkedChordColor";
+	private static final String MARKED_CHORD_COLOR = "markedChordColor";
+	private static final String MARKED_CHORD_SIZE = "markedChordSize";
+	private static final String MARKED_COLOR = "markedColor";
+	private static final String MARKED_SIZE = "markedSize";
 	
 	/**
 	 * Loads and saves preferences.
 	 * @param p
 	 */
 	protected RoboTarPreferences(Preferences p) {
-		correctionsFile = p.get("correctionsFile", "corrections.xml");
-		mainSize = p.getInt("mainSize", 12);
-		markedSize = p.getInt("markedSize", 18);
-		markedColor = decodeColor(p, "markedColor", "0x0000ff");
-		markedChordSize = p.getInt("markedChordSize", 16);
-		markedChordColor = decodeColor(p, "markedChordColor", "0x0000ff");
-		editMarkedChordColor = decodeColor(p, "editMarkedChordColor", "0x00ff00");
+		correctionsFile = p.get(CORRECTIONS_FILE, "corrections.xml");
+		mainSize = p.getInt(MAIN_SIZE, 12);
+		markedSize = p.getInt(MARKED_SIZE, 18);
+		markedColor = decodeColor(p, MARKED_COLOR, "0x0000ff");
+		markedChordSize = p.getInt(MARKED_CHORD_SIZE, 16);
+		markedChordColor = decodeColor(p, MARKED_CHORD_COLOR, "0x0000ff");
+		editMarkedChordColor = decodeColor(p, EDIT_MARKED_CHORD_COLOR, "0x00ff00");
 		// recent chord files - generally only 1 is visible in chords page
-		chosenLibrary = p.get("chosenLibrary", ChordManager.DEFAULT_ROBOTAR); //?
+		chosenLibrary = p.get(CHOSEN_LIBRARY, ChordManager.DEFAULT_ROBOTAR); //?
 		int i = 2;
-		String fileName = p.get("chordLibraryFile1", null);
+		String fileName = p.get(CHORD_LIBRARY_FILE + "1", null);
 		while (fileName != null) {
 			libraries.add(fileName);
-			fileName = p.get("chordLibraryFile" + Integer.toString(i, 10), null);
+			fileName = p.get(CHORD_LIBRARY_FILE + Integer.toString(i, 10), null);
 			i++;
 		}
 		// recent songs list
 		int si = 2;
-		String songFileName = p.get("songFile1", null);
+		String songFileName = p.get(SONG_FILE + "1", null);
 		while (songFileName != null) {
 			songs.add(songFileName);
-			songFileName = p.get("songFile" + Integer.toString(si, 10), null);
+			songFileName = p.get(SONG_FILE + Integer.toString(si, 10), null);
 			si++;
 		}
 		// after load, save them again (useful in first run, but not needed)
@@ -126,24 +135,24 @@ public class RoboTarPreferences {
 	}
 
 	private void update(Preferences p) {
-		p.put("correctionsFile", correctionsFile);
-		p.put("mainSize", Integer.toString(getMainSize(), 10));
-		p.put("markedColor", encodeColor(getMarkedColor()));
-		p.put("markedSize", Integer.toString(getMarkedSize(), 10));
-		p.put("markedChordColor", encodeColor(getMarkedChordColor()));
-		p.put("markedChordSize", Integer.toString(getMarkedChordSize(), 10));
-		p.put("editMarkedChordColor", encodeColor(getEditMarkedChordColor()));
+		p.put(CORRECTIONS_FILE, correctionsFile);
+		p.put(MAIN_SIZE, Integer.toString(getMainSize(), 10));
+		p.put(MARKED_COLOR, encodeColor(getMarkedColor()));
+		p.put(MARKED_SIZE, Integer.toString(getMarkedSize(), 10));
+		p.put(MARKED_CHORD_COLOR, encodeColor(getMarkedChordColor()));
+		p.put(MARKED_CHORD_SIZE, Integer.toString(getMarkedChordSize(), 10));
+		p.put(EDIT_MARKED_CHORD_COLOR, encodeColor(getEditMarkedChordColor()));
 		// recent chord files - generally only 1 is visible in chords page
-		p.put("chosenLibrary", chosenLibrary);
+		p.put(CHOSEN_LIBRARY, chosenLibrary);
 		int i = 1;
 		for (String lib : libraries) {
-			p.put("chordLibraryFile" + Integer.toString(i, 10), lib);
+			p.put(CHORD_LIBRARY_FILE + Integer.toString(i, 10), lib);
 			i++;
 		}
 		// recent song list
 		int si = 1;
 		for (String song : songs) {
-			p.put("songFile" + Integer.toString(si, 10), song);
+			p.put(SONG_FILE + Integer.toString(si, 10), song);
 			si++;
 		}
 	}
