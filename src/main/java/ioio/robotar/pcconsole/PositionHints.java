@@ -109,7 +109,7 @@ public class PositionHints {
 		}
 		return lines.get(ahead).getOffset();
 	}
-	public PositionHint getLastSelectedChord() {
+	public PositionHint getLastSelectedChordHint() {
 		return lastSelectedChord;
 	}
 	public void setLastSelectedChord(PositionHint lastSelectedChord) {
