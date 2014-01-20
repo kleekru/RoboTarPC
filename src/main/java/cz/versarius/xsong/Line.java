@@ -32,4 +32,9 @@ public class Line {
 	public boolean hasAnyChords() {
 		return !((chords == null) || (chords.isEmpty()));
 	}
+	
+	public int getChordLineLength() {
+		ChordRef last = chords.get(chords.size() - 1);
+		return (last.getPosition() + last.getChord().getName().length());
+	}
 }

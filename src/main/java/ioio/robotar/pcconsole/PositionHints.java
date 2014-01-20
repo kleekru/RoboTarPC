@@ -195,6 +195,23 @@ public class PositionHints {
 					done = true;
 				}
 			}
+		}
 	}
+	
+	public PositionHint firstChordOnLine(PositionHint hint) {
+		int idx = chords.indexOf(hint);
+		int line = hint.getLine();
+		boolean done = false;
+		PositionHint last = hint;
+		while (idx > 0 && !done) {
+			idx--;
+			PositionHint chord = chords.get(idx);
+			if (chord.getLine() != line) {
+				done = true;
+			} else {
+				last = chord;
+			}
+		}
+		return last;
 	}
 }

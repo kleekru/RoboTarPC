@@ -16,7 +16,6 @@ import cz.versarius.xsong.Song;
 import cz.versarius.xsong.Verse;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -26,7 +25,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -42,11 +40,8 @@ import java.util.Set;
 
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -64,7 +59,6 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Component;
 import java.awt.Rectangle;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.SwingConstants;
 
@@ -654,6 +648,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			}
 		}
 	}
+	
 	/**
 	 * Traverse through song, creates position hints to be able to mark chords when playing,
 	 * also checks if all referenced chords exists in usedchords section.
@@ -1103,7 +1098,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		// active text line
 		doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), markedStyle, false);
 		// active chord line
-		doc.setCharacterAttributes(lineHint.getOffset() - lineHint.getLength(), lineHint.getLength(), markedChordLineStyle, false);
+		PositionHint first = hints.firstChordOnLine(chordHint);
+		int startingOffset = first.getOffset() - first.getChordRef().getPosition() + 1;
+		//doc.setCharacterAttributes(lineHint.getOffset() - lineHint.getLength(), lineHint.getLength(), markedChordLineStyle, false);
+		doc.setCharacterAttributes(startingOffset, lineHint.getOffset() - startingOffset - 1, markedChordLineStyle, false);
 		// active chord
 		doc.setCharacterAttributes(chordHint.getOffset(), chordHint.getLength(), markedChordStyle, false);
 		
@@ -1131,7 +1129,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			// unmark line
 			doc.setCharacterAttributes(lineHint.getOffset(), lineHint.getLength(), mainStyle, true);
 			// unmark chord line
-			doc.setCharacterAttributes(lineHint.getOffset() - lineHint.getLength(), lineHint.getLength(), mainStyle, true);
+			PositionHint first = hints.firstChordOnLine(chordHint);
+			int startingOffset = first.getOffset() - first.getChordRef().getPosition() + 1;
+			//doc.setCharacterAttributes(lineHint.getOffset() - lineHint.getLength(), lineHint.getLength(), mainStyle, true);
+			doc.setCharacterAttributes(startingOffset, lineHint.getOffset() - startingOffset - 1, mainStyle, true);
 		}
 
 	}
@@ -1442,24 +1443,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		if (line.getText() == null) {
 			line.setText(" ");
 		}
-		if (line.getText().length() > sb.length() - 1) {
-			// chord line is shorter than text line
-			// append spaces at the end of chords line - easier when playing and formatting:
-			// note !! the spaces in chord line exists only in text pane, not in song xml!!
-			int extra = line.getText().length() - sb.length() - 1;
-			for (int i = 0; i < extra; i++) {
-				sb.append(" ");
-			}
-		} else if (line.getText().length() < sb.length() - 1) {
-			// text line is shorter than chord line
-			// append spaces at the end of text line
-			int extra = sb.length() - 1 - line.getText().length();
-			StringBuilder spaces = new StringBuilder(extra);
-			for (int i = 0; i < extra; i++) {
-				spaces.append(" ");
-			}
-			line.setText(line.getText() + spaces.toString());
-		} // else, the length will be same, with \n appended on the next line
+		
 		sb.append("\n");
 		return sb.toString();
 	}

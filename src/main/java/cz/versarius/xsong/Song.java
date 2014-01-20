@@ -110,6 +110,21 @@ public class Song {
 	public void setPath(String path) {
 		this.path = path;
 	}
+
+	public Line getLine(int lineIdx) {
+		int idx = 0;
+		for (Part part : parts) {
+			// check empty lines
+			for (Line line : part.getLines()) {
+				if (lineIdx == idx) {
+					return line;
+				} else {
+					idx++;
+				}
+			}
+		}
+		return null;
+	}
 	
 	
 }
