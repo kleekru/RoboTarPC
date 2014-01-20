@@ -435,8 +435,18 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "down");
 		textPane.getActionMap().put("down", new DownAction());
 		// space keystroke
+		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "space");
+		textPane.getActionMap().put("space", new SpaceAction());
 		// backspace keystroke
+		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "backspace");
+		textPane.getActionMap().put("backspace", new BackspaceAction());
 		// delete keystroke
+		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deletechord");
+		textPane.getActionMap().put("deletechord", new DeleteChordAction());
+		// text keystroke - f2?
+		textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0), "textedit");
+		textPane.getActionMap().put("textedit", new TextEditAction());
+		
 		
 	}
 	
@@ -1738,4 +1748,135 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	
 		}
 	}
+	class SpaceAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (!editing) {
+				return;
+			}
+			
+			if (editMarkerDisplayed) {
+				return;
+			}
+			
+			PositionHint hint = hints.getLastSelectedChordHint();
+			PositionHint nextHint = hints.nextChordOnLine(hint);
+			int max = 0; 
+			if (nextHint == null) {
+				PositionHint lineHint = hints.getLineHint(hint);
+				max = lineHint.getLength() - hint.getChordRef().getPosition() - hint.getChordRef().getChord().getName().length() + 1;
+			} else {
+				max = nextHint.getChordRef().getPosition() - hint.getChordRef().getPosition() - hint.getChordRef().getChord().getName().length() - 1;
+			}
+			if (max > 0) {
+				// move by 1
+				hint.getChordRef().setPosition(hint.getChordRef().getPosition() + 1);
+				reshowSong(actualSong, textPane, hints);
+				// set new hint as last (new structure)
+				PositionHint newHint = hints.findChordBefore(hint.getOffset()+2);
+				hints.setLastSelectedChord(newHint);
+				markCurrentEditedChord(newHint);
+			}
+		}
+	}
+	
+	class BackspaceAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (!editing) {
+				return;
+			}
+			
+			if (editMarkerDisplayed) {
+				return;
+			}
+			
+			PositionHint hint = hints.getLastSelectedChordHint();
+			PositionHint prevHint = hints.prevChordOnLine(hint);
+			int max = 0; 
+			if (prevHint == null) {
+				max = hint.getChordRef().getPosition() - 1;
+			} else {
+				max = hint.getChordRef().getPosition() - prevHint.getChordRef().getPosition() - prevHint.getChordRef().getChord().getName().length() - 1;
+			}
+			if (max > 0) {
+				// move by 1
+				hint.getChordRef().setPosition(hint.getChordRef().getPosition() - 1);
+				reshowSong(actualSong, textPane, hints);
+				// set new hint as last (new structure)
+				PositionHint newHint = hints.findChordBefore(hint.getOffset());
+				hints.setLastSelectedChord(newHint);
+				markCurrentEditedChord(newHint);
+			}
+		}
+	}
+
+	class DeleteChordAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (!editing) {
+				return;
+			}
+			
+			if (editMarkerDisplayed) {
+				return;
+			}
+			
+			PositionHint hint = hints.getLastSelectedChordHint();
+			unmarkCurrentEditedChord(hint);
+			PositionHint other = hints.getNextChordHint(hint);
+			int point = hint.getOffset();
+			if (other == null) {
+				other = hints.getPrevChordHint(hint);
+				if (other == null) {
+					// create marker at the end
+					point = textPane.getStyledDocument().getLength();
+					createMarker(point);
+				}
+			}
+			if (other != null) {
+				point = other.getOffset();
+			}
+			actualSong.deleteChord(hint.getLine(), hint.getChordRef());
+			reshowSong(actualSong, textPane, hints);
+			if (other != null) {
+				// set new hint as last (new structure)
+				PositionHint newHint = hints.findChordBefore(other.getOffset()+1);
+				hints.setLastSelectedChord(newHint);
+				markCurrentEditedChord(newHint);
+			}
+			scrollTo(point);
+		}
+	}
+
+	class TextEditAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (!editing) {
+				return;
+			}
+			
+			if (editMarkerDisplayed) {
+				return;
+			}
+			
+			PositionHint hint = hints.getLastSelectedChordHint();
+			int lineIdx = hint.getLine();
+			Line line = actualSong.getLine(lineIdx);
+			String inputText = JOptionPane.showInputDialog("Enter line text: ", line.getText());
+			if (!"".equals(inputText.trim())) {
+				line.setText(inputText);
+				unmarkCurrentEditedChord(hint);
+				reshowSong(actualSong, textPane, hints);
+				PositionHint newHint = hints.findChordBefore(hint.getOffset()+1);
+				hints.setLastSelectedChord(newHint);
+				markCurrentEditedChord(newHint);
+			}
+		}
+	}
+
 }

@@ -214,4 +214,30 @@ public class PositionHints {
 		}
 		return last;
 	}
+	
+	public PositionHint prevChordOnLine(PositionHint hint) {
+		int idx = chords.indexOf(hint);
+		int line = hint.getLine();
+		if (idx > 0) {
+			idx--;
+			PositionHint prevHint = chords.get(idx);
+			if (prevHint.getLine() == line) {
+				return prevHint;
+			}
+		}
+		return null;
+	}
+	
+	public PositionHint nextChordOnLine(PositionHint hint) {
+		int idx = chords.indexOf(hint);
+		int line = hint.getLine();
+		if (idx < chords.size() - 1) {
+			idx++;
+			PositionHint nextHint = chords.get(idx);
+			if (nextHint.getLine() == line) {
+				return nextHint;
+			}
+		}
+		return null;
+	}
 }

@@ -125,6 +125,11 @@ public class Song {
 		}
 		return null;
 	}
+
+	public void deleteChord(int lineIdx, ChordRef chordRef) {
+		Line line = getLine(lineIdx);
+		line.remove(chordRef);
+	}
 	
 	
 }

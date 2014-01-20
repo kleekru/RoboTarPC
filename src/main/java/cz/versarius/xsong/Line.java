@@ -37,4 +37,8 @@ public class Line {
 		ChordRef last = chords.get(chords.size() - 1);
 		return (last.getPosition() + last.getChord().getName().length());
 	}
+	
+	public void remove(ChordRef ref) {
+		chords.remove(ref);
+	}
 }
