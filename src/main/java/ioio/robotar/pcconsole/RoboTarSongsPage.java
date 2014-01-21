@@ -415,7 +415,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	/** big attempt */
 	private void initEditing() {
 		initKeys();
-		initCaret();
+		//initCaret();
 	}
 	
 	private void initKeys() {
@@ -449,7 +449,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		
 		
 	}
-	
+	/*
 	private void initCaret() {
 		textPane.addCaretListener(new CaretListener() {
 			String newline = "\n";
@@ -477,7 +477,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			}
 			
 		});
-	}
+	}*/
 	
 	private void loadRecent(RoboTarPreferences pref) {
 		this.pref = pref;
