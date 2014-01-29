@@ -29,6 +29,8 @@ import javax.swing.KeyStroke;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
@@ -58,6 +60,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import javax.swing.SwingConstants;
@@ -384,7 +387,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		scrollPane.setPreferredSize(new Dimension(750, 370));
 		songPanel.add(scrollPane);
 		setupStyles(textPane);
-		
+		textPane.addMouseListener(new SongPaneClick());
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		addWindowListener(this);
 		
@@ -1864,19 +1867,56 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				return;
 			}
 			
+			// is not null, because of previous conditions
 			PositionHint hint = hints.getLastSelectedChordHint();
-			int lineIdx = hint.getLine();
-			Line line = actualSong.getLine(lineIdx);
-			String inputText = JOptionPane.showInputDialog("Enter line text: ", line.getText());
-			if (!"".equals(inputText.trim())) {
-				line.setText(inputText);
+			editLineText(hint.getLine());
+			
+		}
+		
+	}
+
+	public void editLineText(int lineIdx) {
+		Line line = actualSong.getLine(lineIdx);
+		String inputText = JOptionPane.showInputDialog(messages.getString("robotar.songs.enter_line_text"), line.getText());
+		// if pressed Cancel, inputText is set to null
+		if (inputText != null && !"".equals(inputText.trim())) {
+			line.setText(inputText);
+			PositionHint hint = hints.getLastSelectedChordHint();
+			if (hint != null) {
 				unmarkCurrentEditedChord(hint);
-				reshowSong(actualSong, textPane, hints);
+			}
+			// recreate and redisplay song
+			reshowSong(actualSong, textPane, hints);
+			if (hint != null) {
+				// mark previously edited chord
 				PositionHint newHint = hints.findChordBefore(hint.getOffset()+1);
 				hints.setLastSelectedChord(newHint);
 				markCurrentEditedChord(newHint);
+			} else {
+				// create editing marker again
+				int last = textPane.getStyledDocument().getLength();
+				createMarker(last);
+				editMarkerPosition = last;
 			}
 		}
 	}
-
+	
+	class SongPaneClick extends MouseAdapter {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			super.mouseClicked(e);
+			if (!editing) {
+				return;
+			}
+			int start = textPane.getSelectionStart();
+			int caret = textPane.getCaretPosition(); // current scroll
+			PositionHint hint = hints.findLineWith(start);
+			if (hint != null) {
+				// we have line, where it was clicked
+				editLineText(hint.getLine());
+				scrollTo(caret);
+			}
+			
+		}
+	}
 }

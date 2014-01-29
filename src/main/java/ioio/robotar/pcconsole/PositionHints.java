@@ -163,6 +163,29 @@ public class PositionHints {
 			return null;
 		}
 	}
+	
+	/** 
+	 * Finds the text line, which contains specified position
+	 */
+	public PositionHint findLineWith(int position) {
+		if (lines.isEmpty()) {
+			return null;
+		}
+		int prev = lines.size() - 1;
+		PositionHint curr = lines.get(prev);
+		PositionHint last = null;
+		while (curr.getOffset() > position && prev > 0) {
+			prev--;
+			last = curr;
+			curr = lines.get(prev);
+		}
+		// in case of click in chord line and not text line - take next text line as result
+		if (curr.getOffset() + curr.getLength() < position) {
+			return last;
+		}
+		return curr;
+	}
+	
 	/**
 	 * Move all chords position from lastHint till the end of line.
 	 * if needed only!
