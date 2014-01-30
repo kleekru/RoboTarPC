@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Insets;
+import java.awt.Window;
 
 import javax.swing.JFrame;
 
@@ -77,6 +78,7 @@ public class RoboTarStartPage {
 	private ChordManager chordManager = new ChordManager();
 	private RoboTarChordsPage chordsPage;
 	private RoboTarSongsPage songsPage;
+	private RoboTarHelp helpPage;
 	
 	private ResourceBundle messages;
 
@@ -274,6 +276,16 @@ public class RoboTarStartPage {
 		JMenuItem mntmSongDownloads = new JMenuItem(messages.getString("robotar.menu.song_downloads"));
 		mntmSongDownloads.setEnabled(false);
 		mnUtilities.add(mntmSongDownloads);
+		
+		JMenu mnHelp = new JMenu("Help");
+		menuBar.add(mnHelp);
+
+		Action startHelpAction = new StartHelpPageAction("Help", KeyEvent.VK_H);
+		JMenuItem mntmHelp = new JMenuItem("RoboTar Help");
+		mnHelp.add(mntmHelp);
+		mntmHelp.addActionListener(startHelpAction);
+		
+		
 	}
 	
 	protected void showCorrectionsDialog(ActionEvent evt) {
@@ -310,6 +322,17 @@ public class RoboTarStartPage {
 		}
 	}
 	
+	private class StartHelpPageAction extends MyAction {
+		public StartHelpPageAction(String text, int mnemonic) {
+	       super(text, mnemonic);
+	    }
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			startHelpPage();
+		}
+	}
+	
 	private class CorrectionsAction extends MyAction {
 		public CorrectionsAction(String text, int mnemonic) {
 			super(text, mnemonic);
@@ -327,6 +350,22 @@ public class RoboTarStartPage {
 		}
 		getChordsPage().setVisible(true);
 	}
+	
+	public RoboTarChordsPage getChordsPage() {
+		return chordsPage;
+	}
+
+	public void startHelpPage() {
+		if (helpPage == null) {
+			helpPage = new RoboTarHelp(this);
+		}
+		getHelpPage().setVisible(true);
+	}
+	
+	public RoboTarHelp getHelpPage() {
+		return helpPage;
+	}
+
 	
 	public void startSongsPage() {
 		if (songsPage == null) {
@@ -347,10 +386,6 @@ public class RoboTarStartPage {
 		this.chordManager = chordManager;
 	}
 
-	public RoboTarChordsPage getChordsPage() {
-		return chordsPage;
-	}
-
 	public void setChordsPage(RoboTarChordsPage chordsPage) {
 		this.chordsPage = chordsPage;
 	}
@@ -363,6 +398,10 @@ public class RoboTarStartPage {
 		this.songsPage = songsPage;
 	}
 
+	public void setHelpPage(RoboTarHelp helpPage) {
+		this.helpPage = helpPage;
+	}
+	
 	public ServoSettings getServoSettings() {
 		return servoSettings;
 	}
