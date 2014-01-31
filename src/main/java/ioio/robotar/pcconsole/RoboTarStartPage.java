@@ -16,10 +16,21 @@
 
 package ioio.robotar.pcconsole;
 
+import ioio.lib.api.DigitalInput;
+import ioio.lib.api.DigitalOutput;
+import ioio.lib.api.IOIO;
+import ioio.lib.api.TwiMaster;
+import ioio.lib.api.exception.ConnectionLostException;
+import ioio.lib.util.BaseIOIOLooper;
+import ioio.lib.util.IOIOLooper;
+import ioio.lib.util.IOIOConnectionManager.Thread;
+import ioio.lib.util.pc.IOIOSwingApp;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Insets;
+import java.awt.Window;
 
 import javax.swing.JFrame;
 
@@ -41,8 +52,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
+import net.infotrek.util.prefs.FilePreferencesFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.core.pattern.color.BlueCompositeConverter;
 
 import java.awt.Point;
 import java.io.File;
@@ -53,7 +68,7 @@ import java.util.prefs.BackingStoreException;
 /**
  * RoboTar GUI main window.
  */
-public class RoboTarStartPage {
+public class RoboTarStartPage extends IOIOSwingApp {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RoboTarStartPage.class);
 	
@@ -71,6 +86,8 @@ public class RoboTarStartPage {
 	 */
 	private LEDSettings leds;
 	
+	private boolean stateLedOn = false;
+
 	/**
 	 * This will hold all chord libraries loaded in one instance.
 	 */
@@ -83,7 +100,30 @@ public class RoboTarStartPage {
 	/** per user preferences */
 	private RoboTarPreferences preferences = RoboTarPreferences.load();
 	
-	//private RoboTarIOIOforPCConsole console;
+	public static void main(String[] args) throws Exception {
+		// set preferences factory implementation and filename
+		System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
+	    System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, ".robotar.properties");
+	 
+	    new RoboTarStartPage().go(args);
+	}
+	
+	@Override
+	protected Window createMainWindow(String[] args) {
+		// ... create main window ...
+		try {
+			initialize();
+		} catch (BackingStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		LOG.info("End of the Run method");
+		if (frmBlueAhuizote == null) {
+			LOG.error("frame still not available"); ///!!
+		}
+		return frmBlueAhuizote;
+	}
 	
 	public RoboTarPreferences getPreferences() {
 		return preferences;
@@ -97,9 +137,7 @@ public class RoboTarStartPage {
 			public void run() {
 				try {
 					//this.console = console;
-					frmBlueAhuizote.pack();
-					frmBlueAhuizote.setLocationByPlatform(true);
-					frmBlueAhuizote.setVisible(true);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -111,12 +149,6 @@ public class RoboTarStartPage {
 	 * Create the application.
 	 */
 	public RoboTarStartPage() {
-		try {
-			initialize();
-		} catch (BackingStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	private void closingMethod() {
@@ -274,6 +306,10 @@ public class RoboTarStartPage {
 		JMenuItem mntmSongDownloads = new JMenuItem(messages.getString("robotar.menu.song_downloads"));
 		mntmSongDownloads.setEnabled(false);
 		mnUtilities.add(mntmSongDownloads);
+		
+		frmBlueAhuizote.pack();
+		frmBlueAhuizote.setLocationByPlatform(true);
+		frmBlueAhuizote.setVisible(true);
 	}
 	
 	protected void showCorrectionsDialog(ActionEvent evt) {
@@ -392,4 +428,260 @@ public class RoboTarStartPage {
 		this.messages = messages;
 	}
 	
+	@Override
+	public IOIOLooper createIOIOLooper(String connectionType, Object extra) {
+		return new BaseIOIOLooper() {
+			private final int I2C_PAIR = 0; //IOIO Pair for I2C
+			private static final float FREQ = 50.0f;
+			private static final int PCA_ADDRESS = 0x40;
+			private static final byte PCA9685_MODE1 = 0x00;
+			private static final byte PCA9685_PRESCALE = (byte) 0xFE;
+			private TwiMaster twi_;
+			
+			private DigitalOutput stateLED;
+			private DigitalInput pedalButton;
+			// all the leds
+			private DigitalOutput[][] fretLEDs = new DigitalOutput[6][4];
+			// reference to actually turned on leds, to be able to turn them off
+			private DigitalOutput[] fretLEDsTurnedOn = new DigitalOutput[6];
+			
+			private boolean lastKnownPedalPosition = true;
+			
+			@Override
+			protected void setup() throws ConnectionLostException,
+					InterruptedException {
+				LOG.info("IOIO is connected");
+				
+				// on-board pin
+				stateLED = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
+
+				// pedal input setup
+				pedalButton = ioio_.openDigitalInput(Pins.PEDAL_PIN, DigitalInput.Spec.Mode.PULL_UP);
+				
+				// fret leds output setup
+				fretLEDs = prepareLEDs(false);
+				
+				// Setup IOIO TWI Pins
+				twi_ = ioio_.openTwiMaster(I2C_PAIR, TwiMaster.Rate.RATE_1MHz, false);
+				
+				reset();
+			}
+
+			private DigitalOutput[][] prepareLEDs(boolean startValue) throws ConnectionLostException {
+				for (int i = 0; i < 6; i++) {
+					for (int j = 0; j < 4; j++) {
+						// pin matching Pins.java
+						fretLEDs[i][j] = ioio_.openDigitalOutput(Pins.getLEDPin(i, j+1), startValue);
+					}
+				}
+				return fretLEDs;
+			}
+			
+			private void reset() throws ConnectionLostException,
+			InterruptedException {
+				// Set prescaler - see PCA9685 data sheet
+				LOG.info("Start of the BaseIOIOLooper.reset method");
+				float prescaleval = 25000000;
+				prescaleval /= 4096;
+				prescaleval /= FREQ;
+				prescaleval -= 1;
+				byte prescale = (byte) Math.floor(prescaleval + 0.5);
+				
+				write8(PCA9685_MODE1, (byte) 0x10); // go to sleep... prerequisite to set prescaler
+				write8(PCA9685_PRESCALE, prescale); // set the prescaler
+				write8(PCA9685_MODE1, (byte) 0x20); // Wake up and set Auto Increment
+			}
+			
+			private void write8(byte reg, byte val) throws ConnectionLostException,
+				InterruptedException {
+				LOG.info("Start of the write8 method");
+				byte[] request = {reg, val};
+				twi_.writeReadAsync(PCA_ADDRESS, false, request, request.length, null, 0);
+			}
+		
+			@Override
+			public void loop() throws ConnectionLostException,
+					InterruptedException {
+				//LOG.info("Start of the loop method");
+				stateLED.write(!stateLedOn);
+
+				// initial position
+				// high = true, low = false
+				boolean pedalInHighPosition = pedalButton.read();
+				//LOG.debug("current position of pedal is: {}", pedalInHighPosition);
+
+				//LOG.debug("lastPedalPosition: {}", lastKnownPedalPosition);
+				if (lastKnownPedalPosition == pedalInHighPosition) {
+					// no change from last time
+					return;
+				}
+				
+				if (!pedalInHighPosition) {
+					LOG.debug("Pedal is pressed");
+					// PEDAL IS PRESSED
+					stateLedOn = true;
+
+					// we are checking and logging the status first
+					if (frmBlueAhuizote == null) {
+						LOG.error("There is no RoboTar GUI!");
+					} else {
+						if (RoboTarStartPage.this.getChordsPage() == null) {
+							LOG.debug("informative - there is no chords page");
+						}
+						if (RoboTarStartPage.this.getSongsPage() == null) {
+							LOG.debug("informative - there is no songs page");
+						}
+						if (RoboTarStartPage.this.getServoSettings() == null) {
+							// this should not happen, servo settings are initialized to neutral positions in the constructor
+							LOG.warn("There is no chord chosen!");
+						} else {
+							// if songs page exists and we already play the song, play next chord
+							if (RoboTarStartPage.this.getSongsPage() != null && RoboTarStartPage.this.getSongsPage().isPlaying()) {
+								RoboTarStartPage.this.getSongsPage().simPedalPressed();
+							} else if (RoboTarStartPage.this.getChordsPage() != null) {
+								// if not, and chords page exists, play chord that is set in radio buttons
+								RoboTarStartPage.this.getChordsPage().prepareChord();
+							}
+							
+							// everything is set correctly and we have servo settings available 
+							// (either from songs or chords page, or default - neutral) or last one? - check
+							ServoSettings chordServoValues = RoboTarStartPage.this.getServoSettings();
+							LEDSettings leds = RoboTarStartPage.this.getLeds();
+							LOG.debug("got chord: {}", chordServoValues.debugOutput());
+							LOG.debug("leds: {}", leds);
+							long timeStart = System.currentTimeMillis();
+							for (int i = 0; i < 6; i++) {
+								int servoNumber = chordServoValues.getServos()[i];
+								float servoValue = chordServoValues.getValues()[i];
+								setServo(servoNumber, servoValue);
+								if (leds != null) {
+									LOG.debug("leds 2: {}", leds.getLeds());
+									if (leds.getLeds() != null) {
+										setLED(i, leds.getLeds()[i]);
+									}
+								}
+							}
+							long timeEnd = System.currentTimeMillis();
+							LOG.debug("It took {} ms to execute 6 servos and LEDs", timeEnd - timeStart);
+						}
+					}
+				} else {
+					LOG.debug("Pedal is released");
+					// PEDAL IS RELEASED
+					// turn off led
+					stateLedOn = false;
+					// reset servos
+					resetAll();
+					
+				} 
+
+				// save current status of the pedal
+				lastKnownPedalPosition = pedalInHighPosition;
+				
+				/*
+				 //TODO what is this?
+				//PWM Range below is 0.0. to 1.5.  Cycle through each servo channel.
+				for (int c=0; c<16; c++) {
+					for (float p = 1.5f; p>0.0; p-=0.5f) {
+						Thread.sleep(200);
+						setServo(c, p);
+						led_.write(ledOn_);
+					}
+				
+					for (float p=0.0f; p<1.5f; p+=0.5f) {
+						Thread.sleep(200);
+						setServo(c, p);
+					}
+				}*/
+				
+			}
+			
+			/**
+			 * Reset all servos to neutral position.
+			 * 
+			 * @throws ConnectionLostException
+			 * @throws InterruptedException
+			 */
+			public void resetAll() throws ConnectionLostException, InterruptedException {
+				stateLedOn = false;
+				ServoSettings sett = RoboTarStartPage.this.getServoSettings();
+				for (int servo = 0; servo < 12; servo++) {
+					setServo(servo, sett.getInitial(servo));
+				}
+				turnOffFretLEDs();
+				LOG.info("Servos in neutral position default");
+			}
+
+			private void turnOffFretLEDs() throws ConnectionLostException {
+				for (int i = 0; i < 6; i++) {
+					for (int j = 0; j < 4; j++) {
+						fretLEDs[i][j].write(false);
+					}
+					fretLEDsTurnedOn[i] = null;
+				}
+			}
+			
+			/**
+			 * Set Servo channel and milliseconds input to PulseWidth calculation
+			 * 
+			 * @param servoNum
+			 * @param pos
+			 * @throws ConnectionLostException
+			 * @throws InterruptedException
+			 */
+			public void setServo(int servoNum, float pos) throws ConnectionLostException, InterruptedException {
+				LOG.debug("setServo call: servo: {}, value: {}", servoNum, pos);
+				setPulseWidth(servoNum, pos + 1.0f);  //
+			}
+			
+			protected void setPulseWidth(int channel, float ms) throws ConnectionLostException, InterruptedException {
+				// Set pulsewidth according to PCA9685 data sheet based on milliseconds value sent from setServo method
+				// 4096 steps per cycle, frequency is 50MHz (50 steps per millisecond)
+				int pw = Math.round(ms / 1000 * FREQ * 4096);
+				// Skip to every 4th address value to turn off the pulse (see datasheet addresses for LED#_OFF_L)
+				byte[] request = { (byte) (0x08 + channel * 4), (byte) pw, (byte) (pw >> 8) };
+				twi_.writeReadAsync(PCA_ADDRESS, false, request, request.length, null, 0);
+			}
+
+			/**
+			 * 
+			 * @param stringNum 0..5
+			 * @param fretNum 1..4
+			 * @throws ConnectionLostException
+			 */
+			public void setLED(int stringNum, int fretNum) throws ConnectionLostException {
+				LOG.debug("setLED call: string: {}, fretNum: {}", stringNum, fretNum);
+				if (fretNum <= 0) {
+					if (fretLEDsTurnedOn[stringNum] != null) {
+						// if we know what was last turned on
+						fretLEDsTurnedOn[stringNum].write(false);
+					} else {
+						// turn off all LEDs on this string
+						for (int j = 0; j < 4; j++) {
+							fretLEDs[stringNum][j].write(false);
+						}
+					}
+					fretLEDsTurnedOn[stringNum] = null;
+				} else {
+					// turn off last turned on LED on this string
+					if (fretLEDsTurnedOn[stringNum] != null) {
+						fretLEDsTurnedOn[stringNum].write(false);
+					}
+					// turn on the one LED on this string
+					fretLEDs[stringNum][fretNum-1].write(true);
+					fretLEDsTurnedOn[stringNum] = fretLEDs[stringNum][fretNum-1];
+				}
+			}
+			
+			@Override
+			public void disconnected() {
+				LOG.info("IOIO disconnected");
+			}
+
+			@Override
+			public void incompatible() {
+				LOG.info("Incompatible firmware version of IOIO");
+			}
+		};
+	}
 }
