@@ -308,8 +308,6 @@ public class RoboTarStartPage extends IOIOSwingApp {
 		mntmSongDownloads.setEnabled(false);
 		mnUtilities.add(mntmSongDownloads);
 		
-<<<<<<< HEAD
-
 		JMenu mnHelp = new JMenu("Help");
 		menuBar.add(mnHelp);
 
@@ -319,9 +317,6 @@ public class RoboTarStartPage extends IOIOSwingApp {
 		mntmHelp.addActionListener(startHelpAction);
 		
 		
-
-=======
->>>>>>> 67544e92e01534942a0a865b0d33f86d646fd4be
 		frmBlueAhuizote.pack();
 		frmBlueAhuizote.setLocationByPlatform(true);
 		frmBlueAhuizote.setVisible(true);
