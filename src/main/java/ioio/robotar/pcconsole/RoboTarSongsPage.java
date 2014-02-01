@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.BadLocationException;
@@ -60,8 +58,6 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Component;
-import java.awt.Point;
-import java.awt.Rectangle;
 
 import javax.swing.SwingConstants;
 
@@ -88,10 +84,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private PositionHints hints;
 	private JTextPane textPane;
 	private JScrollPane scrollPane;
-	private JList songList;
-	private DefaultListModel songListModel;
-	private JList chordList;
-	private DefaultListModel chordListModel;
+	private JList<Song> songList;
+	private DefaultListModel<Song> songListModel;
+	private JList<Chord> chordList;
+	private DefaultListModel<Chord> chordListModel;
 	
 	private JButton btnPlay;
 	private JButton btnSimPedal;
@@ -206,7 +202,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		frmBlueAhuizoteSongs.add(btnEditSong, gbc_btnEditSong);
 		btnEditSong.setEnabled(false);
 		
-		songList = new JList();
+		songList = new JList<Song>();
 		songList.setCellRenderer(new SongListCellRenderer());
 		songList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		songList.addListSelectionListener(new ListSelectionListener() {
@@ -350,7 +346,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		});
 		editPanel.add(btnAddChord, gbc_btnAddChord);
 		
-		chordList = new JList();
+		chordList = new JList<Chord>();
 		chordList.setLayoutOrientation(JList.VERTICAL_WRAP);
 		chordList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		chordList.setAlignmentY(Component.BOTTOM_ALIGNMENT);
@@ -398,7 +394,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				DefaultListModel model = (DefaultListModel) songList.getModel();
+				DefaultListModel<Song> model = (DefaultListModel<Song>) songList.getModel();
 				int selectedIndex = songList.getSelectedIndex();
 				if (selectedIndex != -1) {
 				    model.remove(selectedIndex);
@@ -514,7 +510,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	
 	private void initSongModel() {
 		if (songListModel == null) {
-			songListModel = new DefaultListModel();
+			songListModel = new DefaultListModel<Song>();
 			songList.setModel(songListModel);
 		}
 	}
@@ -587,8 +583,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 	protected void songSelected(ListSelectionEvent e) {
 		// show song in textpane
-		JList list = (JList)e.getSource();
-		DefaultListModel model = (DefaultListModel) list.getModel();
+		@SuppressWarnings("unchecked")
+		JList<Song> list = (JList<Song>)e.getSource();
+		DefaultListModel<Song> model = (DefaultListModel<Song>) list.getModel();
 		int selIdx = (int) list.getSelectedIndex();
 		if (selIdx < 0) {
 			// if nothing selected, select the first or disable song panel
@@ -602,7 +599,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			}
 		} else {
 			// select song name and display it in song panel
-			Song song = (Song) model.get(selIdx);
+			//Song song = (Song) model.get(selIdx);
 			actualSong = (Song) list.getSelectedValue();
 			prepareForPlaying();
 			btnEditSong.setEnabled(true);
@@ -617,8 +614,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			PositionHint lastHint = hints.getLastSelectedChordHint();
 			if (!editMarkerDisplayed && lastHint != null) {
 				// get the selection
-				JList list = (JList)e.getSource();
-				DefaultListModel model = (DefaultListModel) list.getModel();
+				@SuppressWarnings("unchecked")
+				JList<Chord> list = (JList<Chord>)e.getSource();
+				//DefaultListModel<Chord> model = (DefaultListModel<Chord>) list.getModel();
 				int selIdx = (int) list.getSelectedIndex();
 				if (selIdx >= 0) {
 					// compare them (this event comes also from normal traversal)
@@ -785,7 +783,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		if (partsSize <= 0) return;
 		for (Part part : actualSong.getParts()) {
 			// check empty lines
-			int linesSize = part.getLines().size();
+			//int linesSize = part.getLines().size();
 			for (Line line : part.getLines()) {
 				if (line.getChords() != null) {
 					for (ChordRef ref : line.getChords()) {
@@ -800,7 +798,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 	protected void loadChordsFromSong() {
 		if (chordListModel == null) {
-			chordListModel = new DefaultListModel();
+			chordListModel = new DefaultListModel<Chord>();
 			chordList.setModel(chordListModel);
 		} else {
 			chordListModel.removeAllElements();
@@ -1051,7 +1049,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					// look into current chord buffer on chords page
 					RoboTarChordsPage chPage = mainFrame.getChordsPage();
 					if (chPage != null) {
-						DefaultListModel model = chPage.getChordListModel();
+						@SuppressWarnings("unchecked")
+						DefaultListModel<Chord> model = (DefaultListModel<Chord>)chPage.getChordListModel();
 						if (model != null) {
 							Chord existing = findByName(model, ref.getChordId()); 
 							if (existing != null) {
@@ -1074,7 +1073,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnNewSong.setEnabled(true);
 	}
 	
-	private Chord findByName(DefaultListModel model, String chordId) {
+	private Chord findByName(DefaultListModel<Chord> model, String chordId) {
 		// user-T-1
 		String name = chordId.substring(5);
 		for (int i = 0; i<model.getSize(); i++) {
@@ -1477,11 +1476,11 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		this.actualSong = actualSong;
 	}
 
-	public DefaultListModel getSongList() {
+	public DefaultListModel<Song> getSongList() {
 		return songListModel;
 	}
 
-	public void setSongList(DefaultListModel songList) {
+	public void setSongList(DefaultListModel<Song> songList) {
 		this.songListModel = songList;
 	}
 
@@ -1591,6 +1590,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	// editing actions
 	class LeftAction extends AbstractAction {
 
+		private static final long serialVersionUID = 3860330078622760515L;
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!editing) {
@@ -1647,6 +1648,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	}
 	
 	class RightAction extends AbstractAction {
+
+		private static final long serialVersionUID = -7650665587003989836L;
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -1713,6 +1716,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	
 	class UpAction extends AbstractAction {
 
+		private static final long serialVersionUID = -8289591429082252915L;
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!editing) {
@@ -1733,6 +1738,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	}
 	class DownAction extends AbstractAction {
 
+		private static final long serialVersionUID = 8295947628879158412L;
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!editing) {
@@ -1752,6 +1759,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		}
 	}
 	class SpaceAction extends AbstractAction {
+
+		private static final long serialVersionUID = 6419398425102219652L;
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -1786,6 +1795,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	
 	class BackspaceAction extends AbstractAction {
 
+		private static final long serialVersionUID = -7140568654064941697L;
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!editing) {
@@ -1817,6 +1828,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	}
 
 	class DeleteChordAction extends AbstractAction {
+
+		private static final long serialVersionUID = 5415456999853959871L;
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -1856,6 +1869,8 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	}
 
 	class TextEditAction extends AbstractAction {
+
+		private static final long serialVersionUID = 4394233642709046669L;
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
