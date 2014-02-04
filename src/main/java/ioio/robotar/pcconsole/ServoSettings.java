@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -146,6 +148,22 @@ public class ServoSettings {
 	public float[][] getCorrections() {
 		return CORRECTION;
 	}
+
+	/**
+	 * This method should prevent unwanted damage.
+	 * @return true in case when something is set (not 0.0f - initial position) - probably adjusted
+	 *         false in case nothing is set - the device was probably not adjusted
+	 */
+	public boolean isAnyCorrectionSet() {
+		for (int i = 0; i < CORRECTION.length; i++) {
+			for (int j = 0; j < CORRECTION[i].length; j++) {
+				if (CORRECTION[i][j] != 0.0f) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	public float getInitial(int servoNum) {
 		return roundFloat(NEUTRAL + CORRECTION[servoNum][0]);
@@ -220,7 +238,9 @@ public class ServoSettings {
 	public static ServoSettings loadCorrectionsFrom(File file) {
 		XMLSettingLoader loader = new XMLSettingLoader();
 		try {
-			LOG.debug("loading corrections from file: {}", file.getAbsolutePath());
+			// first try relative path from current working dir 
+			// (where RoboTar was started - it may be location of .bat file, .jnlp file or project root (Eclipse run))
+			LOG.info("loading corrections from file: {}", file.getAbsolutePath());
 			return loader.load(new FileInputStream(file));
 		} catch (IOException e) {
 			LOG.error("loadfrom.ioexception", e);
@@ -229,7 +249,25 @@ public class ServoSettings {
 		} catch (SAXException e) {
 			LOG.error("loadfrom.saxexception", e);
 		}
-		// empty settings
+		// not found, try to load from user.home/.robotar/ folder
+		try {
+			// first try relative path from current working dir 
+			// (where RoboTar was started - it may be location of .bat file, .jnlp file or project root (Eclipse run))
+			String pathStr = System.getProperty("user.home") + File.separator 
+					+ RoboTarStartPage.ROBOTAR_FOLDER + File.separator
+					+ file.getPath();
+			Path path = Paths.get(pathStr);
+			LOG.info("loading corrections from file: {}", path.toFile().getAbsolutePath());
+			return loader.load(new FileInputStream(path.toFile()));
+		} catch (IOException e) {
+			LOG.error("loadfrom.ioexception", e);
+		} catch (ParserConfigurationException e) {
+			LOG.error("loadfrom.parseconfigurationexception", e);
+		} catch (SAXException e) {
+			LOG.error("loadfrom.saxexception", e);
+		}
+		// if still nothing - create new empty settings - will generate warning at the startup
+		LOG.info("cannot load corrections, creating new default, empty settings with neutral corrections");
 		return new ServoSettings();
 	}
 
@@ -238,264 +276,5 @@ public class ServoSettings {
 		LOG.debug("saving corrections to file: {}", file.getAbsolutePath());
 		saver.save(sett.getCorrections(), file);
 	}
-	
-	//////////TODO delete after validating, all works
-	
-	
-	private static int lowEstringReceive;
-	private static int AstringReceive;
-	private static int DstringReceive;
-	private static int GstringReceive;
-	private static int BstringReceive;
-	private static int highEstringReceive;
-	private static int channelLowE;
-	private static int channelA;
-	private static int channelD;
-	private static int channelG;
-	private static int channelB;
-	private static int channelHighE;
-	private static float lowEstringPosition;
-	private static float AStringPosition;
-	private static float DStringPosition;
-	private static float GStringPosition;
-	private static float BStringPosition;
-	private static float highEStringPosition;
-	private static int[] chordReceive;
-	
-	public static int[] deprecated(int lowEstringSend, int AstringSend, int DstringSend, int GstringSend, int BstringSend, int highEstringSend)
-		{
 		
-		if (lowEstringSend == 1 | lowEstringSend == 3) {
-			lowEstringPosition=0.0f;
-			}
-			else if (lowEstringSend == 2 | lowEstringSend == 4) {
-				lowEstringPosition = 1.5f;
-			}
-			else {
-				lowEstringPosition = 0.5f;
-			};
-		
-		if (AstringSend == 1 | AstringSend == 3) {
-			AStringPosition=0.0f;
-			}
-			else if (AstringSend == 2 | AstringSend == 4) {
-				AStringPosition = 1.5f;
-			}
-			else {
-				AStringPosition = 0.5f;
-			};
-		
-		if (DstringSend == 1 | DstringSend == 3) {
-			DStringPosition=0.0f;
-			}
-			else if (DstringSend == 2 | DstringSend == 4) {
-				DStringPosition = 1.5f;
-			}
-			else {
-				DStringPosition = 0.5f;
-			};
-			
-		if (GstringSend == 1 | GstringSend == 3) {
-			GStringPosition=0.0f;
-			}
-			else if (GstringSend == 2 | GstringSend == 4) {
-				GStringPosition = 1.5f;
-			}
-			else {
-				GStringPosition = 0.5f;
-			};
-			
-		if (BstringSend == 1 | BstringSend == 3) {
-			BStringPosition=0.0f;
-			}
-			else if (BstringSend == 2 | BstringSend == 4) {
-				BStringPosition = 1.5f;
-			}
-			else {
-				BStringPosition = 0.5f;
-			};
-			
-		if (highEstringSend == 1 | highEstringSend == 3) {
-			highEStringPosition=0.0f;
-			}
-			else if (highEstringSend == 2 | highEstringSend == 4) {
-				highEStringPosition = 1.5f;
-			}
-			else {
-				highEStringPosition = 0.5f;
-			};
-		// End Chords Constructor
-
-		chordReceive = new int[6];	
-		chordReceive[0] = lowEstringReceive;
-		chordReceive[1] = AstringReceive;
-		chordReceive[2] = DstringReceive;
-		chordReceive[3] = GstringReceive;
-		chordReceive[4] = BstringReceive;
-		chordReceive[5] = highEstringReceive;
-		return chordReceive;
-		
-		} //End BuildChord method
-	
-	public static int getLowEstringReceive() {
-		return lowEstringReceive;
-	}
-
-	public static int getAstringReceive() {
-		return AstringReceive;
-	}
-
-	public static int getDstringReceive() {
-		return DstringReceive;
-	}
-
-	public static int getGstringReceive() {
-		return GstringReceive;
-	}
-
-	public static int getBstringReceive() {
-		return BstringReceive;
-	}
-
-	public static int getHighEstringReceive() {
-		return highEstringReceive;
-	}
-
-	public int[] getChordReceive() {
-		return chordReceive;
-	}
-
-	public static void setLowEstringReceive(int lowEstringReceive) {
-		ServoSettings.lowEstringReceive = lowEstringReceive;
-	}
-
-	public void setAstringReceive(int astringReceive) {
-		AstringReceive = astringReceive;
-	}
-
-	public void setDstringReceive(int dstringReceive) {
-		DstringReceive = dstringReceive;
-	}
-
-	public void setGstringReceive(int gstringReceive) {
-		GstringReceive = gstringReceive;
-	}
-
-	public void setBstringReceive(int bstringReceive) {
-		BstringReceive = bstringReceive;
-	}
-
-	public static void setHighEstringReceive(int highEstringReceive) {
-		ServoSettings.highEstringReceive = highEstringReceive;
-	}
-
-	public static void setChordReceive(int[] chordReceive) {
-		ServoSettings.chordReceive = chordReceive;
-	}
-
-	public static int getChannelLowE() {
-		return channelLowE;
-	}
-
-	public static int getChannelA() {
-		return channelA;
-	}
-
-	public static int getChannelD() {
-		return channelD;
-	}
-
-	public static int getChannelG() {
-		return channelG;
-	}
-
-	public static int getChannelB() {
-		return channelB;
-	}
-
-	public static int getChannelHighE() {
-		return channelHighE;
-	}
-
-	public static void setChannelLowE(int channelLowE) {
-		ServoSettings.channelLowE = channelLowE;
-	}
-
-	public static void setChannelA(int channelA) {
-		ServoSettings.channelA = channelA;
-	}
-
-	public static void setChannelD(int channelD) {
-		ServoSettings.channelD = channelD;
-	}
-
-	public static void setChannelG(int channelG) {
-		ServoSettings.channelG = channelG;
-	}
-
-	public static void setChannelB(int channelB) {
-		ServoSettings.channelB = channelB;
-	}
-
-	public static void setChannelHighE(int channelHighE) {
-		ServoSettings.channelHighE = channelHighE;
-	}
-
-	public static float getLowEstringFloat() {
-		return lowEstringPosition;
-	}
-
-	public static void setLowEstringFloat(float lowEstringFloat) {
-		ServoSettings.lowEstringPosition = lowEstringFloat;
-	}
-
-	public static float getLowEstringPosition() {
-		return lowEstringPosition;
-	}
-
-	public static void setLowEstringPosition(float lowEstringPosition) {
-		ServoSettings.lowEstringPosition = lowEstringPosition;
-	}
-
-	public static float getAStringPosition() {
-		return AStringPosition;
-	}
-
-	public static float getDStringPosition() {
-		return DStringPosition;
-	}
-
-	public static float getGStringPosition() {
-		return GStringPosition;
-	}
-
-	public static float getBStringPosition() {
-		return BStringPosition;
-	}
-
-	public static float getHighEStringPosition() {
-		return highEStringPosition;
-	}
-
-	public static void setAStringPosition(float aStringPosition) {
-		AStringPosition = aStringPosition;
-	}
-
-	public static void setDStringPosition(float dStringPosition) {
-		DStringPosition = dStringPosition;
-	}
-
-	public static void setGStringPosition(float gStringPosition) {
-		GStringPosition = gStringPosition;
-	}
-
-	public static void setBStringPosition(float bStringPosition) {
-		BStringPosition = bStringPosition;
-	}
-
-	public static void setHighEStringPosition(float highEStringPosition) {
-		ServoSettings.highEStringPosition = highEStringPosition;
-	}
-
-	
 }// End Class

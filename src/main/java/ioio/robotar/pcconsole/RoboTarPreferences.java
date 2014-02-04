@@ -1,6 +1,7 @@
 package ioio.robotar.pcconsole;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
@@ -17,7 +18,8 @@ public class RoboTarPreferences {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RoboTarPreferences.class);
 	
-	/** where the corrections file is - correction values for servos */
+	/** where the corrections file is - correction values for servos. Relative to current working folder
+	 * or {user.home}/.robotar folder. In this order. */
 	private String correctionsFile;
 	
 	/** Font size of text of song. */

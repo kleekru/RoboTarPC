@@ -61,9 +61,13 @@ import ch.qos.logback.core.pattern.color.BlueCompositeConverter;
 
 import java.awt.Point;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 /**
  * RoboTar GUI main window.
@@ -101,11 +105,30 @@ public class RoboTarStartPage extends IOIOSwingApp {
 	/** per user preferences */
 	private RoboTarPreferences preferences = RoboTarPreferences.load();
 	
+	public static final String ROBOTAR_FOLDER = ".robotar";
+	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
+	
 	public static void main(String[] args) throws Exception {
 		// set preferences factory implementation and filename
 		System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
-	    System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, ".robotar.properties");
+	    System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, 
+	    		ROBOTAR_FOLDER + File.separator + ROBOTAR_PROPS_FILE);
 	 
+	    // check that the folder .robotar exists, if not, create it. 
+	    String userHome = System.getProperty("user.home");
+	    String folder = userHome + File.separator + ROBOTAR_FOLDER;
+	    Path robotarFolder = Paths.get(folder);
+	    if (!Files.exists(robotarFolder)) {
+	    	try {
+	    		Files.createDirectory(robotarFolder);
+	    		LOG.debug(".robotar folder created");
+	    	} catch (Exception e) {
+	    		LOG.error("cannot create .robotar folder in user home!", e);
+	    		// continue without it - problems will arise, but the software will be at least partially working
+	    	}
+	    }
+	    
+	    // now start the app
 	    new RoboTarStartPage().go(args);
 	}
 	
@@ -320,6 +343,13 @@ public class RoboTarStartPage extends IOIOSwingApp {
 		frmBlueAhuizote.pack();
 		frmBlueAhuizote.setLocationByPlatform(true);
 		frmBlueAhuizote.setVisible(true);
+		
+		// display warning if device not yet configured!
+		if (!servoSettings.isAnyCorrectionSet()) {
+			JOptionPane.showMessageDialog(frmBlueAhuizote, 
+					messages.getString("robotar.corrections.notset"), 
+					"RoboTar WARNING", JOptionPane.WARNING_MESSAGE);
+		}
 	}
 	
 	protected void showCorrectionsDialog(ActionEvent evt) {
