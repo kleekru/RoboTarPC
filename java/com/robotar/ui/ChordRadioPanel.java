@@ -24,7 +24,7 @@ import cz.versarius.xchords.StringInfo;
 import cz.versarius.xchords.StringState;
 
 public class ChordRadioPanel extends JPanel implements ActionListener {
-	private static final ResourceBundle messages = ResourceBundle.getBundle("ioio.robotar.pcconsole.RoboTarBundle", Locale.ENGLISH); 
+	private static final ResourceBundle messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH); 
 	private static final long serialVersionUID = 18765864433L;
 	
 	// button groups for radio buttons

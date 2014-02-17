@@ -20,6 +20,7 @@ public class ChordManagerPC extends ChordManager {
 	 */
 	public synchronized void initialize(RoboTarPreferences preferences) {
 		if (!initialized) {
+			this.preferences = preferences;
 			initialize();
 			
 			// load all other recent chord library files

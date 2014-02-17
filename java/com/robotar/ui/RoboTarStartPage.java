@@ -221,7 +221,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 	public void initialize() throws BackingStoreException {
 		getChordManager();
 		servoSettings = ServoSettings.loadCorrectionsFrom(new File(preferences.getCorrectionsFile()), ROBOTAR_FOLDER);
-		messages = ResourceBundle.getBundle("ioio.robotar.pcconsole.RoboTarBundle", Locale.ENGLISH);
+		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();
 		frmBlueAhuizote.setBackground(new Color(0, 0, 255));
