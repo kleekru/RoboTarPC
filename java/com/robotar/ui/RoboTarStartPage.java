@@ -63,9 +63,6 @@ import com.robotar.util.RoboTarPreferences;
 
 import java.awt.Point;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.prefs.BackingStoreException;
@@ -118,7 +115,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 	    // check that the folder .robotar exists, if not, create it. 
 	    String userHome = System.getProperty("user.home");
 	    String folder = userHome + File.separator + ROBOTAR_FOLDER;
-	    Path robotarFolder = Paths.get(folder);
+	    /*Path robotarFolder = Paths.get(folder);
 	    if (!Files.exists(robotarFolder)) {
 	    	try {
 	    		Files.createDirectory(robotarFolder);
@@ -126,6 +123,17 @@ public class RoboTarStartPage extends IOIOSwingApp {
 	    	} catch (Exception e) {
 	    		LOG.error("cannot create .robotar folder in user home!", e);
 	    		// continue without it - problems will arise, but the software will be at least partially working
+	    	}
+	    }*/
+	    File robotarFolder = new File(folder);
+	    if (!robotarFolder.exists()) {
+	    	try {
+	    		if (robotarFolder.mkdir()) {
+	    			LOG.debug(".robotar folder created");
+	    		};
+	    	} catch (Exception e) {
+	    		LOG.error("cannot create .robotar folder in user home!", e);
+	    		// continue.... problems will arise....
 	    	}
 	    }
 	    
