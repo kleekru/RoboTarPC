@@ -35,15 +35,27 @@ TODO:
 
  ## how to install ##
  
- - java jdk 1.7, eclipse kepler, m2eclipse plugin (won't be needed in future)
- - in eclipse Import maven project - robotar
- - project properties add jar libraries from lib folder on Libraries tab
- - git clone https://github.com/ytai/ioio
- - import general project - ioio/software/IOIOlib/target as root dir, choose pc
- - in project properties of Robotar add Project dependency to IOIOLibPC
- - then mvn install from eclipse works - build success
- - copy corrections.template.xml to corrections.xml
- - then right click on project - run as - java application - should run
+ - prerequisities: java jdk 1.6, eclipse kepler
  
- - download android platform - not needed for pc version
+ 	cd <to you projects directory> (e.g. `<HOME>/prj`)
+	git clone https://github.com/miira/xchords.git
+ 	git clone https://github.com/miira/xsong.git
+	git clone https://github.com/kleekru/RoboTarIOIO.git
+	git clone https://github.com/kleekru/RoboTarIOIOforPCConsole.git
+	git clone https://github.com/ytai/ioio
+	cd RoboTarIOIOforPCConsole
+ 	cp corrrections.template.xml corrections.xml
+	
+ - start eclipse
+ - (if you developed in eclipse already before, create new workspace - File->Switch Workspace->Other... and type location of new workspace - e.g. <HOME>/ws/robotar)
+ - in eclipse File->Import... : General->Existing projects into workspace (click Next) Select root directory - choose your project's folder (<HOME>/prj) From the list of available projects, choose xchords, xsong and RoboTarIOIOforPCConsole robotar (click Finish)
+ - (not needed probably: Right click on RoboTarIOIOforPCConsole project name in Package Explorer/OR Project->Properties - add all jar libraries from lib folder on Libraries tab)
+ - then you'll need to import ioio
+ - File->Import... : General->Existing projects into workspace - Select root directory - choose <HOME>/prj/ioio/software as root dir, select IOIOLibPC and import this project. (or similarly select <HOME>/prj/ioio/software/IOIOlib/target as root dir, choose pc)
+ - in project properties of RobotarIOIOforPCConsole add Project dependency on IOIOLibPC (and xchords and xsong, if they are not already there)
+ - Project->Clean (all projects)
+ - then right click on RobotarIOIOforPCConsole project - run as - java application - should run
+ 
+ - for Android version - you need to clone also `https://github.com/kleekru/RoboTarAndroid.git`
+ - download android platform (not needed for pc version), follow installation instructions for android developers (http://developer.android.com/sdk/index.html#ExistingIDE and http://developer.android.com/sdk/installing/index.html and http://developer.android.com/sdk/installing/installing-adt.html)
  
