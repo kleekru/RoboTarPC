@@ -55,7 +55,8 @@ TODO:
  - in project properties of RobotarIOIOforPCConsole add Project dependency on IOIOLibPC (and xchords and xsong, if they are not already there)
  - Project->Clean (all projects)
  - then right click on RobotarIOIOforPCConsole project - run as - java application - should run
- 
- - for Android version - you need to clone also `https://github.com/kleekru/RoboTarAndroid.git`
+ - In RoboTar applications, choose Utilities -> Servo corrections and setup RoboTar device (if you have any), because running with inappropriate values could burn your servos! After changing and saving the values, you can try Chords page and Song page, testing chords individually or play/edit songs.
+  
+ - instructions for Android version - you need to clone also `https://github.com/kleekru/RoboTarAndroid.git`
  - download android platform (not needed for pc version), follow installation instructions for android developers (http://developer.android.com/sdk/index.html#ExistingIDE and http://developer.android.com/sdk/installing/index.html and http://developer.android.com/sdk/installing/installing-adt.html)
  
