@@ -70,9 +70,9 @@ import java.util.prefs.BackingStoreException;
 /**
  * RoboTar GUI main window.
  */
-public class RoboTarStartPage extends IOIOSwingApp {
+public class RoboTarPC extends IOIOSwingApp {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RoboTarStartPage.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RoboTarPC.class);
 	
 	private JFrame frmBlueAhuizote;
 	public JButton btnChords;
@@ -138,7 +138,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 	    }
 	    
 	    // now start the app
-	    new RoboTarStartPage().go(args);
+	    new RoboTarPC().go(args);
 	}
 	
 	@Override
@@ -165,7 +165,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 	/**
 	 * Launch the application.
 	 */
-	public void mainstart(RoboTarIOIOforPCConsole console, String[] args) {
+	public void mainstart(RoboTarPCConsole console, String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -181,7 +181,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 	/**
 	 * Create the application.
 	 */
-	public RoboTarStartPage() {
+	public RoboTarPC() {
 	}
 
 	private void closingMethod() {
@@ -242,7 +242,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 		lblNewLabel.setSize(new Dimension(50, 50));
 		lblNewLabel.setLocation(new Point(0, 43));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		java.net.URL res = RoboTarStartPage.class.getResource("/data/BlueAhuizoteIcon.png");
+		java.net.URL res = RoboTarPC.class.getResource("/data/BlueAhuizoteIcon.png");
 		System.out.println(res.getPath());
 		lblNewLabel.setIcon(new ImageIcon(res));
 		//lblNewLabel.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/BlueAhuizoteIcon.png")));
@@ -259,7 +259,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 		btnChords.setBackground(Color.BLUE);
 		btnChords.setName("ChordsButton");
 		btnChords.setMargin(new Insets(0, 0, 0, 0));
-		btnChords.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/chords.png")));
+		btnChords.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/chords.png")));
 		btnChords.setSelectedIcon(null);
 		btnChords.setRolloverIcon(null);
 		btnChords.setToolTipText("Create or Browse Chords");
@@ -275,7 +275,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 		btnSongs.setForeground(Color.BLUE);
 		btnSongs.setMargin(new Insets(0, 0, 0, 0));
 		btnSongs.setToolTipText("Select or Create Songs");
-		btnSongs.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/SheetMusic.png")));
+		btnSongs.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/SheetMusic.png")));
 		btnSongs.setName("SongsButton");
 		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
 		frmBlueAhuizote.getContentPane().add(btnSongs, BorderLayout.EAST);
@@ -283,12 +283,12 @@ public class RoboTarStartPage extends IOIOSwingApp {
 		JLabel lblNewLabel_1 = new JLabel("");
 		lblNewLabel_1.setForeground(new Color(30, 144, 255));
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/RoboTarLogoFont3.png")));
+		lblNewLabel_1.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/RoboTarLogoFont3.png")));
 		lblNewLabel_1.setBackground(Color.GRAY);
 		frmBlueAhuizote.getContentPane().add(lblNewLabel_1, BorderLayout.NORTH);
 		
 		JLabel lblNewLabel_2 = new JLabel("");
-		lblNewLabel_2.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/junglespeakermountainsmall.png")));
+		lblNewLabel_2.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/junglespeakermountainsmall.png")));
 		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
 		frmBlueAhuizote.getContentPane().add(lblNewLabel_2, BorderLayout.SOUTH);
 		
@@ -601,28 +601,28 @@ public class RoboTarStartPage extends IOIOSwingApp {
 					if (frmBlueAhuizote == null) {
 						LOG.error("There is no RoboTar GUI!");
 					} else {
-						if (RoboTarStartPage.this.getChordsPage() == null) {
+						if (RoboTarPC.this.getChordsPage() == null) {
 							LOG.debug("informative - there is no chords page");
 						}
-						if (RoboTarStartPage.this.getSongsPage() == null) {
+						if (RoboTarPC.this.getSongsPage() == null) {
 							LOG.debug("informative - there is no songs page");
 						}
-						if (RoboTarStartPage.this.getServoSettings() == null) {
+						if (RoboTarPC.this.getServoSettings() == null) {
 							// this should not happen, servo settings are initialized to neutral positions in the constructor
 							LOG.warn("There is no chord chosen!");
 						} else {
 							// if songs page exists and we already play the song, play next chord
-							if (RoboTarStartPage.this.getSongsPage() != null && RoboTarStartPage.this.getSongsPage().isPlaying()) {
-								RoboTarStartPage.this.getSongsPage().simPedalPressed();
-							} else if (RoboTarStartPage.this.getChordsPage() != null) {
+							if (RoboTarPC.this.getSongsPage() != null && RoboTarPC.this.getSongsPage().isPlaying()) {
+								RoboTarPC.this.getSongsPage().simPedalPressed();
+							} else if (RoboTarPC.this.getChordsPage() != null) {
 								// if not, and chords page exists, play chord that is set in radio buttons
-								RoboTarStartPage.this.getChordsPage().prepareChord();
+								RoboTarPC.this.getChordsPage().prepareChord();
 							}
 							
 							// everything is set correctly and we have servo settings available 
 							// (either from songs or chords page, or default - neutral) or last one? - check
-							ServoSettings chordServoValues = RoboTarStartPage.this.getServoSettings();
-							LEDSettings leds = RoboTarStartPage.this.getLeds();
+							ServoSettings chordServoValues = RoboTarPC.this.getServoSettings();
+							LEDSettings leds = RoboTarPC.this.getLeds();
 							LOG.debug("got chord: {}", chordServoValues.debugOutput());
 							LOG.debug("leds: {}", leds);
 							long timeStart = System.currentTimeMillis();
@@ -680,7 +680,7 @@ public class RoboTarStartPage extends IOIOSwingApp {
 			 */
 			public void resetAll() throws ConnectionLostException, InterruptedException {
 				stateLedOn = false;
-				ServoSettings sett = RoboTarStartPage.this.getServoSettings();
+				ServoSettings sett = RoboTarPC.this.getServoSettings();
 				for (int servo = 0; servo < 12; servo++) {
 					setServo(servo, sett.getInitial(servo));
 				}

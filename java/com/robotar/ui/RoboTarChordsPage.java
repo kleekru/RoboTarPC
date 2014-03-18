@@ -86,7 +86,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	private JLabel lblChordPicture;
 	
 	/** reference to mainframe and chordmanager */
-	private RoboTarStartPage mainFrame;
+	private RoboTarPC mainFrame;
 	private ResourceBundle messages;
 	
 	private ChordRadioPanel radioPanel;
@@ -111,7 +111,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 * 
 	 * @param chordReceived
 	 */
-	public RoboTarChordsPage(RoboTarStartPage mainFrame) {
+	public RoboTarChordsPage(RoboTarPC mainFrame) {
 		super();
 		setPreferredSize(new Dimension(800, 410));
 		this.setMainFrame(mainFrame);
@@ -745,11 +745,11 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		this.chordListModel = chordList;
 	}
 
-	public RoboTarStartPage getMainFrame() {
+	public RoboTarPC getMainFrame() {
 		return mainFrame;
 	}
 
-	public void setMainFrame(RoboTarStartPage mainFrame) {
+	public void setMainFrame(RoboTarPC mainFrame) {
 		this.mainFrame = mainFrame;
 	}
 

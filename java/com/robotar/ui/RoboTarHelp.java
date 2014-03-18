@@ -55,7 +55,7 @@ public class RoboTarHelp extends JFrame implements ActionListener {
       setVisible(true);
       // end constructor
   }
-  public RoboTarHelp(RoboTarStartPage roboTarStartPage) {
+  public RoboTarHelp(RoboTarPC roboTarStartPage) {
 	// TODO Auto-generated constructor stub
 }
 /**

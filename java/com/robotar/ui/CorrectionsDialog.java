@@ -29,7 +29,7 @@ public class CorrectionsDialog extends JDialog {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CorrectionsDialog.class);
 	
-	private RoboTarStartPage page;
+	private RoboTarPC page;
 	private ResourceBundle messages;
 	
 	private float VAL = 0.0f;
@@ -39,7 +39,7 @@ public class CorrectionsDialog extends JDialog {
 	
 	JSpinner[][] spinners;
 	
-	public CorrectionsDialog(final RoboTarStartPage page) {
+	public CorrectionsDialog(final RoboTarPC page) {
 		setResizable(false);
 		setSize(440, 370);
 		this.page = page;
@@ -135,7 +135,7 @@ public class CorrectionsDialog extends JDialog {
 		int returnValue = fc.showOpenDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            ServoSettings sett = ServoSettings.loadCorrectionsFrom(file, RoboTarStartPage.ROBOTAR_FOLDER);
+            ServoSettings sett = ServoSettings.loadCorrectionsFrom(file, RoboTarPC.ROBOTAR_FOLDER);
             page.setServoSettings(sett);
             updateControls(page.getServoSettings().getCorrections());
 		}

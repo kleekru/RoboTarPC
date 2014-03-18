@@ -28,12 +28,12 @@ import com.robotar.ioio.ServoSettings;
  * Main class.
  * Manages IOIO console loop and starts RoboTar GUI. 
  */
-public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
-	static final Logger LOG = LoggerFactory.getLogger(RoboTarIOIOforPCConsole.class);
+public class RoboTarPCConsole extends IOIOConsoleApp {
+	static final Logger LOG = LoggerFactory.getLogger(RoboTarPCConsole.class);
 	
 	private boolean stateLedOn = false;
 
-	private RoboTarStartPage robotarGUI;
+	private RoboTarPC robotarGUI;
 
 	// Boilerplate main(). Copy-paste this code into any IOIOapplication.
 	public static void main(String[] args) throws Exception {
@@ -41,12 +41,12 @@ public class RoboTarIOIOforPCConsole extends IOIOConsoleApp {
 		System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
 	    System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, ".robotar.properties");
 	 
-		new RoboTarIOIOforPCConsole().go(args);
+		new RoboTarPCConsole().go(args);
 	}
 
 	@Override
 	protected void run(String[] args) throws IOException {
-		robotarGUI = new RoboTarStartPage();
+		robotarGUI = new RoboTarPC();
 		robotarGUI.mainstart(this, args);
 		try {
 			Thread.sleep(500);

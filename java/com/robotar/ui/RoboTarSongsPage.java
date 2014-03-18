@@ -102,7 +102,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private JButton btnLoadDefaultSongs;
 
 	/** reference to mainframe and chordmanager. */
-	private RoboTarStartPage mainFrame;
+	private RoboTarPC mainFrame;
 	private ResourceBundle messages;
 	private JPanel editPanel;
 	private JButton btnNewLine;
@@ -122,7 +122,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	/**
 	 * Create the frame.
 	 */
-	public RoboTarSongsPage(final RoboTarStartPage mainFrame) {
+	public RoboTarSongsPage(final RoboTarPC mainFrame) {
 		this.mainFrame = mainFrame;
 		messages = mainFrame.getMessages();
 
@@ -500,7 +500,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	}
 
 	private void saveRecent() {
-		pref.setSongs((List<String>)songListModel.elements());
+		pref.setSongs(getSongsList((Enumeration<Song>)songListModel.elements()));
 	}
 	
 	/** generate list of used songs without robotar-default-songs. */
