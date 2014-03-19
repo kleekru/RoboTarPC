@@ -1,4 +1,4 @@
-# RoboTarIOIOforPCConsole #
+# RoboTarPC #
 ===========================
 
 RoboTar robotic guitar assistant - Code for PC version
