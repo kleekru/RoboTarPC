@@ -234,7 +234,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		frmBlueAhuizote = new JFrame();
 		frmBlueAhuizote.setBackground(new Color(0, 0, 255));
 		frmBlueAhuizote.setBounds(100, 100, 800, 600);
-		frmBlueAhuizote.getContentPane().setBackground(new Color(30, 144, 255));
+		frmBlueAhuizote.getContentPane().setBackground(Const.BACKGROUND_COLOR);
 		frmBlueAhuizote.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frmBlueAhuizote.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -247,16 +247,13 @@ public class RoboTarPC extends IOIOSwingApp {
 		lblNewLabel.setIcon(new ImageIcon(res));
 		//lblNewLabel.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/BlueAhuizoteIcon.png")));
 		lblNewLabel.setBorder(null);
-		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
 		frmBlueAhuizote.getContentPane().add(lblNewLabel, BorderLayout.WEST);
 		
 		Action startChordsAction = new StartChordsPageAction(messages.getString("robotar.menu.chords"), KeyEvent.VK_C);
 		btnChords = new JButton("");
 		btnChords.addActionListener(startChordsAction);
-		btnChords.setForeground(Color.BLUE);
 		btnChords.setMinimumSize(new Dimension(100, 100));
 		btnChords.setMaximumSize(new Dimension(100, 100));
-		btnChords.setBackground(Color.BLUE);
 		btnChords.setName("ChordsButton");
 		btnChords.setMargin(new Insets(0, 0, 0, 0));
 		btnChords.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/chords.png")));
@@ -264,20 +261,16 @@ public class RoboTarPC extends IOIOSwingApp {
 		btnChords.setRolloverIcon(null);
 		btnChords.setToolTipText("Create or Browse Chords");
 		btnChords.setRolloverSelectedIcon(null);
-		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
 		frmBlueAhuizote.getContentPane().add(btnChords, BorderLayout.CENTER);
 		
 		Action startSongsAction = new StartSongsPageAction(messages.getString("robotar.menu.songs"), KeyEvent.VK_S);
 		btnSongs = new JButton("");
 		btnSongs.addActionListener(startSongsAction);
 		btnSongs.setBorderPainted(false);
-		btnSongs.setBackground(Color.BLUE);
-		btnSongs.setForeground(Color.BLUE);
 		btnSongs.setMargin(new Insets(0, 0, 0, 0));
 		btnSongs.setToolTipText("Select or Create Songs");
 		btnSongs.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/SheetMusic.png")));
 		btnSongs.setName("SongsButton");
-		frmBlueAhuizote.getContentPane().setBackground(Color.BLUE);
 		frmBlueAhuizote.getContentPane().add(btnSongs, BorderLayout.EAST);
 		
 		JLabel lblNewLabel_1 = new JLabel("");

@@ -14,17 +14,14 @@ import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import cz.versarius.xchords.Chord;
-import cz.versarius.xchords.ChordBag;
 import cz.versarius.xchords.ChordLibrary;
 import cz.versarius.xchords.ChordManager;
 import cz.versarius.xchords.XMLChordSaver;
@@ -105,7 +102,6 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	private JToggleButton tglbtnTestChord;
 
 	private boolean unsavedChords;
-	
 	/**
 	 * Create the frame.
 	 * 
@@ -113,7 +109,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 */
 	public RoboTarChordsPage(RoboTarPC mainFrame) {
 		super();
-		setPreferredSize(new Dimension(800, 410));
+		setPreferredSize(new Dimension(1300, 410));
 		this.setMainFrame(mainFrame);
 		messages = mainFrame.getMessages();
 		
@@ -125,10 +121,10 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		//setBounds(100, 100, 800, 400);
 		
 		frmBlueAhuizoteChords = new JPanel();
-		frmBlueAhuizoteChords.setPreferredSize(new Dimension(800, 410));
+		frmBlueAhuizoteChords.setPreferredSize(new Dimension(850, 410));
 		frmBlueAhuizoteChords.setAlignmentY(Component.TOP_ALIGNMENT);
 		frmBlueAhuizoteChords.setAlignmentX(Component.LEFT_ALIGNMENT);
-		frmBlueAhuizoteChords.setBackground(Color.BLUE);
+		frmBlueAhuizoteChords.setBackground(Const.BACKGROUND_COLOR);
 		frmBlueAhuizoteChords.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(frmBlueAhuizoteChords);
 		GridBagLayout gbl_frmBlueAhuizoteChords = new GridBagLayout();
@@ -174,9 +170,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 						gbc_btnNewChord.gridx = 0;
 						gbc_btnNewChord.gridy = 1;
 						frmBlueAhuizoteChords.add(btnNewChord, gbc_btnNewChord);
-						btnNewChord.setMinimumSize(new Dimension(20, 9));
 						btnNewChord.setBackground(new Color(0, 0, 128));
-						btnNewChord.setMaximumSize(new Dimension(20, 9));
 						btnNewChord.setMargin(new Insets(2, 1, 2, 1));
 						btnNewChord.setIcon(new ImageIcon(RoboTarChordsPage.class
 								.getResource("/data/NewChord.png")));
@@ -216,8 +210,6 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 				gbc_btnAddToSong.gridx = 3;
 				gbc_btnAddToSong.gridy = 1;
 				frmBlueAhuizoteChords.add(btnAddToSong, gbc_btnAddToSong);
-				btnAddToSong.setMinimumSize(new Dimension(20, 9));
-				btnAddToSong.setMaximumSize(new Dimension(20, 9));
 				btnAddToSong.setIcon(new ImageIcon(RoboTarChordsPage.class
 						.getResource("/data/ArrowUp.png")));
 				btnAddToSong.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -252,7 +244,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		frmBlueAhuizoteChords.add(radioPanel, gbc_radioPanel);
 		
 		btnPanel = new JPanel();
-		btnPanel.setBackground(Color.BLUE);
+		btnPanel.setBackground(Const.BACKGROUND_COLOR);
 		GridBagConstraints gbc_btnPanel = new GridBagConstraints();
 		gbc_btnPanel.fill = GridBagConstraints.BOTH;
 		gbc_btnPanel.insets = new Insets(0, 0, 0, 5);
@@ -313,7 +305,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 				listChords.setCellRenderer(new ChordListCellRenderer());
 				listChords.setVisibleRowCount(6);
 				listChords.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				listChords.setBorder(new LineBorder(Color.BLUE, 3, true));
+				listChords.setBorder(new LineBorder(Color.GRAY, 3, true));
 				listChords.addListSelectionListener(this);
 				scrollPane.setViewportView(listChords);
 		

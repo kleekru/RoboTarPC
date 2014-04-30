@@ -128,7 +128,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 		setBounds(100, 100, 1200, 510);
 		frmBlueAhuizoteSongs = new JPanel();
-		frmBlueAhuizoteSongs.setBackground(Color.BLUE);
+		frmBlueAhuizoteSongs.setBackground(Const.BACKGROUND_COLOR);
 		frmBlueAhuizoteSongs.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(frmBlueAhuizoteSongs);
 		GridBagLayout gbl_frmBlueAhuizoteSongs = new GridBagLayout();
@@ -277,7 +277,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		frmBlueAhuizoteSongs.add(songList, gbc_songList);
 		
 		editPanel = new JPanel();
-		editPanel.setBackground(Color.BLUE);
+		//editPanel.setBackground(Color.BLUE);
 		GridBagConstraints gbc_editPanel = new GridBagConstraints();
 		gbc_editPanel.fill = GridBagConstraints.BOTH;
 		gbc_editPanel.insets = new Insets(0, 0, 0, 5);
