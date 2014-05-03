@@ -78,11 +78,11 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 	
 	public ChordRadioPanel() {
 		super();
-
+		setBackground(Const.BACKGROUND_COLOR);
 		setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		setAlignmentX(Component.RIGHT_ALIGNMENT);
 		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("5px"),
-				ColumnSpec.decode("5px"), ColumnSpec.decode("101px"),
+				ColumnSpec.decode("5px"), ColumnSpec.decode("121px"),
 				ColumnSpec.decode("75px"), FormFactory.DEFAULT_COLSPEC,
 				ColumnSpec.decode("3px"), FormFactory.DEFAULT_COLSPEC,
 				ColumnSpec.decode("4px"), FormFactory.DEFAULT_COLSPEC,
@@ -313,21 +313,25 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		Dstring.add(radioButton_43);
 		radioButton_43.setBackground(new Color(205, 133, 63));
 		add(radioButton_43, "9, 5");
+		radioButton_43.addActionListener(this);
 
 		radioButton_33 = new JRadioButton("");
 		Gstring.add(radioButton_33);
 		radioButton_33.setBackground(new Color(205, 133, 63));
 		add(radioButton_33, "11, 5");
+		radioButton_33.addActionListener(this);
 
 		radioButton_23 = new JRadioButton("");
 		Bstring.add(radioButton_23);
 		radioButton_23.setBackground(new Color(205, 133, 63));
 		add(radioButton_23, "13, 5");
+		radioButton_23.addActionListener(this);
 
 		radioButton_13 = new JRadioButton("");
 		highEstring.add(radioButton_13);
 		radioButton_13.setBackground(new Color(205, 133, 63));
 		add(radioButton_13, "15, 5");
+		radioButton_13.addActionListener(this);
 
 		// 4th fret
 		JLabel lblthFret = new JLabel(
@@ -796,8 +800,10 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 	// called when any radio button is pressed
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+		// TODO this should be done in RoboTarChordsPage!! refactor
+		RoboTarChordsPage chordsPage = (RoboTarChordsPage)getTopLevelAncestor();
+		Chord chord = createChordFromRadios(chordsPage.getLibraryName(false));
+		chordsPage.showChordImage(chord);
 		/*RoboTarChordsPage chordsPage = (RoboTarChordsPage)getTopLevelAncestor();
 		chordsPage.prepareServoValues();*/
 	}

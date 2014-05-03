@@ -1,7 +1,6 @@
 package com.robotar.ui;
 
 
-import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -13,9 +12,16 @@ import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +30,7 @@ import java.util.ResourceBundle;
 import cz.versarius.xchords.Chord;
 import cz.versarius.xchords.ChordLibrary;
 import cz.versarius.xchords.ChordManager;
+import cz.versarius.xchords.XML2SVG;
 import cz.versarius.xchords.XMLChordSaver;
 
 import javax.swing.JLabel;
@@ -57,6 +64,9 @@ import javax.swing.JToggleButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.kitfox.svg.SVGCache;
+import com.kitfox.svg.SVGUniverse;
+import com.kitfox.svg.app.beans.SVGIcon;
 import com.robotar.ioio.LEDSettings;
 
 import javax.swing.BoxLayout;
@@ -102,6 +112,9 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	private JToggleButton tglbtnTestChord;
 
 	private boolean unsavedChords;
+	
+	private XML2SVG dyn = new XML2SVG();
+	
 	/**
 	 * Create the frame.
 	 * 
@@ -109,7 +122,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	 */
 	public RoboTarChordsPage(RoboTarPC mainFrame) {
 		super();
-		setPreferredSize(new Dimension(1300, 410));
+		setPreferredSize(new Dimension(800, 600));
 		this.setMainFrame(mainFrame);
 		messages = mainFrame.getMessages();
 		
@@ -222,20 +235,25 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		
 				
 				// TODO Need to update so this field shows a chord picture - use XChords
+				//SVGDisplayPanel chordSVG = new SVGDisplayPanel();
+				//chordSVG.setPreferredSize(new Dimension(132, 138));
+				
+				//chordSVG.
 				lblChordPicture = new JLabel(messages.getString("robotar.chords.no_chord_selected"));
 				lblChordPicture.setForeground(Color.WHITE);
 				lblChordPicture
 						.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 10));
 				lblChordPicture.setBounds(new Rectangle(0, 0, 0, 0));
-				lblChordPicture.setPreferredSize(new Dimension(132, 138));
-				lblChordPicture.setMaximumSize(new Dimension(132, 138));
+				lblChordPicture.setPreferredSize(new Dimension(220, 300));
+				lblChordPicture.setMaximumSize(new Dimension(220, 300)); //132, 138
 				//lblChordPicture.setBorder(new LineBorder(Color.RED, 3));
 				GridBagConstraints gbc_lblChordPicture = new GridBagConstraints();
 				gbc_lblChordPicture.insets = new Insets(0, 0, 5, 5);
 				gbc_lblChordPicture.gridx = 1;
 				gbc_lblChordPicture.gridy = 2;
 				frmBlueAhuizoteChords.add(lblChordPicture, gbc_lblChordPicture);
-		
+				//frmBlueAhuizoteChords.add(chordSVG, gbc_lblChordPicture);
+				
 		radioPanel = new ChordRadioPanel();
 		GridBagConstraints gbc_radioPanel = new GridBagConstraints();
 		gbc_radioPanel.insets = new Insets(0, 0, 5, 0);
@@ -329,16 +347,38 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 			private void addToChordListActionPerformed(ActionEvent evt) {
 				chordNameSend = radioPanel.getChordName();
 				if (isValidChordName(chordNameSend)) {
-					LOG.info("adding chord to chord list");
+					// prepare chord and chordlistmodel
 					Chord chord = radioPanel.createChordFromRadios(getLibraryName(true));
 					if (chordListModel == null) {
 						chordListModel = new DefaultListModel();
 						listChords.setModel(chordListModel);
 					}
-					chordListModel.addElement(chord);
+					
+					// check if the name(id) is unique
+					int idx = chordListModel.indexOf(chord);
+					if (idx != -1) {
+						int confirm = JOptionPane.showOptionDialog(RoboTarChordsPage.this,
+								messages.getString("robotar.chords.add_chord_to_list.exist"),
+								messages.getString("robotar.chords.add_chord_to_list.exist.title"), JOptionPane.YES_NO_OPTION,
+				                JOptionPane.QUESTION_MESSAGE, null, null, null);
+				        if (confirm == JOptionPane.NO_OPTION) {
+				        	return;
+				        }
+					}
+					
+					// add chord to the list
+					LOG.info("adding chord to chord list");
+					if (idx != -1) {
+						chordListModel.set(idx, chord);
+					} else {
+						chordListModel.addElement(chord);
+					}
 					radioPanel.setChordName(null);
 					clearSelection();
 					unsavedChords = true;
+					
+					// update SVGimage in SVGCache
+					createSVG(chord);
 				} else {
 					JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.chords.fill_chord_name"));
 				}
@@ -359,7 +399,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 		 */
 
 		/* set size of the frame */
-		setSize(840, 410);
+		setSize(840, 600);
 		addWindowListener(this);
 		
 		// initialize with recent chord library, robotar by default
@@ -636,25 +676,35 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	}
 	
 	/**
-	 * TODO currently reads fixed images. after adding own new chords -> generate image on the fly
+	 * Creates SVG image, in SVGCache and returns URI to it.
+	 * @param chord
+	 * @return
+	 */
+	private URI createSVG(Chord chord) {
+		Writer w = dyn.transform(chord);
+		if (w != null) {
+			URI uri = SVGCache.getSVGUniverse().loadSVG(new StringReader(w.toString()), chord.getId(), true);
+			return uri;
+		}
+		return null;
+	}
+	
+	/**
+	 * Generates SVG image of the chord on the fly
 	 * @param chord
 	 */
-	private void showChordImage(Chord chord) {
+	public void showChordImage(Chord chord) {
 		String chordName = chord.getName();
-		String imageName = "/default-chords/" + chordName + ".png";
-		try {
-			URL res = RoboTarChordsPage.class.getResource(imageName);
-			if (res != null) {
-				lblChordPicture.setIcon(new ImageIcon(ImageIO.read(res)));
-			} else {
-				LOG.error("file not found: {}", imageName);
-			}
-			lblChordPicture.setText(chordName);
-		} catch (IOException e) {
-			LOG.error("file not found: {}", imageName);
+		URI uri = createSVG(chord);	
+		if (uri != null) {
+			//lblChordPicture.setIcon(new ImageIcon(ImageIO.read(res)));
+			SVGIcon icon = new SVGIcon();
+			icon.setSvgURI(uri);
+			lblChordPicture.setIcon(icon);
+			lblChordPicture.setText("");
+		} else {
+			LOG.error("svg not generated for: {}", chordName);
 			lblChordPicture.setText(messages.getString("robotar.chords.image_not_found"));
-			lblChordPicture.setIcon(null);
-			//LOG.debug("stacktrace", e);
 		}
 	}
 
@@ -683,7 +733,7 @@ public class RoboTarChordsPage extends JFrame implements ActionListener,
 	
 	
 	
-	private String getLibraryName(boolean askUserIfNotDefault) {
+	public String getLibraryName(boolean askUserIfNotDefault) {
 		DefaultListModel model = (DefaultListModel)listChords.getModel();
 		if (model == null || model.isEmpty()) {
 		//if (listChords.isSelectionEmpty()) {
