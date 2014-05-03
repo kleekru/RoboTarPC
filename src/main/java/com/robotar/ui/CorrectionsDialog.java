@@ -21,6 +21,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.NumberFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -163,6 +165,12 @@ public class CorrectionsDialog extends JDialog {
 				JComponent comp = spinner.getEditor();
 			    JFormattedTextField field = (JFormattedTextField) comp.getComponent(0);
 			    DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
+			    // prepare .123 style (instead of 0.123)
+			    if (formatter instanceof NumberFormatter) {
+			    	NumberFormat nf = (NumberFormat) ((NumberFormatter)formatter).getFormat();
+			    	nf.setMinimumIntegerDigits(0);
+			    	nf.setMaximumFractionDigits(3);
+			    }
 			    formatter.setCommitsOnValidEdit(true);
 			    spinner.addChangeListener(new ChangeListener() {
 
