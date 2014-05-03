@@ -1,16 +1,26 @@
 package com.robotar.ui;
 
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultFormatter;
+import javax.swing.text.JTextComponent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +29,21 @@ import com.robotar.ioio.ServoSettings;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class CorrectionsDialog extends JDialog {
+	private static final long serialVersionUID = 1091251507083649724L;
 
 	private static final Logger LOG = LoggerFactory.getLogger(CorrectionsDialog.class);
 	
@@ -38,10 +56,13 @@ public class CorrectionsDialog extends JDialog {
 	private float STEP = 0.001f;
 	
 	JSpinner[][] spinners;
+
+	protected boolean copyFirst;
 	
 	public CorrectionsDialog(final RoboTarPC page) {
+		setBackground(Const.BACKGROUND_COLOR);
 		setResizable(false);
-		setSize(440, 370);
+		setSize(460, 400);
 		this.page = page;
 		this.messages = page.getMessages();
 		setTitle(messages.getString("robotar.corrections.title"));
@@ -55,12 +76,28 @@ public class CorrectionsDialog extends JDialog {
 		    }
 		});
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] {80, 80, 80, 80, 80};
-		gridBagLayout.rowHeights = new int[]{23, 0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[] {80, 80, 80, 80, 80, 20};
+		gridBagLayout.rowHeights = new int[]{23, 0, 0, 0, 0};
+		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		getContentPane().setLayout(gridBagLayout);
 
+		// copy value from 1st to other fields
+		JCheckBox chboxCopy = new JCheckBox(messages.getString("robotar.corrections.copy_first"));
+		chboxCopy.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent ev) {
+				copyFirst = (ItemEvent.SELECTED == ev.getStateChange());
+			}
+		});
+		GridBagConstraints gbc_chboxCopy = new GridBagConstraints();
+		gbc_chboxCopy.insets = new Insets(0, 0, 5, 5);
+		gbc_chboxCopy.gridx = 0;
+		gbc_chboxCopy.gridy = 0;
+		getContentPane().add(chboxCopy, gbc_chboxCopy);
+		
+		
 		// load button
 		JButton btnLoadCorrections = new JButton(messages.getString("robotar.corrections.load_from"));
 		btnLoadCorrections.addActionListener(new ActionListener() {
@@ -117,10 +154,43 @@ public class CorrectionsDialog extends JDialog {
 				gbc_spinner.insets = new Insets(0, 0, 5, 0);
 				gbc_spinner.gridx = j+1;
 				gbc_spinner.gridy = i+1;
+				installFocusListener(spinner);
 				getContentPane().add(spinner, gbc_spinner);
 				spinners[i][j] = spinner;
+				spinner.setName(String.valueOf(i*4 + j));
+				
+				// copy first feature
+				JComponent comp = spinner.getEditor();
+			    JFormattedTextField field = (JFormattedTextField) comp.getComponent(0);
+			    DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
+			    formatter.setCommitsOnValidEdit(true);
+			    spinner.addChangeListener(new ChangeListener() {
+
+			        @Override
+			        public void stateChanged(ChangeEvent e) {
+			        	Object curValue = ((JSpinner)e.getSource()).getValue();
+			            String name = ((JSpinner)e.getSource()).getName();
+			            int x = Integer.valueOf(name);
+			            if (x%4 == 0 && copyFirst) {
+			            	// set others
+			            	spinners[x/4][1].setValue(curValue);
+			            	spinners[x/4][2].setValue(curValue);
+			            	spinners[x/4][3].setValue(curValue);
+			            }
+			        }
+			    });
 			}
 		}
+		
+		// notice to users
+		JLabel lblRange = new JLabel(messages.getString("robotar.corrections.values_range"));
+		lblRange.setMaximumSize(new Dimension(400, 40));
+		GridBagConstraints gbc_lblRange = new GridBagConstraints();
+		gbc_lblRange.insets = new Insets(0, 0, 5, 5);
+		gbc_lblRange.gridwidth = 4;
+		gbc_lblRange.gridx = 1;
+		gbc_lblRange.gridy = 14;
+		getContentPane().add(lblRange, gbc_lblRange);
 
 		// display values from actual settings
 		updateControls(page.getServoSettings().getCorrections());
@@ -180,4 +250,78 @@ public class CorrectionsDialog extends JDialog {
 		}
 		
 	}
+
+	// from here to the end of the class, only because of little easy feature:
+	// on TAB -> select all in spinner. welcome to Java. 
+	// http://stackoverflow.com/questions/15328185/make-jspinner-select-text-when-focused
+	public static final SelectOnFocusGainedHandler SHARED_INSTANCE = new SelectOnFocusGainedHandler();
+
+	public void installFocusListener(JSpinner spinner) {
+
+        JComponent spinnerEditor = spinner.getEditor();
+
+        if (spinnerEditor != null) {
+
+            // This is me spending a few days trying to make this work and 
+            // eventually throwing a hissy fit and just grabbing all the 
+            // JTextComponent components contained within the editor....
+            List<JTextComponent> lstChildren = findAllChildren(spinner, JTextComponent.class);
+            if (lstChildren != null && lstChildren.size() > 0) {
+
+                JTextComponent editor = lstChildren.get(0);
+                editor.addFocusListener(SHARED_INSTANCE);
+
+            }
+
+        }
+
+    }
+
+    public static <T extends Component> List<T> findAllChildren(JComponent component, Class<T> clazz) {
+
+        List<T> lstChildren = new ArrayList<T>(5);
+        for (Component comp : component.getComponents()) {
+
+            if (clazz.isInstance(comp)) {
+
+                lstChildren.add((T) comp);
+
+            } else if (comp instanceof JComponent) {
+
+                lstChildren.addAll(findAllChildren((JComponent) comp, clazz));
+
+            }
+
+        }
+
+        return Collections.unmodifiableList(lstChildren);
+
+    }
+
+    public static class SelectOnFocusGainedHandler extends FocusAdapter {
+
+        @Override
+        public void focusGained(FocusEvent e) {
+
+            Component comp = e.getComponent();
+            if (comp instanceof JTextComponent) {
+                final JTextComponent textComponent = (JTextComponent) comp;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(25);
+                        } catch (InterruptedException ex) {
+                        }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                textComponent.selectAll();
+                            }
+                        });
+                    }
+                }).start();
+            }            
+        }        
+    }
 }
