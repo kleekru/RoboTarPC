@@ -27,24 +27,40 @@ public class PositionHints {
 	public void setLines(List<PositionHint> lines) {
 		this.lines = lines;
 	}
+	/**
+	 * Use only when playing song.
+	 * @return
+	 */
 	public int getCurrentChord() {
 		return currentChord;
 	}
 	public void setCurrentChord(int currentChord) {
 		this.currentChord = currentChord;
 	}
+	/**
+	 * Use only when playing song.
+	 * @return
+	 */
 	public int getCurrentLine() {
 		return currentLine;
 	}
 	public void setCurrentLine(int currentLine) {
 		this.currentLine = currentLine;
 	}
+	/**
+	 * Use only when playing song.
+	 * @return
+	 */
 	public PositionHint getChordHint() {
 		if (currentChord < 0) {
 			return null;
 		}
 		return chords.get(currentChord);
 	}
+	/**
+	 * Use only when playing song.
+	 * @return
+	 */
 	public PositionHint getNextChordHint() {
 		currentChord++;
 		if (currentChord >= chords.size()) {
@@ -75,6 +91,11 @@ public class PositionHints {
 		return chords.get(curr);
 	}
 	
+	/**
+	 * Use only when playing song.
+	 * @param chordHint
+	 * @return
+	 */
 	public PositionHint getLineHintCurr(PositionHint chordHint) {
 		if (chordHint == null) {
 			return null;
@@ -88,6 +109,24 @@ public class PositionHints {
 	}
 	public PositionHint getLineHint(PositionHint chordHint) {
 		return lines.get(chordHint.getLine());
+	}
+	public PositionHint getNextLineHint(PositionHint lineHint) {
+		//int curr = lines.indexOf(lineHint); // paranoic
+		int curr = lineHint.getLine();
+		curr++;
+		if (curr == lines.size()) {
+			return null;
+		}
+		return lines.get(curr);
+	}
+	public PositionHint getPrevLineHint(PositionHint lineHint) {
+		//int curr = lines.indexOf(lineHint); // paranoic
+		int curr = lineHint.getLine();
+		curr--;
+		if (curr < 0) {
+			return null;
+		}
+		return lines.get(curr);
 	}
 	public int getLineOffset(PositionHint chordHint) {
 		return lines.get(chordHint.getLine()).getOffset();
@@ -106,7 +145,11 @@ public class PositionHints {
 		}
 		return lines.get(++lineidx).getOffset();
 	}
-	
+	/**
+	 * Use only when playing song.
+	 * @param lineHint
+	 * @return
+	 */
 	public int lookAhead(PositionHint lineHint) {
 		int ahead = currentLine + 2;
 		if (lines.size() <= ahead) {
@@ -119,6 +162,23 @@ public class PositionHints {
 	}
 	public void setLastSelectedChord(PositionHint lastSelectedChord) {
 		this.lastSelectedChord = lastSelectedChord;
+	}
+	/** 
+	 * Find line positionHint for a given offset position.
+	 * @param position
+	 * @return
+	 */
+	public PositionHint findLineAt(int position) {
+		if (lines.isEmpty()) {
+			return null;
+		}
+		int next = 0;
+		PositionHint curr = lines.get(next);
+		while (curr.getOffset() < position && next < lines.size() - 1) {
+			next++;
+			curr = lines.get(next);
+		}
+		return curr;
 	}
 	/** 
 	 * Finds the nearest chord before specified position in doc.
@@ -192,7 +252,7 @@ public class PositionHints {
 	 * @param diff
 	 * @param lastHint
 	 */
-	public void moveChords(int diff, PositionHint lastHint) {
+	public void adjustChords(int diff, PositionHint lastHint) {
 		if (diff < 0) {
 			return; // we can not shrink, we don't know by how much
 		}
@@ -218,6 +278,33 @@ public class PositionHints {
 					done = true;
 				}
 			}
+		}
+	}
+	
+	/** 
+	 * Moves all chords from lastHint till the end of line by fixed amount.
+	 * 
+	 * @param diff
+	 * @param lastHint
+	 */
+	public void moveChords(int diff, PositionHint lastHint) {
+		if (diff < 0) {
+			return; // we can not shrink, we don't know by how much
+		}
+		int idx = chords.indexOf(lastHint);
+		int line = lastHint.getLine();
+		boolean done = false;
+		while ((idx < chords.size()) && !done) {
+			PositionHint chord = chords.get(idx);
+			if (chord.getLine() != line) {
+				// done
+				done = true;
+			} else {
+				ChordRef ref = chord.getChordRef();
+				chord.setOffset(chord.getOffset() + diff);
+				ref.setPosition(ref.getPosition() + diff);
+			}
+			idx++;
 		}
 	}
 	
@@ -262,5 +349,12 @@ public class PositionHints {
 			}
 		}
 		return null;
+	}
+	
+	public PositionHint getLastChordAtSong() {
+		if (chords.isEmpty()) {
+			return null;
+		}
+		return chords.get(chords.size() - 1);
 	}
 }
