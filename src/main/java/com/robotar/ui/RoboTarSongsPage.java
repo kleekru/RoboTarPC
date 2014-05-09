@@ -1867,8 +1867,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			}
 			
 			if (marker.isDisplayed()) {
-				// TODO in future - user defined key mappings - this must be done outside
-				addChordToSong();
 				return;
 			} 
 			
