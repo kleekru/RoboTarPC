@@ -98,14 +98,14 @@ public class CorrectionsDialog extends JDialog {
 		gbc_chboxCopy.gridx = 0;
 		gbc_chboxCopy.gridy = 0;
 		getContentPane().add(chboxCopy, gbc_chboxCopy);
-		
+		chboxCopy.setSelected(true);
 		
 		// load button
 		JButton btnLoadCorrections = new JButton(messages.getString("robotar.corrections.load_from"));
 		btnLoadCorrections.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					loadCorrections(e);
+					loadCorrections();
 				} catch (FileNotFoundException e1) {
 					e1.printStackTrace();
 				}
@@ -122,7 +122,7 @@ public class CorrectionsDialog extends JDialog {
 		JButton btnSaveCorrections = new JButton(messages.getString("robotar.corrections.save_as"));
 		btnSaveCorrections.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				saveCorrections(e);
+				saveCorrections();
 			}
 		});
 		GridBagConstraints gbc_btnSaveButton = new GridBagConstraints();
@@ -208,7 +208,7 @@ public class CorrectionsDialog extends JDialog {
 		setVisible(true);
 	}
 
-	protected void loadCorrections(ActionEvent evt) throws FileNotFoundException {
+	protected void loadCorrections() throws FileNotFoundException {
 		JFileChooser fc = new JFileChooser();
 		int returnValue = fc.showOpenDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -248,7 +248,7 @@ public class CorrectionsDialog extends JDialog {
 		return vals;
 	}
 	
-	protected void saveCorrections(ActionEvent e) {
+	protected void saveCorrections() {
 		JFileChooser fc = new JFileChooser();
 		int returnValue = fc.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
