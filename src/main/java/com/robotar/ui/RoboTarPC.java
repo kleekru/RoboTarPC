@@ -55,6 +55,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 import net.infotrek.util.prefs.FilePreferencesFactory;
 
@@ -238,6 +239,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();
+		
 		JPanel frmBlueAhuizotePC = new JPanel() {
 
 			@Override
@@ -260,17 +262,15 @@ public class RoboTarPC extends IOIOSwingApp {
 		frmBlueAhuizotePC.setOpaque(false);
 		frmBlueAhuizote.setContentPane(frmBlueAhuizotePC);
 		//frmBlueAhuizote.setBackground(new Color(0, 0, 255));
-		frmBlueAhuizote.setBounds(100, 100, 800, 600);
+		//frmBlueAhuizote.setBounds(100, 100, 800, 600);
 		//frmBlueAhuizote.getContentPane().setBackground(Color.BLUE); //Const.BACKGROUND_COLOR);
 		frmBlueAhuizote.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frmBlueAhuizote.getContentPane().setLayout(new BorderLayout(0, 0));
+		frmBlueAhuizotePC.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		JLabel lblNewLabel = new JLabel("");
-		lblNewLabel.setSize(new Dimension(50, 50));
-		lblNewLabel.setLocation(new Point(0, 43));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		java.net.URL res = RoboTarPC.class.getResource("/data/BlueAhuizoteIcon.png");
-		System.out.println(res.getPath());
 		lblNewLabel.setIcon(new ImageIcon(res));
 		//lblNewLabel.setIcon(new ImageIcon(RoboTarStartPage.class.getResource("/data/BlueAhuizoteIcon.png")));
 		lblNewLabel.setBorder(null);
@@ -279,15 +279,10 @@ public class RoboTarPC extends IOIOSwingApp {
 		Action startChordsAction = new StartChordsPageAction(messages.getString("robotar.menu.chords"), KeyEvent.VK_C);
 		btnChords = new JButton("");
 		btnChords.addActionListener(startChordsAction);
-		btnChords.setMinimumSize(new Dimension(100, 100));
-		btnChords.setMaximumSize(new Dimension(100, 100));
-		btnChords.setName("ChordsButton");
+		btnChords.setBorderPainted(false);
 		btnChords.setMargin(new Insets(0, 0, 0, 0));
-		btnChords.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/chords.png")));
-		btnChords.setSelectedIcon(null);
-		btnChords.setRolloverIcon(null);
 		btnChords.setToolTipText("Create or Browse Chords");
-		btnChords.setRolloverSelectedIcon(null);
+		btnChords.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/chords.png")));
 		frmBlueAhuizote.getContentPane().add(btnChords, BorderLayout.CENTER);
 		
 		Action startSongsAction = new StartSongsPageAction(messages.getString("robotar.menu.songs"), KeyEvent.VK_S);
@@ -297,7 +292,6 @@ public class RoboTarPC extends IOIOSwingApp {
 		btnSongs.setMargin(new Insets(0, 0, 0, 0));
 		btnSongs.setToolTipText("Select or Create Songs");
 		btnSongs.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/SheetMusic.png")));
-		btnSongs.setName("SongsButton");
 		frmBlueAhuizote.getContentPane().add(btnSongs, BorderLayout.EAST);
 		
 		JLabel lblNewLabel_1 = new JLabel("");
@@ -377,10 +371,11 @@ public class RoboTarPC extends IOIOSwingApp {
 		mntmHelp.addActionListener(startHelpAction);
 		
 		
+		frmBlueAhuizote.setSize(818, 560);
+		frmBlueAhuizote.setPreferredSize(new Dimension(818, 560));
 		frmBlueAhuizote.pack();
 		frmBlueAhuizote.setLocationByPlatform(true);
 		frmBlueAhuizote.setVisible(true);
-		
 		// display warning if device not yet configured!
 		if (!servoSettings.isAnyCorrectionSet()) {
 			JOptionPane.showMessageDialog(frmBlueAhuizote, 
