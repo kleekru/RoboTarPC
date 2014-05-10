@@ -82,6 +82,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	private JFrame frmBlueAhuizote;
 	public JButton btnChords;
 	public JButton btnSongs;
+
 	/**
 	 * This is the field, which RoboTarIOIOforPCConsole reads in loop() 
 	 * and uses its values to send them to the device.
@@ -92,13 +93,13 @@ public class RoboTarPC extends IOIOSwingApp {
 	 * LED settings for the current chord.
 	 */
 	private LEDSettings leds;
-	
 	private boolean stateLedOn = false;
 
 	/**
 	 * This will hold all chord libraries loaded in one instance.
 	 */
 	private ChordManagerPC chordManager = new ChordManagerPC();
+	
 	private RoboTarChordsPage chordsPage;
 	private RoboTarSongsPage songsPage;
 	private RoboTarHelp helpPage;

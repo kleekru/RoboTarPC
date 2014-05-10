@@ -19,7 +19,9 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import cz.versarius.xchords.Chord;
@@ -39,13 +41,11 @@ import java.awt.event.WindowListener;
 import java.awt.Font;
 import java.awt.Dimension;
 
-import javax.swing.border.BevelBorder;
 import javax.swing.JButton;
 
 import java.awt.Insets;
 
 import javax.swing.JList;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.ListSelectionModel;
@@ -68,57 +68,49 @@ import java.awt.ComponentOrientation;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 
-public class RoboTarChordsPage extends JFrame implements 
-		ListSelectionListener, WindowListener {
+public class RoboTarChordsPage extends JFrame implements WindowListener {
 	private static final long serialVersionUID = -4977090038183485379L;
 
 	static final Logger LOG = LoggerFactory.getLogger(RoboTarChordsPage.class);
 
 	private JPanel frmBlueAhuizoteChords;
 	
-	private JButton btnNewChord;
-	
-	private String chordNameSend;
-	
-	private DefaultListModel chordListModel;
-	private JList listChords;
-	private JLabel lblChordPicture;
-	
 	/** reference to mainframe and chordmanager */
 	private RoboTarPC mainFrame;
 	private ResourceBundle messages;
-	
-	private ChordRadioPanel radioPanel;
-	// chord name
-	private JTextField chordName;
-		
-	private JButton btnAddToSong;
 
+	private DefaultListModel libraryListModel;
+	private JList listLibraries;
+	private DefaultListModel chordListModel;
+	private JList listChords;
+
+	private ChordRadioPanel radioPanel;
+	private JTextField chordName;
+	private String chordNameSend;
+	private SVGPanel chordSVG;
+	private JLabel activeSong;
+		
+	private JToggleButton tglbtnTestChord;
+	private JButton btnAddToSong;
 	private JButton btnAddToChordList;
 
-	private JLabel activeSong;
-	//private JPanel btnPanel;
 	private JButton btnLoadChords;
 	private JButton btnSaveChords;
 	private JButton btnLoadDefault;
 	private JButton btnClearChords;
-
-	private JToggleButton tglbtnTestChord;
-
-	private boolean unsavedChords;
+	private JButton btnNewLibrary;
+	private JButton btnNewChord;
 	
+	private boolean unsavedChords;
+
 	private XML2SVG dyn = new XML2SVG();
 
-	private SVGPanel chordSVG;
-
-	private JButton btnNewLibrary;
-	
 	/**
 	 * Create the frame.
 	 * 
 	 * @param chordReceived
 	 */
-	public RoboTarChordsPage(RoboTarPC mainFrame) {
+	public RoboTarChordsPage(final RoboTarPC mainFrame) {
 		super();
 		this.setMainFrame(mainFrame);
 		messages = mainFrame.getMessages();
@@ -206,7 +198,7 @@ public class RoboTarChordsPage extends JFrame implements
 		btnNewChord.setMargin(new Insets(2, 1, 2, 1));
 		btnNewChord.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				newChordButtonActionPerformed(evt);
+				newChordButtonActionPerformed();
 			}
 		});
 		
@@ -242,7 +234,7 @@ public class RoboTarChordsPage extends JFrame implements
 		frmBlueAhuizoteChords.add(btnAddToSong, gbc_btnAddToSong);
 		btnAddToSong.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				addToSongActionPerformed(evt);
+				addToSongActionPerformed();
 			}
 		});
 
@@ -250,7 +242,6 @@ public class RoboTarChordsPage extends JFrame implements
 		// TODO Need to update so this field shows a chord picture - use XChords
 		chordSVG = new SVGPanel();
 		chordSVG.setPreferredSize(new Dimension(130, 190));
-		//chordSVG.setSize(230, 220);
 		chordSVG.setMinimumSize(new Dimension(130, 190));
 		//chordSVG.setAutosize(SVGPanel.AUTOSIZE_STRETCH);
 		chordSVG.setAntiAlias(true);
@@ -258,18 +249,6 @@ public class RoboTarChordsPage extends JFrame implements
 		chordSVG.setVisible(false);
 		//chordSVG.setBackground(Color.GREEN);
 		//chordSVG.setScaleToFit(true); //SVGPanel.AUTOSIZE_BESTFIT);
-		//chordSVG.
-		/*lblChordPicture = new JLabel(messages.getString("robotar.chords.no_chord_selected"));
-		lblChordPicture.setForeground(Color.WHITE);
-		lblChordPicture
-				.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 10));
-		lblChordPicture.setBounds(new Rectangle(0, 0, 0, 0));
-		lblChordPicture.setPreferredSize(new Dimension(220, 300));
-		lblChordPicture.setMaximumSize(new Dimension(220, 300)); //132, 138
-		lblChordPicture.setBackground(Color.GREEN);
-		*/
-		//lblChordPicture.setHorizontalAlignment(SwingConstants.CENTER);
-		//lblChordPicture.setBorder(new LineBorder(Color.RED, 3));
 		GridBagConstraints gbc_lblChordPicture = new GridBagConstraints();
 		gbc_lblChordPicture.insets = new Insets(0, 0, 0, 0);
 		gbc_lblChordPicture.gridx = 6;
@@ -330,7 +309,7 @@ public class RoboTarChordsPage extends JFrame implements
 		lblthFret.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		radioLabelsPanel.add(lblthFret, gbc_label);
 		
-		
+		// radios
 		radioPanel = new ChordRadioPanel();
 		GridBagConstraints gbc_radioPanel = new GridBagConstraints();
 		gbc_radioPanel.insets = new Insets(0, 0, 5, 0);
@@ -365,7 +344,7 @@ public class RoboTarChordsPage extends JFrame implements
 		btnLoadChords.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				try {
-					loadChords(evt);
+					loadChords();
 				} catch (FileNotFoundException e1) {
 					JOptionPane.showMessageDialog(RoboTarChordsPage.this, messages.getString("robotar.chords.file_not_found"));
 				}
@@ -377,10 +356,11 @@ public class RoboTarChordsPage extends JFrame implements
 		gbc_btnLoadChords.fill = GridBagConstraints.HORIZONTAL;
 		frmBlueAhuizoteChords.add(btnLoadChords, gbc_btnLoadChords);
 		
+		// save chords
 		btnSaveChords = new JButton(messages.getString("robotar.chords.save_chords"));
 		btnSaveChords.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				saveChords(evt);
+				saveChords();
 			}
 		});
 		GridBagConstraints gbc_btnSaveChords = new GridBagConstraints();
@@ -407,6 +387,51 @@ public class RoboTarChordsPage extends JFrame implements
 		});
 		btnPanel.add(btnClearChords);
 		*/
+		
+		// library list
+		JScrollPane libScrollPane = new JScrollPane();
+		libScrollPane.setPreferredSize(new Dimension(90, 100));
+		libScrollPane.setMaximumSize(new Dimension(100, 200));
+		libScrollPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+		GridBagConstraints gbc_libScrollPane = new GridBagConstraints();
+		gbc_libScrollPane.fill = GridBagConstraints.BOTH;
+		gbc_libScrollPane.gridx = 0;
+		gbc_libScrollPane.gridheight = 9;
+		gbc_libScrollPane.gridy = 2;
+		frmBlueAhuizoteChords.add(libScrollPane, gbc_libScrollPane);
+		listLibraries = new JList();
+		listLibraries.setFont(new Font("Tahoma", Font.BOLD, 11));
+		listLibraries.setCellRenderer(new ChordLibraryListCellRenderer());
+		listLibraries.setVisibleRowCount(6);
+		listLibraries.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		//listLibraries.setBorder(new LineBorder(Color.GRAY, 3, true));
+		listLibraries.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					JList theList = (JList) event.getSource();
+					DefaultListModel model = (DefaultListModel) theList.getModel();
+					int selIdx = (int) theList.getSelectedIndex();
+					if (selIdx >= 0) {
+						if (unsavedChords) {
+							int confirm = JOptionPane.showOptionDialog(RoboTarChordsPage.this,
+									messages.getString("robotar.chords.unsaved_chords"),
+									messages.getString("robotar.chords.unsaved_chords.title"), JOptionPane.YES_NO_OPTION,
+					                JOptionPane.QUESTION_MESSAGE, null, null, null);
+					        if (confirm == JOptionPane.YES_OPTION) {
+					        	saveChords();
+					        }
+						}
+						ChordLibrary lib = (ChordLibrary) model.get(selIdx);
+						mainFrame.getChordManager().setChosenLibrary(lib.getName());
+						reloadChordList(lib.getName());
+					}
+				}
+			}
+		});
+		libScrollPane.setViewportView(listLibraries);
+		
+		// chord list
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setPreferredSize(new Dimension(90, 100));
 		scrollPane.setMaximumSize(new Dimension(100, 200));
@@ -423,9 +448,23 @@ public class RoboTarChordsPage extends JFrame implements
 		listChords.setVisibleRowCount(6);
 		listChords.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		//listChords.setBorder(new LineBorder(Color.GRAY, 3, true));
-		listChords.addListSelectionListener(this);
+		listChords.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					JList theList = (JList) event.getSource();
+					DefaultListModel model = (DefaultListModel) theList.getModel();
+					int selIdx = (int) theList.getSelectedIndex();
+					if (selIdx >= 0) {
+						Chord chord = (Chord) model.get(selIdx);
+						setChord(chord);
+					}
+				}
+			}
+		});
 		scrollPane.setViewportView(listChords);
 		
+		// add to chord list
 		btnAddToChordList = new JButton(messages.getString("robotar.chords.add_to_chord_list"));
 		GridBagConstraints gbc_btnAddToChordList = new GridBagConstraints();
 		gbc_btnAddToChordList.anchor = GridBagConstraints.SOUTH;
@@ -438,7 +477,7 @@ public class RoboTarChordsPage extends JFrame implements
 		btnAddToChordList.setFont(new Font("Segoe UI", Font.BOLD, 13));
 		btnAddToChordList.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				addToChordListActionPerformed(evt);
+				addToChordListActionPerformed();
 			}
 		});
 
@@ -458,8 +497,10 @@ public class RoboTarChordsPage extends JFrame implements
 		setSize(820, 520);
 		addWindowListener(this);
 		
+		// initialize chord libraries list
+		reloadLibrariesList(mainFrame.getChordManager());
 		// initialize with recent chord library, robotar by default
-		reloadChordList(mainFrame.getChordManager().getChosenLibrary());
+		//reloadChordList(mainFrame.getChordManager().getChosenLibrary());
 		
 		// delete chords
 		listChords.registerKeyboardAction(new ActionListener() {
@@ -483,7 +524,7 @@ public class RoboTarChordsPage extends JFrame implements
 		setVisible(true);
 	}
 
-	protected void newChordButtonActionPerformed(ActionEvent evt) {
+	protected void newChordButtonActionPerformed() {
 		radioPanel.clear();
 		//radioPanel.setChordName(messages.getString("robotar.chords.enter_chord_name"));
 		String generatedName = generateUnusedChordName();
@@ -492,7 +533,10 @@ public class RoboTarChordsPage extends JFrame implements
 	}
 
 	protected void newLibraryButtonActionPerformed() {
-		LOG.info("todo");
+		String newName = findLibraryName(true);
+		mainFrame.getChordManager().getChordLibraries().put(newName, new ChordLibrary());
+		mainFrame.getChordManager().setChosenLibrary(newName);
+		reloadLibrariesList(mainFrame.getChordManager());
 	}
 	
 	private String generateUnusedChordName() {
@@ -525,13 +569,13 @@ public class RoboTarChordsPage extends JFrame implements
 		return false;
 	}
 
-	protected void clearChords(ActionEvent evt) {
+	protected void clearChords() {
 		if (chordListModel != null) {
 			chordListModel.removeAllElements();
 		}
 	}
 
-	protected void saveChords(ActionEvent evt) {
+	protected void saveChords() {
 		// better condition?
 		if ((chordListModel == null) || 
 				(chordListModel != null && chordListModel.isEmpty())) {
@@ -569,13 +613,14 @@ public class RoboTarChordsPage extends JFrame implements
 						// mark and save recent
 						mng.setChosenLibrary(libraryName);
 			            unsavedChords = false;
+			            lib.setChanged(unsavedChords);
 			            return;
 					}
 				} else if (ChordManager.DEFAULT_ROBOTAR.equals(libraryName)) {
 					// user tries to save modified 'robotar' library
 					JOptionPane.showMessageDialog(this,
-		        		    "It is currently not possible to modify default chords for RoboTar, sorry.",
-		        		    "Saving default chords",
+							messages.getString("robotar.chords.dont_change_robotar_chords"),
+							messages.getString("robotar.chords.dont_change_robotar_chords.title"),
 		        		    JOptionPane.ERROR_MESSAGE);
 					return;
 				}
@@ -611,7 +656,7 @@ public class RoboTarChordsPage extends JFrame implements
 		
 	}
 
-	protected void loadChords(ActionEvent evt) throws FileNotFoundException {
+	protected void loadChords() throws FileNotFoundException {
 		JFileChooser fc = new JFileChooser();
 		int returnValue = fc.showOpenDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -630,6 +675,25 @@ public class RoboTarChordsPage extends JFrame implements
 		}
 	}
 
+	/**
+	 * Reload current list of chord libraries and set chosen library from chordmanager.
+	 * @param mng
+	 */
+	@SuppressWarnings("unchecked")
+	protected void reloadLibrariesList(ChordManager mng) {
+		Map<String, ChordLibrary> libs = mng.getChordLibraries();
+		if (libs.isEmpty()) {
+			LOG.error("Cannot find any chord library, empty chord manager", libs);
+			return;
+		}
+		libraryListModel = new DefaultListModel();
+		for (Map.Entry<String, ChordLibrary> entry : libs.entrySet()) {
+			libraryListModel.addElement(entry.getValue());
+		}
+		Collections.sort((List<ChordLibrary>)Collections.list(libraryListModel.elements()));
+		listLibraries.setModel(libraryListModel);
+	}
+	
 	/** 
 	 * Reload current list of chords with chosen library from chordmanager.
 	 * @param libName
@@ -657,7 +721,7 @@ public class RoboTarChordsPage extends JFrame implements
 		mng.setChosenLibrary(libName);
 	}
 
-	protected void loadDefaultChords(ActionEvent evt) {
+	protected void loadDefaultChords() {
 		// populate the list with default chords set
 		reloadChordList(ChordManager.DEFAULT_ROBOTAR);
 	}
@@ -688,11 +752,12 @@ public class RoboTarChordsPage extends JFrame implements
 		this.frmBlueAhuizoteChords = frmBlueAhuizoteChords;
 	}
 
-	public void addToChordListActionPerformed(ActionEvent evt) {
+	public void addToChordListActionPerformed() {
 		chordNameSend = getChordName();
 		if (isValidChordName(chordNameSend)) {
 			// prepare chord and chordlistmodel
-			Chord chord = radioPanel.createChordFromRadios(getLibraryName(true), chordNameSend);
+			String libName = getLibraryName(true);
+			Chord chord = radioPanel.createChordFromRadios(libName, chordNameSend);
 			if (chordListModel == null) {
 				chordListModel = new DefaultListModel();
 				listChords.setModel(chordListModel);
@@ -720,7 +785,7 @@ public class RoboTarChordsPage extends JFrame implements
 			setChordName(null);
 			clearSelection();
 			unsavedChords = true;
-			
+			mainFrame.getChordManager().findByName(libName).setChanged(true);
 			// update SVGimage in SVGCache
 			createSVG(chord);
 		} else {
@@ -728,7 +793,7 @@ public class RoboTarChordsPage extends JFrame implements
 		}
 	}
 
-	public void addToSongActionPerformed(ActionEvent evt) {
+	public void addToSongActionPerformed() {
 		chordNameSend = getChordName();
 		if (isValidChordName(chordNameSend)) {
 			LOG.info("adding chord to song chord list: {}", chordNameSend);
@@ -752,22 +817,6 @@ public class RoboTarChordsPage extends JFrame implements
 	
 	private boolean isValidChordName(String chordName) {
 		return (!((chordName == null) || chordName.trim().isEmpty() || chordName.equalsIgnoreCase(messages.getString("robotar.chords.enter_chord_name"))));
-	}
-
-	/**
-	 * If chord list selection is changed, this method is called.
-	 */
-	@Override
-	public void valueChanged(ListSelectionEvent event) {
-		if (!event.getValueIsAdjusting()) {
-			JList theList = (JList) event.getSource();
-			DefaultListModel model = (DefaultListModel) theList.getModel();
-			int selIdx = (int) theList.getSelectedIndex();
-			if (selIdx >= 0) {
-				Chord chord = (Chord) model.get(selIdx);
-				setChord(chord);
-			}
-		}
 	}
 
 	/**
@@ -847,43 +896,56 @@ public class RoboTarChordsPage extends JFrame implements
 		}
 	}
 	
-	
-	
-	public String getLibraryName(boolean askUserIfNotDefault) {
-		DefaultListModel model = (DefaultListModel)listChords.getModel();
-		if (model == null || model.isEmpty()) {
-		//if (listChords.isSelectionEmpty()) {
-			// chord list is empty - choose new name of the library
-			// prepare default name
-			ChordManager mng = mainFrame.getChordManager();
-			int i = 0;
-			String defName;
+	/**
+	 * Create new default name of the library and (optionally) let the user change it.
+	 * Validates non-existence in loaded libraries list. (manager)
+	 * @param askUserIfNotDefault
+	 * @return
+	 */
+	public String findLibraryName(boolean askUserIfNotDefault) {
+		// prepare default name
+		ChordManager mng = mainFrame.getChordManager();
+		int i = 0;
+		String defName;
+		do {
+			i++;
+			defName = ChordManager.USER_PREFIX + Integer.toString(i);
+		} while (!mng.isNameAvailable(defName));
+		
+		// let user change the name of library
+		String name = defName;
+		
+		if (askUserIfNotDefault) {
+			boolean nameOK = true;
 			do {
-				i++;
-				defName = ChordManager.USER_PREFIX + Integer.toString(i);
-			} while (!mng.isNameAvailable(defName));
-			
-			// let user change the name of library
-			String name = defName;
-			
-			if (askUserIfNotDefault) {
-				boolean nameOK = true;
-				do {
-					name = JOptionPane.showInputDialog(this, messages.getString("robotar.chords.enter_library_name"), defName);
-					nameOK = mng.isNameAvailable(name);
-					if (!nameOK) {
-						// msg box
-						JOptionPane.showMessageDialog(this, messages.getString("robotar.chords.library_name_used"));
-					}
-				} while (!nameOK);
-			}
-			
-			// finally we have valid name
-			return name;
+				name = JOptionPane.showInputDialog(this, messages.getString("robotar.chords.enter_library_name"), defName);
+				nameOK = mng.isNameAvailable(name);
+				if (!nameOK) {
+					// msg box
+					JOptionPane.showMessageDialog(this, messages.getString("robotar.chords.library_name_used"));
+				}
+			} while (!nameOK);
+		}
+		
+		// finally we have valid name
+		return name;
+	}
+	
+	/**
+	 * Get selected library name or create new one, if needed, ask user for the name.
+	 * @param askUserIfNotDefault
+	 * @return
+	 */
+	public String getLibraryName(boolean askUserIfNotDefault) {
+		DefaultListModel model = (DefaultListModel)listLibraries.getModel();
+		if (model == null || model.isEmpty() || listLibraries.isSelectionEmpty()) {
+			// chord libraries list is empty - choose new name of the library
+			return findLibraryName(askUserIfNotDefault);
 		} else {
 			// adding to existing library = take the same name as the chords there
-			return ((Chord)listChords.getModel().getElementAt(0)).getLibrary();
-			//return ((Chord)listChords.getSelectedValue()).getLibrary();
+			// it is already set as chosen library (listselectedevent)
+			return (mainFrame.getChordManager().getChosenLibrary());
+			//return ((Chord)listChords.getModel().getElementAt(0)).getLibrary();
 		}
 	}
 
