@@ -28,7 +28,11 @@ import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.Window;
 
 import javax.swing.JFrame;
@@ -49,6 +53,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import net.infotrek.util.prefs.FilePreferencesFactory;
@@ -232,9 +237,30 @@ public class RoboTarPC extends IOIOSwingApp {
 		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();
-		frmBlueAhuizote.setBackground(new Color(0, 0, 255));
+		JPanel frmBlueAhuizotePC = new JPanel() {
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				// TODO Auto-generated method stub
+				Graphics2D g2d = (Graphics2D) g;
+		                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+		                        RenderingHints.VALUE_ANTIALIAS_ON);
+		 
+		                GradientPaint gp = new GradientPaint(0, 0,
+		                       Const.BACKGROUND_COLOR.brighter(), 0, getHeight(),
+		                       Color.BLUE);
+		 
+		                g2d.setPaint(gp);
+		                g2d.fillRect(0, 0, getWidth(), getHeight());
+
+				super.paintComponent(g);
+			}
+		};
+		frmBlueAhuizotePC.setOpaque(false);
+		frmBlueAhuizote.setContentPane(frmBlueAhuizotePC);
+		//frmBlueAhuizote.setBackground(new Color(0, 0, 255));
 		frmBlueAhuizote.setBounds(100, 100, 800, 600);
-		frmBlueAhuizote.getContentPane().setBackground(Const.BACKGROUND_COLOR);
+		//frmBlueAhuizote.getContentPane().setBackground(Color.BLUE); //Const.BACKGROUND_COLOR);
 		frmBlueAhuizote.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frmBlueAhuizote.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -302,18 +328,14 @@ public class RoboTarPC extends IOIOSwingApp {
 		mntmExit.setMnemonic(KeyEvent.VK_X);
 		mnFileMenu.add(mntmExit);
 		
-		JMenu mnChordLauncher = new JMenu(messages.getString("robotar.menu.chord_launcher"));
-		menuBar.add(mnChordLauncher);
+		JMenu mnLauncher = new JMenu(messages.getString("robotar.menu.launcher"));
+		menuBar.add(mnLauncher);
 		
 		JMenuItem mntmChords = new JMenuItem(startChordsAction);
-		mnChordLauncher.add(mntmChords);
+		mnLauncher.add(mntmChords);
 		
 		JMenuItem mntmSongs = new JMenuItem(startSongsAction);
-		mnChordLauncher.add(mntmSongs);
-		
-		JMenuItem mntmSongPlayer = new JMenuItem(messages.getString("robotar.menu.song_player"));
-		mntmSongPlayer.setEnabled(false);
-		mnChordLauncher.add(mntmSongPlayer);
+		mnLauncher.add(mntmSongs);
 		
 		JMenu mnUtilities = new JMenu(messages.getString("robotar.menu.utilities"));
 		menuBar.add(mnUtilities);
@@ -333,11 +355,23 @@ public class RoboTarPC extends IOIOSwingApp {
 		mntmSongDownloads.setEnabled(false);
 		mnUtilities.add(mntmSongDownloads);
 		
-		JMenu mnHelp = new JMenu("Help");
+		JMenu mnLang = new JMenu(messages.getString("robotar.menu.lang_sel"));
+		menuBar.add(mnLang);
+		
+		JMenuItem mntmEnglish = new JMenuItem(messages.getString("robotar.menu.english"));
+		mnLang.add(mntmEnglish);
+		JMenuItem mntmSpanish = new JMenuItem(messages.getString("robotar.menu.spanish"));
+		mnLang.setEnabled(false);
+		mnLang.add(mntmSpanish);
+		JMenuItem mntmCzech = new JMenuItem(messages.getString("robotar.menu.czech"));
+		mnLang.setEnabled(false);
+		mnLang.add(mntmCzech);
+		
+		JMenu mnHelp = new JMenu(messages.getString("robotar.menu.help"));
 		menuBar.add(mnHelp);
 
-		Action startHelpAction = new StartHelpPageAction("Help", KeyEvent.VK_H);
-		JMenuItem mntmHelp = new JMenuItem("RoboTar Help");
+		Action startHelpAction = new StartHelpPageAction(messages.getString("robotar.menu.help"), KeyEvent.VK_H);
+		JMenuItem mntmHelp = new JMenuItem(messages.getString("robotar.menu.robotar_help"));
 		mnHelp.add(mntmHelp);
 		mntmHelp.addActionListener(startHelpAction);
 		

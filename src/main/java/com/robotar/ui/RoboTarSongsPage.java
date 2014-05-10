@@ -63,10 +63,14 @@ import com.robotar.util.RoboTarPreferences;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Component;
+import java.awt.RenderingHints;
 
 import javax.swing.SwingConstants;
 
@@ -132,8 +136,27 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		messages = mainFrame.getMessages();
 
 		setBounds(100, 100, 1200, 510);
-		frmBlueAhuizoteSongs = new JPanel();
-		frmBlueAhuizoteSongs.setBackground(Const.BACKGROUND_COLOR);
+		frmBlueAhuizoteSongs = new JPanel() {
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				// TODO Auto-generated method stub
+				Graphics2D g2d = (Graphics2D) g;
+		                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+		                        RenderingHints.VALUE_ANTIALIAS_ON);
+		 
+		                GradientPaint gp = new GradientPaint(0, 0,
+		                       Const.BACKGROUND_COLOR.brighter(), 0, getHeight(),
+		                       Const.BACKGROUND_COLOR);
+		 
+		                g2d.setPaint(gp);
+		                g2d.fillRect(0, 0, getWidth(), getHeight());
+
+				super.paintComponent(g);
+			}
+		};
+		frmBlueAhuizoteSongs.setOpaque(false);
+		//frmBlueAhuizoteSongs.setBackground(Const.BACKGROUND_COLOR);
 		frmBlueAhuizoteSongs.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(frmBlueAhuizoteSongs);
 		GridBagLayout gbl_frmBlueAhuizoteSongs = new GridBagLayout();
