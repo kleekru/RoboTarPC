@@ -361,10 +361,10 @@ public class RoboTarPC extends IOIOSwingApp {
 		JMenuItem mntmEnglish = new JMenuItem(messages.getString("robotar.menu.english"));
 		mnLang.add(mntmEnglish);
 		JMenuItem mntmSpanish = new JMenuItem(messages.getString("robotar.menu.spanish"));
-		mnLang.setEnabled(false);
+		mntmSpanish.setEnabled(false);
 		mnLang.add(mntmSpanish);
 		JMenuItem mntmCzech = new JMenuItem(messages.getString("robotar.menu.czech"));
-		mnLang.setEnabled(false);
+		mntmCzech.setEnabled(false);
 		mnLang.add(mntmCzech);
 		
 		JMenu mnHelp = new JMenu(messages.getString("robotar.menu.help"));
