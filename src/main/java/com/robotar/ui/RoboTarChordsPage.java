@@ -58,6 +58,7 @@ import com.kitfox.svg.SVGCache;
 import com.kitfox.svg.SVGDiagram;
 import com.kitfox.svg.app.beans.SVGPanel;
 import com.robotar.ioio.LEDSettings;
+import com.robotar.ioio.ServoSettings;
 
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -420,6 +421,11 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 					                JOptionPane.QUESTION_MESSAGE, null, null, null);
 					        if (confirm == JOptionPane.YES_OPTION) {
 					        	saveChords();
+					        } else {
+					        	unsavedChords = false;
+					        	// probably. safe way is find library on chords-id (it may not exist..-deleted)
+								ChordLibrary lib = mainFrame.getChordManager().findByName(mainFrame.getChordManager().getChosenLibrary());
+								lib.setChanged(false);
 					        }
 						}
 						ChordLibrary lib = (ChordLibrary) model.get(selIdx);
@@ -513,6 +519,10 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 					int selectedIndex = listChords.getSelectedIndex();
 					if (selectedIndex != -1) {
 					    model.remove(selectedIndex);
+					    ChordLibrary lib = getMainFrame().getChordManager().findByName(chosenLib);
+					    lib.setChanged(true);
+					    unsavedChords = true;
+					    listLibraries.repaint();
 					}
 				}
 			}
@@ -525,18 +535,49 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 	}
 
 	protected void newChordButtonActionPerformed() {
+		if (listLibraries.isSelectionEmpty()) {
+			JOptionPane.showMessageDialog(this,
+        		    messages.getString("robotar.chords.no_library_selected"),
+        		    messages.getString("robotar.chords.new_chord.title"),
+        		    JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
 		radioPanel.clear();
 		//radioPanel.setChordName(messages.getString("robotar.chords.enter_chord_name"));
 		String generatedName = generateUnusedChordName();
 		setChordName(generatedName);
 		clearSelection();
+		Chord chord = radioPanel.createChordFromRadios(((ChordLibrary)listLibraries.getSelectedValue()).getName(), generatedName);
+		showChordImage(chord);
 	}
 
 	protected void newLibraryButtonActionPerformed() {
+		if (unsavedChords) {
+			int confirm = JOptionPane.showOptionDialog(RoboTarChordsPage.this,
+					messages.getString("robotar.chords.unsaved_chords"),
+					messages.getString("robotar.chords.new_chord.title"), JOptionPane.YES_NO_OPTION,
+	                JOptionPane.QUESTION_MESSAGE, null, null, null);
+	        if (confirm == JOptionPane.YES_OPTION) {
+				if (!saveChords()) {
+					LOG.error("can not save chords.... check log");
+					return;
+				}
+			} else {
+				unsavedChords = false;
+				// probably. safe way is find library on chords-id (it may not exist..-deleted)
+				ChordLibrary lib = mainFrame.getChordManager().findByName(mainFrame.getChordManager().getChosenLibrary());
+				lib.setChanged(false);
+			}
+		}
 		String newName = findLibraryName(true);
-		mainFrame.getChordManager().getChordLibraries().put(newName, new ChordLibrary());
-		mainFrame.getChordManager().setChosenLibrary(newName);
-		reloadLibrariesList(mainFrame.getChordManager());
+		if (newName != null) {
+			ChordLibrary lib = new ChordLibrary();
+			lib.setName(newName);
+			mainFrame.getChordManager().getChordLibraries().put(newName, lib);
+			mainFrame.getChordManager().setChosenLibrary(newName);
+			reloadLibrariesList(mainFrame.getChordManager());
+			listLibraries.setSelectedValue(lib, true);
+		}
 	}
 	
 	private String generateUnusedChordName() {
@@ -575,15 +616,15 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 		}
 	}
 
-	protected void saveChords() {
+	protected boolean saveChords() {
 		// better condition?
 		if ((chordListModel == null) || 
 				(chordListModel != null && chordListModel.isEmpty())) {
 			JOptionPane.showMessageDialog(this,
-        		    "Empty list of chords, nothing to save.",
-        		    "Saving chords",
+        		    messages.getString("robotar.chords.empty_chord_list"),
+        		    messages.getString("robotar.chords.saving_chords.title"),
         		    JOptionPane.INFORMATION_MESSAGE);
-			return;
+			return false;
 		}
 		
 		// first check, if it is already in chord manager.
@@ -596,6 +637,22 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 					ChordManager mng = mainFrame.getChordManager();
 					ChordLibrary lib = mng.findByName(libraryName);
 					if (lib != null) {
+						// prepare file where to save
+						XMLChordSaver saver = new XMLChordSaver();
+						File file = null;
+						if (lib.getPath() == null) {
+							// create new one
+							JFileChooser fc = new JFileChooser();
+							int returnValue = fc.showSaveDialog(this);
+							if (returnValue == JFileChooser.APPROVE_OPTION) {
+					            file = fc.getSelectedFile();
+					            lib.setPath(file.getAbsolutePath());
+							} else {
+								return false;
+							}
+						} else {
+							file = new File(lib.getPath());
+						}
 						// adjust all chords in library to the current state of left list of chords!
 						// add new, remove old, modify existing - the easiest is just copy everything
 						// to the library again
@@ -606,15 +663,14 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 			            }
 						lib.setChords(list);
 						
-						// save to existing file
-						XMLChordSaver saver = new XMLChordSaver();
-						saver.save(lib, new File(lib.getPath()));
+						saver.save(lib, file);
 						
 						// mark and save recent
 						mng.setChosenLibrary(libraryName);
 			            unsavedChords = false;
 			            lib.setChanged(unsavedChords);
-			            return;
+			            listLibraries.repaint();
+			            return true;
 					}
 				} else if (ChordManager.DEFAULT_ROBOTAR.equals(libraryName)) {
 					// user tries to save modified 'robotar' library
@@ -622,7 +678,7 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 							messages.getString("robotar.chords.dont_change_robotar_chords"),
 							messages.getString("robotar.chords.dont_change_robotar_chords.title"),
 		        		    JOptionPane.ERROR_MESSAGE);
-					return;
+					return false;
 				}
 			}
 		}
@@ -648,12 +704,13 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
             		    "Could not load currently saved file. See log console.",
             		    "Chord library validation loading",
             		    JOptionPane.ERROR_MESSAGE);
-            	return;
+            	return true; // ? it is saved, but cannot be loaded
             }
             mng.setChosenLibrary(libName);
             unsavedChords = false;
+            return true;
 		}
-		
+		return false;
 	}
 
 	protected void loadChords() throws FileNotFoundException {
@@ -690,7 +747,9 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 		for (Map.Entry<String, ChordLibrary> entry : libs.entrySet()) {
 			libraryListModel.addElement(entry.getValue());
 		}
-		Collections.sort((List<ChordLibrary>)Collections.list(libraryListModel.elements()));
+		if (!libraryListModel.isEmpty()) {
+			Collections.sort((List<ChordLibrary>)Collections.list(libraryListModel.elements()));
+		}
 		listLibraries.setModel(libraryListModel);
 	}
 	
@@ -786,6 +845,7 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 			clearSelection();
 			unsavedChords = true;
 			mainFrame.getChordManager().findByName(libName).setChanged(true);
+			listLibraries.repaint();
 			// update SVGimage in SVGCache
 			createSVG(chord);
 		} else {

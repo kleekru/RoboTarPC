@@ -71,8 +71,6 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 				radio.addActionListener(this);
 				//radio.setSize(20, 20);
 				add(radio, gbc_radio);
-				System.out.println(radio.getSize());
-				System.out.println(radio.getBackground());
 				radioButtons[row][s] = radio;
 				btnGrps[s].add(radio);
 				gbc_radio.gridx++;
@@ -380,5 +378,4 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		chordsPage.prepareServoValues();*/
 	}
 
-		
 }

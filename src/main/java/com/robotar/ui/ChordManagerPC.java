@@ -1,6 +1,9 @@
 package com.robotar.ui;
 
+import java.util.List;
+
 import cz.versarius.xchords.ChordManager;
+
 import com.robotar.util.RoboTarPreferences;
 
 /** 
@@ -11,8 +14,13 @@ public class ChordManagerPC extends ChordManager {
 	
 	/** Save content of chord manager to preferences. */
 	public void saveToPreferences() {
-		preferences.setLibraries(getLibrariesList(getChordLibraries().values()));
-		preferences.setChosenLibrary(getChosenLibrary());
+		List<String> list = getLibrariesList(getChordLibraries().values());
+		preferences.setLibraries(list);
+		if (!list.isEmpty()) { // TODO should check name/path - this is wrong
+			preferences.setChosenLibrary(getChosenLibrary());
+		} else {
+			preferences.setChosenLibrary("robotar");
+		}
 	}
 	
 	/**
