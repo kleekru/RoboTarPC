@@ -838,7 +838,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				} else {
 					for (int j = lastLineIdx; j >= 0; j--) {
 						Line line = part.getLines().get(j);
-						if (line.getChords() == null) {
+						if (!line.hasAnyChords() && !line.hasAnyText()) {
 							part.getLines().remove(j);
 						}
 					}
