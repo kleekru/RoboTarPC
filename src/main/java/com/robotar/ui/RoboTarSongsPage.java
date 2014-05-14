@@ -769,7 +769,12 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			posBehindLastChord = last.getOffset() + chordNameLength; // + 1;
 		}
 		textPane.setCaretPosition(posBehindLastChord);
-		placeMarker(posBehindLastChord + 1, (last != null));
+		
+		if (last == null && actualSong.getLine(0).hasAnyText()) {
+			placeMarkerNewline(posBehindLastChord + 1);
+		} else {
+			placeMarker(posBehindLastChord + 1, (last != null));
+		}
 		textPane.requestFocusInWindow();
 		if (!actualSong.isChanged()) {
 			actualSong.setChanged(true);
@@ -1724,7 +1729,6 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("left action");
 			if (!editing) {
 				return;
 			}
@@ -1741,7 +1745,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					StyledDocument doc = textPane.getStyledDocument();
 					int position = doc.getLength();
 					if (marker.getPosition() != position) {
-						return;
+						//return;
 					}
 				}
 				PositionHint lineHint = hints.findLineAt(marker.getPosition());
@@ -1788,7 +1792,15 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 						scrollTo(ensurePrevTextLineVisible);
 					}
 				} else {
-					// we are at the beginning, nothing to do. (or beep sound)
+					// we are at the place of first chord, there may be lines
+					// without chords above
+					if (lastChordHint.getLine() != 0) {
+						// there are rows of text without chords
+						int lineWithoutChords = hints.getPrevLineOffset(lastChordHint, 0);
+						placeMarkerNewline(lineWithoutChords);
+						scrollTo(lineWithoutChords);
+						chordList.setSelectedIndex(0);
+					}
 				}
 			}
 		}
@@ -1811,9 +1823,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					//return;
 				//}
 				// the same condition as above
-				if (hints.getChords().size() == 0) {
+				/*if (hints.getChords().size() == 0) {
 					return;
-				}
+				}*/
 				// we are either at the end of line with chords or at empty line
 				// check if next line exists, if so, remove marker. if not, stay where you are
 				PositionHint lineHint = hints.findLineAt(marker.getPosition());
