@@ -127,6 +127,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 	private JPanel songPanel;
 	private JEditorPane helpPane;
 	private Marker marker;
+	private String SPACES = "     ";
 	
 	/**
 	 * Create the frame.
@@ -740,7 +741,14 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		//addNewLineData();
 	}
 	
+	protected void showActualSong() {
+		showSong(actualSong, textPane);
+	}
+	
 	protected void setupEditMode() {
+		if (actualSong == null) {
+			return;
+		}
 		btnEditSong.setText(messages.getString("robotar.songs.done_edit_song"));
 		btnEditSong.setEnabled(true);
 		btnNewSong.setEnabled(false);
@@ -754,14 +762,14 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		//textPane.setEditable(true);
 		editing = true;
 		loadChordsFromSong();
-		int posBehindLastChord = 0;
+		int posBehindLastChord = getTitleLineLength();
 		PositionHint last = hints.getLastChordAtSong();
 		if (last != null) {
 			int chordNameLength = Chord.getChordName(last.getChordRef().getChordId()).length();
-			posBehindLastChord = last.getOffset() + chordNameLength + 1;
+			posBehindLastChord = last.getOffset() + chordNameLength; // + 1;
 		}
 		textPane.setCaretPosition(posBehindLastChord);
-		placeMarker(posBehindLastChord, (last != null));
+		placeMarker(posBehindLastChord + 1, (last != null));
 		textPane.requestFocusInWindow();
 		if (!actualSong.isChanged()) {
 			actualSong.setChanged(true);
@@ -784,6 +792,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		btnAddChord.setText(messages.getString("robotar.songs.add_chord"));
 		btnNewLine.setEnabled(marker.isDisplayed());
 		btnNewVerse.setEnabled(marker.isDisplayed());
+	}
+	
+	protected Marker getMarker() {
+		return marker;
 	}
 	
 	/**
@@ -1022,32 +1034,35 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		dialog.setVisible(true);
 		
 		if (dialog.isPressedOK()) {
-			Song song = new Song();
-			song.setTitle(dialog.getTitleText());
-			song.setInterpret(dialog.getInterepretText());
-			song.setInfo(dialog.getInfoText());
-			
-			// first part and line - empty, must be there to behave correctly, if empty, they will be removed at the end
-			Part firstPart = new Verse();
-			song.getParts().add(firstPart);
-			List<Line> lines = new ArrayList<Line>();
-			firstPart.setLines(lines);
-			List<ChordRef> chordrefs = new ArrayList<ChordRef>();
-			Line line = new Line();
-			line.setChords(chordrefs);
-			lines.add(line);
-			
-			initSongModel();
-			// will fire refreshing of textpane twice... :/
-			songListModel.add(0, song);
-			actualSong = (Song)songListModel.firstElement();
+			createNewSong(dialog.getTitleText(), dialog.getInterepretText(), dialog.getInfoText());
 			songList.setSelectedIndex(0);
-			
 			// put into edit mode
 			setupEditMode();
 		}
 	}
 
+	protected void createNewSong(String title, String interpret, String info) {
+		Song song = new Song();
+		song.setTitle(title);
+		song.setInterpret(interpret);
+		song.setInfo(info);
+		
+		// first part and line - empty, must be there to behave correctly, if empty, they will be removed at the end
+		Part firstPart = new Verse();
+		song.getParts().add(firstPart);
+		List<Line> lines = new ArrayList<Line>();
+		firstPart.setLines(lines);
+		List<ChordRef> chordrefs = new ArrayList<ChordRef>();
+		Line line = new Line();
+		line.setChords(chordrefs);
+		lines.add(line);
+		
+		initSongModel();
+		// will fire refreshing of textpane twice... :/
+		songListModel.add(0, song);
+		actualSong = (Song)songListModel.firstElement();
+	}
+	
 	private String generateSongName() {
 		String name = messages.getString("robotar.songs.default_song_title") + " " + counter;
 		counter++;
@@ -1387,6 +1402,11 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			e.printStackTrace();
 		}
 	}
+	
+	public int getTitleLineLength() {
+		return actualSong.getTitle().length() + SPACES.length() + actualSong.getInterpret().length() + 1;
+	}
+	
 	/**
 	 * Prepare song for display
 	 * @param song
@@ -1405,7 +1425,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			doc.remove(0, doc.getLength());
 			
 			// title and interpret line
-			doc.insertString(0, song.getTitle() + "     " + song.getInterpret() + "\n", titleStyle);
+			doc.insertString(0, song.getTitle() + SPACES + song.getInterpret() + "\n", titleStyle);
 			int lengthSoFar = doc.getLength();
 			// process parts
 			int lineNum = 0;
@@ -1416,7 +1436,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 					if (!line.hasAnyChords()) {
 						if (line.getText() == null) {
 							// totally empty line
-							continue;
+							//continue;
 						}
 					} else {
 						// put chords above the text
@@ -1447,10 +1467,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			String str = doc.getText(actLength - 5, 5);
 			LOG.info(""+str.length());
 			LOG.info("'" + doc.getText(actLength - 5, 5) + "'");
-			if (actLength != lengthSoFar) {
+			/*if (actLength != lengthSoFar) {
 				// remove last trailing \n
 				doc.remove(actLength - 1, 1);
-			}
+			}*/
 			// scroll to top
 			//scrollTo(0); 
 		} catch (BadLocationException e1) {
@@ -1484,7 +1504,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			doc.remove(0, doc.getLength());
 			
 			// title and interpret line
-			doc.insertString(0, song.getTitle() + "     " + song.getInterpret() + "\n", titleStyle);
+			doc.insertString(0, song.getTitle() + SPACES + song.getInterpret() + "\n", titleStyle);
 			
 			// process parts
 			int lineNum = 0;

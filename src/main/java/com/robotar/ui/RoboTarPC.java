@@ -65,9 +65,9 @@ import org.slf4j.LoggerFactory;
 import com.robotar.ioio.LEDSettings;
 import com.robotar.ioio.Pins;
 import com.robotar.ioio.ServoSettings;
+import com.robotar.ui.Const;
 import com.robotar.util.RoboTarPreferences;
 
-import java.awt.Point;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
