@@ -180,7 +180,10 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 		gbc_btnNewLibrary.gridx = 0;
 		gbc_btnNewLibrary.gridy = 1;
 		frmBlueAhuizoteChords.add(btnNewLibrary, gbc_btnNewLibrary);
-		btnNewLibrary.setBackground(new Color(0, 0, 128));
+		//btnNewLibrary.setBackground(Color.BLUE); //new Color(0, 0, 128));
+		//btnNewLibrary.setOpaque(true);
+		//btnNewLibrary.setBorderPainted(false);
+		//btnNewLibrary.setForeground(Color.WHITE);
 		btnNewLibrary.setMargin(new Insets(2, 1, 2, 1));
 		btnNewLibrary.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -195,7 +198,7 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 		gbc_btnNewChord.gridx = 2;
 		gbc_btnNewChord.gridy = 1;
 		frmBlueAhuizoteChords.add(btnNewChord, gbc_btnNewChord);
-		btnNewChord.setBackground(new Color(0, 0, 128));
+		//btnNewChord.setBackground(new Color(0, 0, 128));
 		btnNewChord.setMargin(new Insets(2, 1, 2, 1));
 		btnNewChord.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
