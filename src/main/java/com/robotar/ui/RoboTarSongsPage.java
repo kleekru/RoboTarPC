@@ -2118,7 +2118,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				scrollTo(pos);
 			} else {
 				// create editing marker again
-				if (marker.isNewline()) {
+				if (!line.hasAnyChords()) {
 					// empty line (no chords)
 					PositionHint lineHint = hints.getLines().get(lineIdx);
 					placeMarkerNewline(lineHint.getOffset());
