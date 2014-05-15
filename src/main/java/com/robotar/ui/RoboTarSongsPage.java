@@ -2071,8 +2071,11 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				PositionHint newHint = hints.findChordBefore(other.getOffset()+1);
 				hints.setLastSelectedChord(newHint);
 				markCurrentEditedChord(newHint);
+			} else {
+				// show * at empty line
+				PositionHint lineHint = hints.getLineHint(hint);
+				placeMarkerNewline(lineHint.getOffset());
 			}
-			scrollTo(point);
 		}
 	}
 
