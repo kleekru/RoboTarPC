@@ -2105,7 +2105,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		Line line = actualSong.getLine(lineIdx);
 		String inputText = JOptionPane.showInputDialog(messages.getString("robotar.songs.enter_line_text"), line.getText());
 		// if pressed Cancel, inputText is set to null
-		if (inputText != null && !"".equals(inputText.trim())) {
+		if (inputText != null) {
 			line.setText(inputText);
 			PositionHint hint = hints.getLastSelectedChordHint();
 			// recreate and redisplay song
