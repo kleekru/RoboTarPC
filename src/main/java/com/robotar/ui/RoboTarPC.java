@@ -67,6 +67,9 @@ import org.slf4j.LoggerFactory;
 import com.robotar.ioio.LEDSettings;
 import com.robotar.ioio.Pins;
 import com.robotar.ioio.ServoSettings;
+import com.robotar.ioio.showcase.FlashPattern;
+import com.robotar.ioio.showcase.ShowcasePatterns;
+import com.robotar.ioio.showcase.StringsPattern;
 import com.robotar.ui.Const;
 import com.robotar.util.RoboTarPreferences;
 
@@ -114,6 +117,8 @@ public class RoboTarPC extends IOIOSwingApp {
 	private RoboTarPreferences preferences = RoboTarPreferences.load();
 
 	protected boolean showChecked;
+
+	protected ShowcasePatterns patterns;
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
@@ -368,6 +373,9 @@ public class RoboTarPC extends IOIOSwingApp {
 			public void actionPerformed(ActionEvent e) {
 				showChecked = !showChecked;
 				mntmShow.setSelected(showChecked);
+				if (patterns != null && !showChecked) {
+					patterns.quit();
+				}
 			}
 		});
 		JMenu mnLang = new JMenu(messages.getString("robotar.menu.lang_sel"));
@@ -721,12 +729,17 @@ public class RoboTarPC extends IOIOSwingApp {
 			}
 			
 			private void runDemo() throws ConnectionLostException, InterruptedException {
+				patterns = new ShowcasePatterns(fretLEDs);
+				patterns.add(new FlashPattern());
+				patterns.add(new StringsPattern());
 				// endless cycle, until unchecked in menu
 				while (showChecked) {
 					// pick one pattern
-					int n = r.nextInt(2);
+					//int n = r.nextInt(2);
 					// play it
-					play(RoboTarPC.this, n);
+					//play(RoboTarPC.this, n);
+					int n = patterns.getRandomPatternIdx();
+					patterns.play(n);
 				}
 			}
 
