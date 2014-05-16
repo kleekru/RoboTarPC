@@ -850,10 +850,10 @@ public class RoboTarPC extends IOIOSwingApp {
 						Thread.sleep(200);
 						fretLEDs[i][j].write(false);
 						j++;
-						if (j > 5) {
+						if (j > 3) {
 							i++;
 							j = 0;
-							if (i > 3) {
+							if (i > 5) {
 								i = 0;
 								loop++;
 							}
