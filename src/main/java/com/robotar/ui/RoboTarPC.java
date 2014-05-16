@@ -730,8 +730,7 @@ public class RoboTarPC extends IOIOSwingApp {
 			
 			private void runDemo() throws ConnectionLostException, InterruptedException {
 				patterns = new ShowcasePatterns(fretLEDs);
-				patterns.add(new FlashPattern());
-				patterns.add(new StringsPattern());
+				patterns.initAll();
 				// endless cycle, until unchecked in menu
 				while (showChecked) {
 					// pick one pattern
