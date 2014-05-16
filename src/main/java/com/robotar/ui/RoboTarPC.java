@@ -47,6 +47,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JMenu;
@@ -55,6 +56,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import net.infotrek.util.prefs.FilePreferencesFactory;
@@ -70,6 +72,7 @@ import com.robotar.util.RoboTarPreferences;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.prefs.BackingStoreException;
 
@@ -109,6 +112,8 @@ public class RoboTarPC extends IOIOSwingApp {
 
 	/** per user preferences */
 	private RoboTarPreferences preferences = RoboTarPreferences.load();
+
+	protected boolean showChecked;
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
@@ -234,6 +239,12 @@ public class RoboTarPC extends IOIOSwingApp {
 	 * @throws BackingStoreException 
 	 */
 	public void initialize() throws BackingStoreException {
+		 /*try {
+		    UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
+		 } catch (Exception e) {
+		            e.printStackTrace();
+		 }*/
+	 
 		getChordManager();
 		servoSettings = ServoSettings.loadCorrectionsFrom(new File(preferences.getCorrectionsFile()), ROBOTAR_FOLDER);
 		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH);
@@ -350,6 +361,15 @@ public class RoboTarPC extends IOIOSwingApp {
 		mntmSongDownloads.setEnabled(false);
 		mnUtilities.add(mntmSongDownloads);
 		
+		final JCheckBoxMenuItem mntmShow = new JCheckBoxMenuItem(messages.getString("robotar.menu.show"));
+		mnUtilities.add(mntmShow);
+		mntmShow.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showChecked = !showChecked;
+				mntmShow.setSelected(showChecked);
+			}
+		});
 		JMenu mnLang = new JMenu(messages.getString("robotar.menu.lang_sel"));
 		menuBar.add(mnLang);
 		
@@ -545,6 +565,7 @@ public class RoboTarPC extends IOIOSwingApp {
 			private DigitalOutput[] fretLEDsTurnedOn = new DigitalOutput[6];
 			
 			private boolean lastKnownPedalPosition = true;
+			private Random r = new Random();
 			
 			@Override
 			protected void setup() throws ConnectionLostException,
@@ -604,6 +625,10 @@ public class RoboTarPC extends IOIOSwingApp {
 				//LOG.info("Start of the loop method");
 				stateLED.write(!stateLedOn);
 
+				if (showChecked) {
+					runDemo();
+					return;
+				}
 				// initial position
 				// high = true, low = false
 				boolean pedalInHighPosition = pedalButton.read();
@@ -695,6 +720,16 @@ public class RoboTarPC extends IOIOSwingApp {
 				
 			}
 			
+			private void runDemo() throws ConnectionLostException, InterruptedException {
+				// endless cycle, until unchecked in menu
+				while (showChecked) {
+					// pick one pattern
+					int n = r.nextInt(2);
+					// play it
+					play(RoboTarPC.this, n);
+				}
+			}
+
 			/**
 			 * Reset all servos to neutral position.
 			 * 
@@ -717,6 +752,14 @@ public class RoboTarPC extends IOIOSwingApp {
 						fretLEDs[i][j].write(false);
 					}
 					fretLEDsTurnedOn[i] = null;
+				}
+			}
+			
+			private void turnOnFretLEDs() throws ConnectionLostException {
+				for (int i = 0; i < 6; i++) {
+					for (int j = 0; j < 4; j++) {
+						fretLEDs[i][j].write(true);
+					}
 				}
 			}
 			
@@ -780,6 +823,45 @@ public class RoboTarPC extends IOIOSwingApp {
 			@Override
 			public void incompatible() {
 				LOG.info("Incompatible firmware version of IOIO");
+			}
+			
+			private void play(RoboTarPC frame, int pattern) throws ConnectionLostException, InterruptedException {
+				if (pattern == 0) {
+					// shine all
+					boolean b = true;
+					int loop = 0;
+					while (frame.showChecked && loop < 3) {
+						if (b) {
+							turnOnFretLEDs();
+						} else {
+							turnOffFretLEDs();
+							loop++;
+						}
+						b = !b;
+						Thread.sleep(1000);
+					}
+				} else if (pattern == 1) {
+					// one after another
+					int i = 0;
+					int j = 0;
+					int loop = 0;
+					while (frame.showChecked && loop < 3) {
+						fretLEDs[i][j].write(true);
+						Thread.sleep(200);
+						fretLEDs[i][j].write(false);
+						j++;
+						if (j > 5) {
+							i++;
+							j = 0;
+							if (i > 3) {
+								i = 0;
+								loop++;
+							}
+						}
+					}
+				} else {
+					/// TODO other patterns....
+				}
 			}
 		};
 	}
