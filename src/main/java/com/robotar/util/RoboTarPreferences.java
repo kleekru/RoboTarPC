@@ -51,6 +51,10 @@ public class RoboTarPreferences {
 	/** recent song list */
 	private List<String> songs = new ArrayList<String>();
 	
+	/** Max inactivity time (in seconds) */
+	private int maxInactivity;
+	private static final int MAX_MAX_INACTIVITY = 180;
+	
 	// keys in preferences file 
 	private static final String CORRECTIONS_FILE = "correctionsFile";
 	private static final String MAIN_SIZE = "mainSize";
@@ -62,6 +66,7 @@ public class RoboTarPreferences {
 	private static final String MARKED_CHORD_SIZE = "markedChordSize";
 	private static final String MARKED_COLOR = "markedColor";
 	private static final String MARKED_SIZE = "markedSize";
+	private static final String MAX_INACTIVITY = "maxInactivity";
 	
 	/**
 	 * Loads and saves preferences.
@@ -75,6 +80,11 @@ public class RoboTarPreferences {
 		markedChordSize = p.getInt(MARKED_CHORD_SIZE, 16);
 		markedChordColor = decodeColor(p, MARKED_CHORD_COLOR, "0x0000ff");
 		editMarkedChordColor = decodeColor(p, EDIT_MARKED_CHORD_COLOR, "0x00ff00");
+		// max inactivity - check against the physical limit of 180sec
+		maxInactivity = p.getInt(MAX_INACTIVITY, MAX_MAX_INACTIVITY);
+		if (maxInactivity <= 0 || maxInactivity > MAX_MAX_INACTIVITY) {
+			maxInactivity = MAX_MAX_INACTIVITY;
+		}
 		// recent chord files - generally only 1 is visible in chords page
 		chosenLibrary = p.get(CHOSEN_LIBRARY, ChordManager.DEFAULT_ROBOTAR); //?
 		int i = 2;
@@ -145,6 +155,7 @@ public class RoboTarPreferences {
 		p.put(MARKED_CHORD_COLOR, encodeColor(getMarkedChordColor()));
 		p.put(MARKED_CHORD_SIZE, Integer.toString(getMarkedChordSize(), 10));
 		p.put(EDIT_MARKED_CHORD_COLOR, encodeColor(getEditMarkedChordColor()));
+		p.put(MAX_INACTIVITY, Integer.toString(getMaxInactivity(), 10));
 		// recent chord files - generally only 1 is visible in chords page
 		p.put(CHOSEN_LIBRARY, chosenLibrary);
 		int i = 1;
@@ -196,6 +207,10 @@ public class RoboTarPreferences {
 		return markedChordSize;
 	}
 
+	public int getMaxInactivity() {
+		return maxInactivity;
+	}
+	
 	public List<String> getLibraries() {
 		return libraries;
 	}
@@ -227,5 +242,5 @@ public class RoboTarPreferences {
 	public void setEditMarkedChordColor(Color editMarkedChordColor) {
 		this.editMarkedChordColor = editMarkedChordColor;
 	}
-
+	
 }

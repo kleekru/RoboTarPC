@@ -77,6 +77,8 @@ import java.io.File;
 import java.util.Locale;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.prefs.BackingStoreException;
 
 /**
@@ -103,6 +105,11 @@ public class RoboTarPC extends IOIOSwingApp {
 	private boolean stateLedOn = false;
 
 	/**
+	 * Burn prevention field. (+
+	 */
+	private boolean recentActivity = false;
+	
+	/**
 	 * This will hold all chord libraries loaded in one instance.
 	 */
 	private ChordManagerPC chordManager = new ChordManagerPC();
@@ -119,6 +126,8 @@ public class RoboTarPC extends IOIOSwingApp {
 	protected boolean showChecked;
 
 	protected ShowcasePatterns patterns;
+
+	private IOIOReconnectAction ioioReconnectAction;
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
@@ -310,6 +319,8 @@ public class RoboTarPC extends IOIOSwingApp {
 		btnSongs.setIcon(new ImageIcon(RoboTarPC.class.getResource("/data/SheetMusic.png")));
 		frmBlueAhuizote.getContentPane().add(btnSongs, BorderLayout.EAST);
 		
+		ioioReconnectAction = new IOIOReconnectAction(messages.getString("robotar.menu.reconnect"), KeyEvent.VK_R);
+		
 		JLabel lblNewLabel_1 = new JLabel("");
 		lblNewLabel_1.setForeground(new Color(30, 144, 255));
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
@@ -347,6 +358,13 @@ public class RoboTarPC extends IOIOSwingApp {
 		
 		JMenuItem mntmSongs = new JMenuItem(startSongsAction);
 		mnLauncher.add(mntmSongs);
+		
+		JMenu mnIOIO = new JMenu(messages.getString("robotar.menu.ioio"));
+		menuBar.add(mnIOIO);
+		
+		JMenuItem mntmReconnect = new JMenuItem(ioioReconnectAction);
+		ioioReconnectAction.setEnabled(false); // until it will be implemented...
+		mnIOIO.add(mntmReconnect);
 		
 		JMenu mnUtilities = new JMenu(messages.getString("robotar.menu.utilities"));
 		menuBar.add(mnUtilities);
@@ -404,6 +422,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		frmBlueAhuizote.pack();
 		frmBlueAhuizote.setLocationByPlatform(true);
 		frmBlueAhuizote.setVisible(true);
+		frmBlueAhuizote.setTitle(messages.getString("robotar.name"));
 		// display warning if device not yet configured!
 		if (!servoSettings.isAnyCorrectionSet()) {
 			JOptionPane.showMessageDialog(frmBlueAhuizote, 
@@ -444,6 +463,21 @@ public class RoboTarPC extends IOIOSwingApp {
 		public void actionPerformed(ActionEvent e) {
 			startSongsPage();
 		}
+	}
+	
+	private class IOIOReconnectAction extends MyAction {
+		public IOIOReconnectAction(String text, int mnemonic) {
+		       super(text, mnemonic);
+		    }
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO ??
+				// call stop first?
+				// helper_.stop() 
+				// does this start new connection or not?
+				helper_.start();
+			}
 	}
 	
 	private class StartHelpPageAction extends MyAction {
@@ -566,6 +600,7 @@ public class RoboTarPC extends IOIOSwingApp {
 			private TwiMaster twi_;
 			
 			private DigitalOutput stateLED;
+			private DigitalOutput activityPIN;
 			private DigitalInput pedalButton;
 			// all the leds
 			private DigitalOutput[][] fretLEDs = new DigitalOutput[6][4];
@@ -573,16 +608,33 @@ public class RoboTarPC extends IOIOSwingApp {
 			private DigitalOutput[] fretLEDsTurnedOn = new DigitalOutput[6];
 			
 			private boolean lastKnownPedalPosition = true;
-			private Random r = new Random();
+			
+			private ReschedulableTimer safetyTimer;
 			
 			@Override
 			protected void setup() throws ConnectionLostException,
 					InterruptedException {
 				LOG.info("IOIO is connected");
+				frmBlueAhuizote.setTitle(messages.getString("robotar.ioio.connected"));
+				ioioReconnectAction.setEnabled(false);
 				
 				// on-board pin
 				stateLED = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
 
+				// activity pin
+				activityPIN = ioio_.openDigitalOutput(Pins.ACTIVITY_PIN, true);
+				safetyTimer = new ReschedulableTimer();
+				safetyTimer.schedule(new Runnable() {
+					public void run() {
+						// set the activityPIN to false after max inactivity limit is reached
+						try {
+							activityPIN.write(false);
+						} catch (ConnectionLostException e) {
+							LOG.error("can not write false to activity PIN!", e);
+						}
+					}
+				}, preferences.getMaxInactivity() * 1000); // in milliseconds
+				
 				// pedal input setup
 				pedalButton = ioio_.openDigitalInput(Pins.PEDAL_PIN, DigitalInput.Spec.Mode.PULL_UP);
 				
@@ -704,40 +756,31 @@ public class RoboTarPC extends IOIOSwingApp {
 					stateLedOn = false;
 					// reset servos
 					resetAll();
-					
+					// user made some activity! reschedule max inactivity action
+					if (servoSettings.isAnyCorrectionSet()) {
+						LOG.debug("rescheduling the timer");
+						safetyTimer.reschedule(preferences.getMaxInactivity() * 1000); // in milliseconds
+					}
 				} 
 
 				// save current status of the pedal
 				lastKnownPedalPosition = pedalInHighPosition;
 				
-				/*
-				 //TODO what is this?
-				//PWM Range below is 0.0. to 1.5.  Cycle through each servo channel.
-				for (int c=0; c<16; c++) {
-					for (float p = 1.5f; p>0.0; p-=0.5f) {
-						Thread.sleep(200);
-						setServo(c, p);
-						led_.write(ledOn_);
-					}
-				
-					for (float p=0.0f; p<1.5f; p+=0.5f) {
-						Thread.sleep(200);
-						setServo(c, p);
-					}
-				}*/
-				
 			}
 			
+			/**
+			 * Showcase demo
+			 * @throws ConnectionLostException
+			 * @throws InterruptedException
+			 */
 			private void runDemo() throws ConnectionLostException, InterruptedException {
 				patterns = new ShowcasePatterns(fretLEDs);
 				patterns.initAll();
 				// endless cycle, until unchecked in menu
 				while (showChecked) {
 					// pick one pattern
-					//int n = r.nextInt(2);
-					// play it
-					//play(RoboTarPC.this, n);
 					int n = patterns.getRandomPatternIdx();
+					// play it
 					patterns.play(n);
 				}
 			}
@@ -830,51 +873,15 @@ public class RoboTarPC extends IOIOSwingApp {
 			@Override
 			public void disconnected() {
 				LOG.info("IOIO disconnected");
+				frmBlueAhuizote.setTitle(messages.getString("robotar.ioio.disconnected"));
+				ioioReconnectAction.setEnabled(true);
 			}
 
 			@Override
 			public void incompatible() {
-				LOG.info("Incompatible firmware version of IOIO");
+				LOG.error("Incompatible firmware version of IOIO");
 			}
 			
-			private void play(RoboTarPC frame, int pattern) throws ConnectionLostException, InterruptedException {
-				if (pattern == 0) {
-					// shine all
-					boolean b = true;
-					int loop = 0;
-					while (frame.showChecked && loop < 3) {
-						if (b) {
-							turnOnFretLEDs();
-						} else {
-							turnOffFretLEDs();
-							loop++;
-						}
-						b = !b;
-						Thread.sleep(1000);
-					}
-				} else if (pattern == 1) {
-					// one after another
-					int i = 0;
-					int j = 0;
-					int loop = 0;
-					while (frame.showChecked && loop < 3) {
-						fretLEDs[i][j].write(true);
-						Thread.sleep(200);
-						fretLEDs[i][j].write(false);
-						j++;
-						if (j > 3) {
-							i++;
-							j = 0;
-							if (i > 5) {
-								i = 0;
-								loop++;
-							}
-						}
-					}
-				} else {
-					/// TODO other patterns....
-				}
-			}
 		};
 	}
 }
