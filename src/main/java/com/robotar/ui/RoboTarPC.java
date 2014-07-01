@@ -759,6 +759,7 @@ public class RoboTarPC extends IOIOSwingApp {
 					// user made some activity! reschedule max inactivity action
 					if (servoSettings.isAnyCorrectionSet()) {
 						LOG.debug("rescheduling the timer");
+						activityPIN.write(true);
 						safetyTimer.reschedule(preferences.getMaxInactivity() * 1000); // in milliseconds
 					}
 				} 
