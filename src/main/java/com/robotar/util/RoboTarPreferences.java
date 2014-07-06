@@ -53,7 +53,7 @@ public class RoboTarPreferences {
 	
 	/** Max inactivity time (in seconds) */
 	private int maxInactivity;
-	private static final int MAX_MAX_INACTIVITY = 180;
+	private static final int MAX_MAX_INACTIVITY = 120;
 	
 	// keys in preferences file 
 	private static final String CORRECTIONS_FILE = "correctionsFile";
