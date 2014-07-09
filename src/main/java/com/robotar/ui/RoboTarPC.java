@@ -621,6 +621,20 @@ public class RoboTarPC extends IOIOSwingApp {
 				// on-board pin
 				stateLED = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
 
+				// pedal input setup
+				pedalButton = ioio_.openDigitalInput(Pins.PEDAL_PIN, DigitalInput.Spec.Mode.PULL_UP);
+				
+				// fret leds output setup
+				fretLEDs = prepareLEDs(false);
+				
+				// Setup IOIO TWI Pins
+				twi_ = ioio_.openTwiMaster(I2C_PAIR, TwiMaster.Rate.RATE_1MHz, false);
+				
+				reset();
+				
+				// set servos in neutral position after connection is established
+				resetAll();
+				
 				// activity pin
 				activityPIN = ioio_.openDigitalOutput(Pins.ACTIVITY_PIN, true);
 				safetyTimer = new ReschedulableTimer();
@@ -637,17 +651,6 @@ public class RoboTarPC extends IOIOSwingApp {
 						}
 					}
 				}, preferences.getMaxInactivity() * 1000); // in milliseconds
-				
-				// pedal input setup
-				pedalButton = ioio_.openDigitalInput(Pins.PEDAL_PIN, DigitalInput.Spec.Mode.PULL_UP);
-				
-				// fret leds output setup
-				fretLEDs = prepareLEDs(false);
-				
-				// Setup IOIO TWI Pins
-				twi_ = ioio_.openTwiMaster(I2C_PAIR, TwiMaster.Rate.RATE_1MHz, false);
-				
-				reset();
 			}
 
 			private DigitalOutput[][] prepareLEDs(boolean startValue) throws ConnectionLostException {
