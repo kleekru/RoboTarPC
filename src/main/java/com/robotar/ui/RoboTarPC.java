@@ -628,9 +628,12 @@ public class RoboTarPC extends IOIOSwingApp {
 					public void run() {
 						// set the activityPIN to false after max inactivity limit is reached
 						try {
+							resetAll();
 							activityPIN.write(false);
 						} catch (ConnectionLostException e) {
-							LOG.error("can not write false to activity PIN!", e);
+							LOG.error("timer. can not reset servos/write false to activity PIN!", e);
+						} catch (InterruptedException e) {
+							LOG.error("timer. can not reset servos!", e);
 						}
 					}
 				}, preferences.getMaxInactivity() * 1000); // in milliseconds
@@ -715,10 +718,18 @@ public class RoboTarPC extends IOIOSwingApp {
 						if (RoboTarPC.this.getSongsPage() == null) {
 							LOG.debug("informative - there is no songs page");
 						}
+						
 						if (RoboTarPC.this.getServoSettings() == null) {
 							// this should not happen, servo settings are initialized to neutral positions in the constructor
 							LOG.warn("There is no chord chosen!");
 						} else {
+							// user made some activity! reschedule max inactivity action
+							if (RoboTarPC.this.servoSettings.isAnyCorrectionSet()) {
+								LOG.debug("rescheduling the timer");
+								activityPIN.write(true);
+								safetyTimer.reschedule(preferences.getMaxInactivity() * 1000); // in milliseconds
+							}
+							
 							// if songs page exists and we already play the song, play next chord
 							if (RoboTarPC.this.getSongsPage() != null && RoboTarPC.this.getSongsPage().isPlaying()) {
 								RoboTarPC.this.getSongsPage().simPedalPressed();
@@ -756,12 +767,6 @@ public class RoboTarPC extends IOIOSwingApp {
 					stateLedOn = false;
 					// reset servos
 					resetAll();
-					// user made some activity! reschedule max inactivity action
-					if (servoSettings.isAnyCorrectionSet()) {
-						LOG.debug("rescheduling the timer");
-						activityPIN.write(true);
-						safetyTimer.reschedule(preferences.getMaxInactivity() * 1000); // in milliseconds
-					}
 				} 
 
 				// save current status of the pedal

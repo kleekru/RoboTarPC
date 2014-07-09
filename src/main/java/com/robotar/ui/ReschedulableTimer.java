@@ -3,7 +3,7 @@ package com.robotar.ui;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class ReschedulableTimer extends Timer {
+public class ReschedulableTimer extends Timer {
 	private Runnable task;
 	private TimerTask timerTask;
 
