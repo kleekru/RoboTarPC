@@ -301,7 +301,7 @@ public class RoboTarPC extends IOIOSwingApp {
 			
 			int localMajor = 0;
 			int localMinor = 3;
-			int localPatch = 0;
+			int localPatch = 2;
 			LOG.info("local version: {}.{}.{}", localMajor, localMinor, localPatch);
 			
 			if (remoteMajor < localMajor) {
