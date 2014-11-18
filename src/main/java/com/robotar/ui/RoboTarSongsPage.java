@@ -949,17 +949,23 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 
 	protected void addNewVerseToSong() {
 		PositionHint lineHint = hints.findLineAt(marker.getPosition());
-		actualSong.insertPartAfter(lineHint.getLine(), PartType.VERSE);
+		boolean shouldCreateMarker = actualSong.insertPartAfter(lineHint.getLine(), PartType.VERSE);
 		
 		// have to recount everything with new line
 		reshowSong(actualSong, textPane, hints);
-		// create *
-		PositionHint nextLineHint = hints.getNextLineHint(lineHint);
-		marker.placeNewline(textPane.getStyledDocument(), nextLineHint.getOffset());
-		int ensureTextLineVisible = marker.getPosition() + 2;
-		chordList.setSelectedIndex(0);
-		scrollTo(ensureTextLineVisible);
-		
+		if (shouldCreateMarker) {
+			// create *
+			PositionHint nextLineHint = hints.getNextLineHint(lineHint);
+			marker.placeNewline(textPane.getStyledDocument(), nextLineHint.getOffset());
+			int ensureTextLineVisible = marker.getPosition() + 2;
+			chordList.setSelectedIndex(0);
+			scrollTo(ensureTextLineVisible);
+		} else {
+			// highlight first chord in new part
+			PositionHint newHint = hints.findChordBefore(lineHint.getOffset()+1);
+			hints.setLastSelectedChord(newHint);
+			markCurrentEditedChord(newHint);
+		}
 	}
 
 	/**
