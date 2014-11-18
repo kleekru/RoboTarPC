@@ -227,7 +227,7 @@ public class CorrectionsDialog extends JDialog {
 		gbc_lbl.insets = new Insets(0, 0, 5, 5);
 		gbc_lbl.gridx = i;
 		gbc_lbl.gridy = j;
-		getContentPane().add(lblServo, gbc_lbl);
+		contentPane.add(lblServo, gbc_lbl);
 	}
 
 
