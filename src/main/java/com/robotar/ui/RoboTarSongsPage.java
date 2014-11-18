@@ -1925,7 +1925,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				return;
 			} 
 			
-			PositionHint hint = hints.getLastSelectedChordHint();
+ 			PositionHint hint = hints.getLastSelectedChordHint();
 			PositionHint nextHint = hints.nextChordOnLine(hint);
 			int max = 0; 
 			if (nextHint == null) {
@@ -1942,6 +1942,10 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				PositionHint newHint = hints.findChordBefore(hint.getOffset()+2);
 				hints.setLastSelectedChord(newHint);
 				markCurrentEditedChord(newHint);
+				// scroll (otherwise caret is at the end of song)
+				int ensureTextLineVisible = hints.getNextLineOffset(newHint, textPane.getStyledDocument().getLength());
+				scrollTo(ensureTextLineVisible);
+				
 			}
 		}
 	}
@@ -1976,6 +1980,9 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 				PositionHint newHint = hints.findChordBefore(hint.getOffset());
 				hints.setLastSelectedChord(newHint);
 				markCurrentEditedChord(newHint);
+				// scroll (otherwise caret is at the end of song)
+				int ensureTextLineVisible = hints.getNextLineOffset(newHint, textPane.getStyledDocument().getLength());
+				scrollTo(ensureTextLineVisible);
 			}
 		}
 	}
