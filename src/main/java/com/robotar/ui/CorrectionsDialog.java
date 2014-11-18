@@ -10,6 +10,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -78,9 +79,9 @@ public class CorrectionsDialog extends JDialog {
 		    }
 		});
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] {80, 80, 80, 80, 80, 20};
+		gridBagLayout.columnWidths = new int[] {80, 80, 80, 80, 80, 80, 80, 20};
 		gridBagLayout.rowHeights = new int[]{23, 0, 0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		getContentPane().setLayout(gridBagLayout);
 
@@ -114,7 +115,7 @@ public class CorrectionsDialog extends JDialog {
 		GridBagConstraints gbc_btnLoadButton = new GridBagConstraints();
 		gbc_btnLoadButton.gridwidth = 2;
 		gbc_btnLoadButton.insets = new Insets(0, 0, 5, 5);
-		gbc_btnLoadButton.gridx = 1;
+		gbc_btnLoadButton.gridx = 3;
 		gbc_btnLoadButton.gridy = 0;
 		getContentPane().add(btnLoadCorrections, gbc_btnLoadButton);
 		
@@ -128,19 +129,31 @@ public class CorrectionsDialog extends JDialog {
 		GridBagConstraints gbc_btnSaveButton = new GridBagConstraints();
 		gbc_btnSaveButton.gridwidth = 2;
 		gbc_btnSaveButton.insets = new Insets(0, 0, 5, 5);
-		gbc_btnSaveButton.gridx = 3;
+		gbc_btnSaveButton.gridx = 5;
 		gbc_btnSaveButton.gridy = 0;
 		getContentPane().add(btnSaveCorrections, gbc_btnSaveButton);
 
-		// labels
-		String prefix = messages.getString("robotar.corrections.servo") + " ";
-		for (int i=0; i<12; i++) {
-			JLabel lblServo = new JLabel(prefix + i);
-			GridBagConstraints gbc_lblServo = new GridBagConstraints();
-			gbc_lblServo.insets = new Insets(0, 0, 5, 5);
-			gbc_lblServo.gridx = 0;
-			gbc_lblServo.gridy = i+1;
-			getContentPane().add(lblServo, gbc_lblServo);
+		// horizontal labels
+		createLabel(0, 1, messages.getString("robotar.corrections.string"), getContentPane());
+		createLabel(1, 1, messages.getString("robotar.corrections.frets"), getContentPane());
+		createLabel(2, 1, messages.getString("robotar.corrections.servo"), getContentPane());
+		createLabel(3, 1, messages.getString("robotar.corrections.open"), getContentPane());
+		createLabel(4, 1, messages.getString("robotar.corrections.mute"), getContentPane());
+		createLabel(5, 1, messages.getString("robotar.corrections.left"), getContentPane());
+		createLabel(6, 1, messages.getString("robotar.corrections.right"), getContentPane());
+		
+		// vertical labels
+		// labels for strings
+		for (int i = 12; i>0; i--) {
+			createLabel(0, 12-i+2, ""+(i+1)/2, getContentPane());
+		}
+		// labels for frets
+		for (int i = 0; i<12; i++) {
+			createLabel(1, i+2, ((i%2)==0 ? "1-2" : "3-4"), getContentPane());
+		}
+		// labels for servos
+		for (int i = 0; i<12; i++) {
+			createLabel(2, i+2, ""+i, getContentPane());
 		}
 		
 		// servo settings
@@ -154,8 +167,8 @@ public class CorrectionsDialog extends JDialog {
 				GridBagConstraints gbc_spinner = new GridBagConstraints();
 				gbc_spinner.fill = GridBagConstraints.HORIZONTAL;
 				gbc_spinner.insets = new Insets(0, 0, 5, 0);
-				gbc_spinner.gridx = j+1;
-				gbc_spinner.gridy = i+1;
+				gbc_spinner.gridx = j+3;
+				gbc_spinner.gridy = i+2;
 				installFocusListener(spinner);
 				getContentPane().add(spinner, gbc_spinner);
 				spinners[i][j] = spinner;
@@ -196,8 +209,8 @@ public class CorrectionsDialog extends JDialog {
 		GridBagConstraints gbc_lblRange = new GridBagConstraints();
 		gbc_lblRange.insets = new Insets(0, 0, 5, 5);
 		gbc_lblRange.gridwidth = 4;
-		gbc_lblRange.gridx = 1;
-		gbc_lblRange.gridy = 14;
+		gbc_lblRange.gridx = 3;
+		gbc_lblRange.gridy = 15;
 		getContentPane().add(lblRange, gbc_lblRange);
 
 		// display values from actual settings
@@ -207,6 +220,16 @@ public class CorrectionsDialog extends JDialog {
 		setLocationByPlatform(true);
 		setVisible(true);
 	}
+
+	private void createLabel(int i, int j, String openStr, Container contentPane) {
+		JLabel lblServo = new JLabel(openStr);
+		GridBagConstraints gbc_lbl = new GridBagConstraints();
+		gbc_lbl.insets = new Insets(0, 0, 5, 5);
+		gbc_lbl.gridx = i;
+		gbc_lbl.gridy = j;
+		getContentPane().add(lblServo, gbc_lbl);
+	}
+
 
 	protected void loadCorrections() throws FileNotFoundException {
 		JFileChooser fc = new JFileChooser();
