@@ -2,6 +2,7 @@ package com.robotar.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -37,22 +39,27 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		int rh = 24;
 		int cw = 30;
 		gbl_radioPanel.columnWidths = new int[] { cw, cw, cw, cw, cw, cw };
-		gbl_radioPanel.rowHeights = new int[] { rh, rh, rh, rh, rh, rh };
+		gbl_radioPanel.rowHeights = new int[] { 18, rh, rh, rh, rh, rh, rh };
 		gbl_radioPanel.columnWeights = new double[]{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-		gbl_radioPanel.rowWeights = new double[]{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+		gbl_radioPanel.rowWeights = new double[]{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		setLayout(gbl_radioPanel);
-		setMinimumSize(new Dimension(6*cw, 6*rh));
-		setPreferredSize(new Dimension(6*cw, 6*rh));
+		setMinimumSize(new Dimension(6*cw, 6*rh+18));
+		setPreferredSize(new Dimension(6*cw, 6*rh+18));
 		// Group the radio buttons.
 		for (int i = 0; i < 6; i++) {
 			btnGrps[i] = new ButtonGroup();
+		}
+		
+		// text
+		for (int i = 6; i>0; i--) {
+			createLabel(6-i, 0, ""+i, this);
 		}
 		
 		// radio buttons
 		Color bg = new Color(205, 133, 63);
 		GridBagConstraints gbc_radio = new GridBagConstraints();
 		gbc_radio.insets = new Insets(0, 0, 0, 2);
-		gbc_radio.gridy = 0;
+		gbc_radio.gridy = 1;
 		//gbc_radio.fill = GridBagConstraints.BOTH;
 		gbc_radio.anchor = GridBagConstraints.CENTER;
 		for (int row = 0; row < 6; row++) {
@@ -93,7 +100,16 @@ public class ChordRadioPanel extends JPanel implements ActionListener {
 		// radioButton_24, radioButton_14, listChords}));
 
 	}
-
+	
+	private void createLabel(int i, int j, String openStr, Container contentPane) {
+		JLabel lblServo = new JLabel(openStr);
+		GridBagConstraints gbc_lbl = new GridBagConstraints();
+		gbc_lbl.insets = new Insets(0, 0, 5, 5);
+		gbc_lbl.gridx = i;
+		gbc_lbl.gridy = j;
+		contentPane.add(lblServo, gbc_lbl);
+	}
+	
 	/*
 	@Override
 	protected void paintComponent(Graphics g) {

@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
@@ -270,11 +271,11 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 		gbc_radioLabelsPanel.gridx = 4;
 		gbc_radioLabelsPanel.gridy = 2;
 		gbc_radioLabelsPanel.fill = GridBagConstraints.VERTICAL;
-		gbc_radioLabelsPanel.anchor = GridBagConstraints.WEST;
+		gbc_radioLabelsPanel.anchor = GridBagConstraints.EAST;
 		frmBlueAhuizoteChords.add(radioLabelsPanel, gbc_radioLabelsPanel);
 		GridBagLayout radioLabelsLayout = new GridBagLayout();
 		int rh = 24;
-		radioLabelsLayout.rowHeights = new int[] { rh, rh, rh, rh, rh, rh };
+		radioLabelsLayout.rowHeights = new int[] { 18, rh, rh, rh, rh, rh, rh };
 		radioLabelsLayout.rowWeights = new double[]{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		radioLabelsPanel.setLayout(radioLabelsLayout);
 		
@@ -282,34 +283,34 @@ public class RoboTarChordsPage extends JFrame implements WindowListener {
 		gbc_label.fill = GridBagConstraints.HORIZONTAL;
 		gbc_label.insets = new Insets(0, 0, 0, 0);
 		gbc_label.gridx = 0;
-		gbc_label.gridy = 0;
+		gbc_label.gridy = 1;
 		// muted radio buttons
-		JLabel lblClickToMute = new JLabel(messages.getString("robotar.chords.mute_string"));
+		JLabel lblClickToMute = new JLabel(messages.getString("robotar.chords.mute_string"), SwingConstants.RIGHT);
 		radioLabelsPanel.add(lblClickToMute, gbc_label);
 		lblClickToMute.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		gbc_label.gridy++;
 		// open radio buttons
-		JLabel lblOpenString = new JLabel(messages.getString("robotar.chords.open_string"));
+		JLabel lblOpenString = new JLabel(messages.getString("robotar.chords.open_string"), SwingConstants.RIGHT);
 		lblOpenString.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		radioLabelsPanel.add(lblOpenString, gbc_label);
 		// 1st fret
 		gbc_label.gridy++;
-		JLabel lblstFret = new JLabel(messages.getString("robotar.chords.first_fret"));
+		JLabel lblstFret = new JLabel(messages.getString("robotar.chords.first_fret"), SwingConstants.RIGHT);
 		lblstFret.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		radioLabelsPanel.add(lblstFret, gbc_label);
 		// 2nd fret
 		gbc_label.gridy++;
-		JLabel lblndFret = new JLabel(messages.getString("robotar.chords.second_fret"));
+		JLabel lblndFret = new JLabel(messages.getString("robotar.chords.second_fret"), SwingConstants.RIGHT);
 		lblndFret.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		radioLabelsPanel.add(lblndFret, gbc_label);
 		// 3rd fret
 		gbc_label.gridy++;
-		JLabel lblrdFret = new JLabel(messages.getString("robotar.chords.third_fret"));
+		JLabel lblrdFret = new JLabel(messages.getString("robotar.chords.third_fret"), SwingConstants.RIGHT);
 		lblrdFret.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		radioLabelsPanel.add(lblrdFret, gbc_label);
 		// 4th fret
 		gbc_label.gridy++;
-		JLabel lblthFret = new JLabel(messages.getString("robotar.chords.fourth_fret"));
+		JLabel lblthFret = new JLabel(messages.getString("robotar.chords.fourth_fret"), SwingConstants.RIGHT);
 		lblthFret.setFont(new Font("Segoe UI", Font.BOLD, 16));
 		radioLabelsPanel.add(lblthFret, gbc_label);
 		
