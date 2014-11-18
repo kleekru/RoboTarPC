@@ -1,6 +1,37 @@
-build
+#build
 
-A. mixed
+## current IOIO preparation
+
+download App-IOIO0400.zip from https://github.com/ytai/ioio/wiki/Downloads
+extract into ioio0400
+layout:
+prj/RoboTarPC
+prj/ioio0400/IOIOLib/target/pc/
+prj/libs
+
+edit build.xml (if it is there - only in github version, not in this package) (add upload target, see below)
+otherwise create build.xml with this content
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="jar" name="IOIOLibPC">
+	<target name="jar">
+		<echo message="jarring"/>
+		<mkdir dir="dist"/>
+		<jar destfile="dist/ioiolibpc-0.4.0.jar" basedir="bin"/>
+	</target>
+</project>
+
+you can also add this target - that puts the resulting ioio.lib into libs folder (where we defined our local gradle repository)
+	<target name="upload" depends="jar">
+		<copy file="dist/ioiolibpc-0.4.0.jar" todir="../../../../libs/" overwrite="true"/>
+	</target>
+
+run ant jar (or ant upload) and copy final ioiolibpc-0.4.0.jar into libs folder (gradle repo)
+
+then you can build RoboTarPC
+
+
+##A. mixed
 
 yeah. that's the mixed build. i can see it in my env too.
 [17.12.2013 1:23:07] Miroslav Mocek: 1. delete all in target subdirectory
@@ -14,11 +45,11 @@ yeah. that's the mixed build. i can see it in my env too.
 [17.12.2013 1:25:32] Miroslav Mocek: 6. if there is the data directory, run from eclipse - it should work
 
 
-B. normal
+##B. normal
 
-C. gradle
+##C. gradle
 
-D. running from cmd line:
+##D. running from cmd line:
 
 1. you have to build from eclipse
  
@@ -34,3 +65,20 @@ Next time you can use only 'mvn package', as long as the .jars remains in depend
 
 5. from cmd line, project root /target dir, run:
 java -jar RoboTarIOIOforPCConsole-0.0.1-SNAPSHOT.jar
+
+
+##E. izpack build
+
+create installation jar
+
+	cd RoboTarPC
+	gradle izPackCreateInstaller
+	cd build/distributions/
+	java -jar RoboTarPC-0.2-installer.jar
+
+run after install:
+	
+	cd /Applications/RoboTar/
+	./robotar.sh
+
+	
