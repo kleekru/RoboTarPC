@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<shortcuts>
+
+  <programGroup defaultName="RoboTar"
+  location="applications"/>
+
+  <shortcut
+     name="RoboTar"
+     programGroup="yes"
+     desktop="yes"
+     applications="no"
+     startMenu="yes"
+     startup="no"
+     target="$INSTALL_PATH/robotar.bat"
+     commandLine=""
+     workingDirectory="$INSTALL_PATH"
+     description="RoboTar"
+     iconFile="$INSTALL_PATH/ahuizote.ico"
+     iconIndex="0"
+     type="Application"
+     encoding="UTF-8"
+     terminal="true"
+     KdeSubstUID="false"
+     initialState="normal">
+     <createForPack name="app"/>
+   </shortcut>
+
+
+
+   <shortcut
+     name="RoboTar Uninstaller"
+     programGroup="yes"
+     desktop="yes"
+     applications="no"
+     startMenu="no"
+     startup="no"
+     target="$INSTALL_PATH\Uninstaller\uninstaller.jar"
+     initialState="noShow"
+     iconFile="%SystemRoot%\system32\SHELL32.dll"
+     iconIndex="31"
+     workingDirectory=""
+     type="Application"
+     encoding="UTF-8"
+     description="RoboTar Uninstaller">
+     <createForPack name="app" />
+   </shortcut>
+
+</shortcuts>

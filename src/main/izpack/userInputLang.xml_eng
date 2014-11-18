@@ -1,0 +1,6 @@
+<langpack>
+	<str id="input.title" txt="Port selection"/>
+	<str id="input.comment" txt="Write port number to which is RoboTar attached (e.g. 1 or 5 or 23 or other..."/>
+	<str id="input.port" txt="Port COM"/>
+	<str id="input.mandatory" txt="You have to provide the COM number! (have you installed RoboTar device driver already?)"/>
+</langpack>

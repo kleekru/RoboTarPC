@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<installation version="1.0">
+	<info>
+		<appname>RoboTar</appname>
+		<appversion>0.3.2</appversion>
+		<url>http://www.robo-tar.com</url>
+		<authors>
+			<author name="Kevin Krumwiede" email="kevin@robo-tar.com"/>
+			<author name="Miroslav Mocek" email="mocek.miroslav@gmail.com"/>
+		</authors>
+		<javaversion>1.6</javaversion>
+		<rebootaction>ask</rebootaction>
+        <run-privileged condition="izpack.windowsinstall.vista|izpack.windowsinstall.7"/>
+	</info>
+
+	<variables>
+		<variable name="releasedOn" value="19/11/2014"/>
+		<!-- <variable name="TargetPanel.dir.windows" value="C:/RoboTar"/>
+  		<variable name="TargetPanel.dir.unix" value="/usr/local/robotar"/>
+  		<variable name="TargetPanel.dir.mac" value="$APPLICATIONS_DEFAULT_ROOT/ff/"/> -->
+	</variables>
+
+	<guiprefs width="640" height="480" resizable="yes"></guiprefs>
+
+	<locale>
+		<langpack iso3="eng"/>
+		<langpack iso3="cze"/>
+	</locale>
+
+	<resources>
+		<res id="Installer.image" src="src/main/izpack/ahuizote.png"/>		
+		<res id="userInputSpec.xml" src="src/main/izpack/userInputSpec.xml" />
+		<res id="userInputLang.xml_eng" src="src/main/izpack/userInputLang.xml_eng" />
+		<res id="userInputLang.xml_cze" src="src/main/izpack/userInputLang.xml_cze" />
+		<res id="shortcutSpec.xml" src="src/main/izpack/res/default_shortcut_spec.xml" />
+		<res id="Win_shortcutSpec.xml" src="src/main/izpack/res/win_shortcut_spec.xml" />
+		<res id="TargetPanel.dir.windows" src="src/main/izpack/res/installpath.windows.txt"/>
+	</resources>
+
+	<panels>
+		<panel classname="HelloPanel" id="helloPanel"/>
+		<panel classname="TargetPanel" id="targetPanel"/>
+		<panel classname="UserInputPanel" id="userInputPanel"/>
+       	<panel classname="PacksPanel" id="panelPacks"/>
+      	<panel classname="InstallPanel" id="installPanel"/>
+       	<panel classname="ShortcutPanel" id="shortcutPanel"/>
+       	<panel classname="SimpleFinishPanel" id="simpleFinishPanel"/>
+	</panels>
+	
+	<packs>
+		<pack name="app" id="app" required="yes">
+			<description>RoboTar application</description>	
+			
+			<file src="build/libs/RoboTarPC-0.3.2.jar" targetdir="$INSTALL_PATH/" override="true" />
+			<file src="src/main/izpack/ahuizote.ico" targetdir="$INSTALL_PATH/" override="true"/>
+			<file src="src/main/izpack/ahuizote.png" targetdir="$INSTALL_PATH/" override="true"/>
+			
+			<file src="src/main/izpack/robotar.bat" targetdir="$INSTALL_PATH/" override="true" os="win"/>
+				<parsable targetfile="$INSTALL_PATH/robotar.bat" type="plain" os="win"/>
+			<file src="src/main/izpack/robotar.sh" targetdir="$INSTALL_PATH/" override="true" os="unix"/>
+				<parsable targetfile="$INSTALL_PATH/robotar.sh" type="plain" os="unix"/>
+				<executable targetfile="$INSTALL_PATH/robotar.sh" os="unix" stage="never" failure="warn" keep="true"/>
+			<file src="src/main/izpack/robotar.sh" targetdir="$INSTALL_PATH/" override="true" os="mac"/>
+				<parsable targetfile="$INSTALL_PATH/robotar.sh" type="plain" os="mac"/>
+				<executable targetfile="$INSTALL_PATH/robotar.sh" os="mac" stage="never" failure="warn" keep="true"/>
+			
+			<file src="corrections.xml" targetdir="$INSTALL_PATH/" />
+			
+			<fileset dir="build/libs/lib" targetdir="$INSTALL_PATH/lib" override="true">
+			    <include name="*.jar"/>
+			</fileset>
+			
+		</pack>
+<!--
+		<pack name="chords" id="chords">
+			<description>Chord libraries</description>
+			<file src="src/main/resources/default-chords/robotar-default.xml" targetdir="$INSTALL_PATH/"/>
+		</pack>
+-->
+		<pack name="songs" id="songs" required="no">
+			<description>Songs bundled</description>
+			<fileset dir="src/main/resources/default-songs/" targetdir="$USER_HOME/songs" />
+		</pack>
+	</packs>
+
+	<native type="izpack" name="ShellLink.dll"/>
+	<native type="izpack" name="ShellLink_x64.dll"/>
+        
+</installation>

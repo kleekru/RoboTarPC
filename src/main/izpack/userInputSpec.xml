@@ -1,0 +1,24 @@
+<userInput>
+  <!-- Install -->
+    <panel order="0">
+        <createForPack name="app" />
+        <field type="title" bold="true" id="input.title" />
+	<field type="staticText" id="input.comment" />
+	<field type="rule" align="left" variable="PORT_SELECTED">
+		<description id="input.port"/>
+		<spec size="3" id="input.com" layout="N:2:2"/>
+		<validator class="com.izforge.izpack.util.NotEmptyValidator"
+             id="input.mandatory" />
+    </field>
+	<!-- field type="combo" variable="PORT_SELECTED">
+		<description id="input.port"/>
+		<spec>
+			<choice txt="COM1" value="COM1" />
+			<choice txt="COM2" value="COM2" />
+			<choice txt="COM3" value="COM3" />
+			<choice txt="COM4" value="COM4" />
+		</spec>
+	</field-->
+    </panel>
+</userInput>
+ 

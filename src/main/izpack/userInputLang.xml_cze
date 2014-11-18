@@ -1,0 +1,6 @@
+<langpack>
+	<str id="input.title" txt="Výběr portu"/>
+	<str id="input.comment" txt="Napište číslo portu, na kterém je připojen RoboTar (např. 1, 5, 23...)"/>
+	<str id="input.port" txt="Port COM"/>
+	<str id="input.mandatory" txt="Vyplňte číslo portu, na který byl nainstalován ovladač zařízení RoboTar"/>
+</langpack>

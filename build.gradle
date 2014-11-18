@@ -1,0 +1,78 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+sourceCompatibility = 1.6
+version = '0.3.2'
+
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'org.gradle.api.plugins:gradle-izpack-plugin:0.2.3'
+	}	
+}
+apply plugin: 'izpack'
+
+repositories {
+	mavenCentral()
+	// projects dependencies
+	flatDir {
+		name 'repoDir'
+		dirs project.locrepo
+	}
+}
+
+uploadArchives {
+	repositories {
+		add project.repositories.repoDir
+	}
+}
+
+dependencies {
+	izpack 'org.codehaus.izpack:izpack-standalone-compiler:4.3.4'
+
+	compile 'org.slf4j:slf4j-api:1.7.5'
+	compile 'ch.qos.logback:logback-classic:1.0.13'
+	compile ':kitfox-svg-salamander:1.0.8'
+	compile ':xchords:0.4.0'
+	compile ':xsong:0.2.0'
+	compile ':RoboTarIOIO:0.2.1'
+	compile ':ioiolibpc:0.4.0'
+	
+	runtime ':purejavacomm:0.0.21'
+	runtime ':jna:4.0.0'
+	
+	testCompile 'org.codehaus.groovy:groovy-all:2.0.5'
+	testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+}
+
+distZip << {
+	throw new Exception('disabled task. (users want installer, no copy&run) run izpack task instead!')
+}
+
+mainClassName = 'com.robotar.ui.RoboTarPC'
+
+// jar dependencies approach
+jar { //.doFirst {
+	def manifestClasspath = configurations.runtime.collect { 'lib/' + it.getName() }.join(' ')
+	println manifestClasspath
+	
+	manifest {
+		attributes "Main-Class" : mainClassName
+		attributes "Class-Path" : manifestClasspath  // set classpath to list of internal directories created
+	}
+}
+
+task copyToLib(type: Copy) {
+	into "$buildDir/libs/lib"
+	from configurations.runtime
+}
+
+izPackCreateInstaller.dependsOn(copyToLib)
+
+izpack {
+	baseDir = file('.')
+}
+

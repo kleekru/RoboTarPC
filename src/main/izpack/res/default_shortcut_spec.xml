@@ -1,0 +1,43 @@
+<shortcuts>
+  <skipIfNotSupported/>
+  <programGroup defaultName="RoboTar"
+                location="applications||startMenu"/>
+  <shortcut
+    name="Start RoboTar"
+    target="$INSTALL_PATH\robotar.sh"
+    commandLine=""
+    workingDirectory="$INSTALL_PATH"
+    description="This starts RoboTar"
+    iconFile="$INSTALL_PATH\ahuizote.png"
+    iconIndex="0"
+    initialState="noShow||normal||maximized||minimized"
+    programGroup="yes||no"
+    desktop="yes||no"
+    applications="yes||no"
+    startMenu="yes||no"
+    startup="yes||no">
+
+    <createForPack name="app"/>
+  </shortcut>
+  
+   <shortcut
+     name="RoboTar Uninstaller"
+     programGroup="yes"
+     desktop="yes"
+     applications="no"
+     startMenu="no"
+     startup="no"
+     target="/usr/lib/java/bin/java"
+     commandLine="-jar
+     &amp;quot;$INSTALL_PATH/Uninstaller/uninstaller.jar&amp;quot;"
+     initialState="noShow"
+     iconFile="trashcan_full"
+     iconIndex="0"
+     workingDirectory=""
+     type="Application"
+     encoding="UTF-8"
+     description="RoboTar Uninstaller">
+     <createForPack name="app" />
+   </shortcut>
+ 
+</shortcuts>
