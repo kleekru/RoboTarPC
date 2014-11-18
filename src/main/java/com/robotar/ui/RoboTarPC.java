@@ -73,7 +73,14 @@ import com.robotar.ioio.showcase.StringsPattern;
 import com.robotar.ui.Const;
 import com.robotar.util.RoboTarPreferences;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Locale;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -249,6 +256,79 @@ public class RoboTarPC extends IOIOSwingApp {
     }
     
 	/**
+	 * Get content of the file at address URL.
+	 * 
+	 * @param address
+	 * @return content or null
+	 */
+	private String getRemoteVersion(String address) {
+		try {
+	        URL url = new URL(address);
+	         
+	        BufferedReader br = new BufferedReader(
+                    new InputStreamReader(url.openStream()));
+	        String inputLine;
+	        StringBuilder sb = new StringBuilder();
+	        while ((inputLine = br.readLine()) != null) {
+				sb.append(inputLine);
+			}
+	        br.close();
+	        return sb.toString();
+		} catch (IOException ex) {
+			LOG.error("Problem with accessing address {}", address);
+			LOG.error("exc", ex);
+			return null;
+		}
+    }
+
+	private boolean isNewerVersion(String version) {
+		if (version == null || version.isEmpty()) {
+			LOG.error("empty version information");
+			return false;
+		}
+		LOG.debug("version: >{}<", version);
+		String[] arr = version.split("\\.");
+		LOG.debug("arr.length {}", arr.length);
+		if (arr == null || arr.length != 3) {
+			LOG.error("wrong format of version information");
+			return false;
+		}
+		try {
+			int remoteMajor = Integer.parseInt(arr[0], 10);
+			int remoteMinor = Integer.parseInt(arr[1], 10);
+			int remotePatch = Integer.parseInt(arr[2], 10);
+			LOG.info("remote version: {}.{}.{}", remoteMajor, remoteMinor, remotePatch);
+			
+			int localMajor = 0;
+			int localMinor = 3;
+			int localPatch = 0;
+			LOG.info("local version: {}.{}.{}", localMajor, localMinor, localPatch);
+			
+			if (remoteMajor < localMajor) {
+				return false;
+			}
+			if (remoteMinor < localMinor) {
+				return false;
+			}
+			if (remotePatch <= localPatch) {
+				return false;
+			}
+			LOG.info("!new version is available!");
+			return true;
+		} catch (NumberFormatException ex) {
+			LOG.error("Problem with parsing version info", ex);
+			return false;
+		}
+	}
+	
+	public boolean isNewerVersionAvailable() {
+		String url = "http://www.versarius.cz/currentversion";
+		LOG.info("checking for new version at address: {}", url);
+		String remoteVersion = getRemoteVersion(url);
+		return isNewerVersion(remoteVersion);
+	}
+	
+	/**
 	 * Initialize the contents of the frame.
 	 * @throws BackingStoreException 
 	 */
@@ -423,11 +503,19 @@ public class RoboTarPC extends IOIOSwingApp {
 		frmBlueAhuizote.setLocationByPlatform(true);
 		frmBlueAhuizote.setVisible(true);
 		frmBlueAhuizote.setTitle(messages.getString("robotar.name"));
+		
 		// display warning if device not yet configured!
 		if (!servoSettings.isAnyCorrectionSet()) {
 			JOptionPane.showMessageDialog(frmBlueAhuizote, 
 					messages.getString("robotar.corrections.notset"), 
 					"RoboTar WARNING", JOptionPane.WARNING_MESSAGE);
+		}
+		
+		// check for newer versions
+		if (isNewerVersionAvailable()) {
+			JOptionPane.showMessageDialog(frmBlueAhuizote, 
+				messages.getString("robotar.version.available"), 
+				"RoboTar", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
