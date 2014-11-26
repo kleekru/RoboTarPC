@@ -40,7 +40,7 @@
 	<panels>
 		<panel classname="HelloPanel" id="helloPanel"/>
 		<panel classname="TargetPanel" id="targetPanel"/>
-		<panel classname="UserInputPanel" id="userInputPanel"/>
+		<panel classname="UserInputPanel" id="userInputPanel" condition="izpack.windowsinstall"/>
        	<panel classname="PacksPanel" id="panelPacks"/>
       	<panel classname="InstallPanel" id="installPanel"/>
        	<panel classname="ShortcutPanel" id="shortcutPanel"/>
