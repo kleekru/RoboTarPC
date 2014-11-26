@@ -322,10 +322,14 @@ public class RoboTarPC extends IOIOSwingApp {
 	}
 	
 	public boolean isNewerVersionAvailable() {
-		String url = "http://www.versarius.cz/currentversion";
+		String url = "http://kleekru.mydomain.com/currentversion";
 		LOG.info("checking for new version at address: {}", url);
 		String remoteVersion = getRemoteVersion(url);
 		return isNewerVersion(remoteVersion);
+	}
+	
+	public boolean displayVersionNotification() {
+		return false;
 	}
 	
 	/**
@@ -512,7 +516,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		}
 		
 		// check for newer versions
-		if (isNewerVersionAvailable()) {
+		if (displayVersionNotification() && isNewerVersionAvailable()) {
 			JOptionPane.showMessageDialog(frmBlueAhuizote, 
 				messages.getString("robotar.version.available"), 
 				"RoboTar", JOptionPane.INFORMATION_MESSAGE);
