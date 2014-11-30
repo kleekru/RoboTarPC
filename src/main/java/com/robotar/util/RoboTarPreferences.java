@@ -55,6 +55,9 @@ public class RoboTarPreferences {
 	private int maxInactivity;
 	private static final int MAX_MAX_INACTIVITY = 120;
 	
+	/** Check for new version at the startup? */
+	private boolean checkNewVersion;
+	
 	// keys in preferences file 
 	private static final String CORRECTIONS_FILE = "correctionsFile";
 	private static final String MAIN_SIZE = "mainSize";
@@ -67,6 +70,7 @@ public class RoboTarPreferences {
 	private static final String MARKED_COLOR = "markedColor";
 	private static final String MARKED_SIZE = "markedSize";
 	private static final String MAX_INACTIVITY = "maxInactivity";
+	private static final String CHECK_NEW_VERSION = "checkNewVersion";
 	
 	/**
 	 * Loads and saves preferences.
@@ -74,6 +78,7 @@ public class RoboTarPreferences {
 	 */
 	protected RoboTarPreferences(Preferences p) {
 		correctionsFile = p.get(CORRECTIONS_FILE, "corrections.xml");
+		checkNewVersion = p.getBoolean(CHECK_NEW_VERSION, true);
 		mainSize = p.getInt(MAIN_SIZE, 12);
 		markedSize = p.getInt(MARKED_SIZE, 18);
 		markedColor = decodeColor(p, MARKED_COLOR, "0x0000ff");
@@ -149,6 +154,7 @@ public class RoboTarPreferences {
 
 	private void update(Preferences p) {
 		p.put(CORRECTIONS_FILE, correctionsFile);
+		p.putBoolean(CHECK_NEW_VERSION, checkNewVersion);
 		p.put(MAIN_SIZE, Integer.toString(getMainSize(), 10));
 		p.put(MARKED_COLOR, encodeColor(getMarkedColor()));
 		p.put(MARKED_SIZE, Integer.toString(getMarkedSize(), 10));
@@ -241,6 +247,14 @@ public class RoboTarPreferences {
 
 	public void setEditMarkedChordColor(Color editMarkedChordColor) {
 		this.editMarkedChordColor = editMarkedChordColor;
+	}
+
+	public boolean isCheckNewVersion() {
+		return checkNewVersion;
+	}
+
+	public void setCheckNewVersion(boolean checkNewVersion) {
+		this.checkNewVersion = checkNewVersion;
 	}
 	
 }

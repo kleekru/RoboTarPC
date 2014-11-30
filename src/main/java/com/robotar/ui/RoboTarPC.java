@@ -57,7 +57,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import net.infotrek.util.prefs.FilePreferencesFactory;
@@ -68,26 +67,18 @@ import org.slf4j.LoggerFactory;
 import com.robotar.ioio.LEDSettings;
 import com.robotar.ioio.Pins;
 import com.robotar.ioio.ServoSettings;
-import com.robotar.ioio.showcase.FlashPattern;
 import com.robotar.ioio.showcase.ShowcasePatterns;
-import com.robotar.ioio.showcase.StringsPattern;
 import com.robotar.ui.Const;
 import com.robotar.util.RoboTarPreferences;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.Random;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.prefs.BackingStoreException;
 
 /**
@@ -335,7 +326,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	}
 	
 	public boolean displayVersionNotification() {
-		return true;
+		return preferences.isCheckNewVersion();
 	}
 	
 	/**
@@ -431,8 +422,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		JMenu mnFileMenu = new JMenu(messages.getString("robotar.menu.file"));
 		menuBar.add(mnFileMenu);
 		
-		JMenuItem mntmAbout = new JMenuItem(messages.getString("robotar.menu.about"));
-		mntmAbout.setEnabled(false);
+		JMenuItem mntmAbout = new JMenuItem(new AboutAction(messages.getString("robotar.menu.about")));
 		mnFileMenu.add(mntmAbout);
 		
 		JMenuItem mntmExit = new JMenuItem(messages.getString("robotar.menu.exit"));
@@ -527,6 +517,8 @@ public class RoboTarPC extends IOIOSwingApp {
 			// this is informational only, therefore it is modeless, connection to ioio continues
 			JDialog dialog3 = new JDialog(frmBlueAhuizote, messages.getString("robotar.version.title"));
 		    dialog3.setBounds(200, 300, 400, 90);
+		    dialog3.setBackground(Const.BACKGROUND_COLOR);
+			
 		    JLabel label = new JLabel(MessageFormat.format(messages.getString("robotar.version.available"), remoteVersion));
 		    JLabel labelYours = new JLabel(MessageFormat.format(messages.getString("robotar.version.yours"), localVersion));
 		    JLabel labelDesc = new JLabel(messages.getString("robotar.version.desc"));
@@ -535,6 +527,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		    dialog3.getContentPane().add(labelDesc, BorderLayout.SOUTH);
 		    //dialog3.pack();
 		    dialog3.setVisible(true);
+		    dialog3.repaint();
 		}
 	}
 	
@@ -543,6 +536,11 @@ public class RoboTarPC extends IOIOSwingApp {
 		dlg.setVisible(true);
 	}
 
+	protected void showAboutDialog(ActionEvent evt) {
+		AboutDialog dlg = new AboutDialog(this);
+		dlg.setVisible(true);
+	}
+	
 	private abstract class MyAction extends AbstractAction {
 		public MyAction(String text, int mnemonic) {
 			super(text);
@@ -609,6 +607,19 @@ public class RoboTarPC extends IOIOSwingApp {
 		}
 	};
 		
+	private class AboutAction extends AbstractAction {
+
+		public AboutAction(String string) {
+			super(string);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			showAboutDialog(e);
+		}
+		
+	}
+	
 	public void startChordsPage() {
 		if (chordsPage == null) {
 			chordsPage = new RoboTarChordsPage(this);
@@ -621,10 +632,15 @@ public class RoboTarPC extends IOIOSwingApp {
 	}
 
 	public void startHelpPage() {
-		if (helpPage == null) {
+		/*if (helpPage == null) {
 			helpPage = new RoboTarHelp(this);
 		}
 		getHelpPage().setVisible(true);
+		*/
+		// we don't have help bundled. instead use www pages 
+		JOptionPane.showMessageDialog(frmBlueAhuizote, 
+				messages.getString("robotar.help.home"), 
+				"RoboTar Help", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	public RoboTarHelp getHelpPage() {
@@ -999,5 +1015,9 @@ public class RoboTarPC extends IOIOSwingApp {
 			}
 			
 		};
+	}
+
+	public String getLocalVersion() {
+		return localVersion;
 	}
 }
