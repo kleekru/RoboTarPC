@@ -48,6 +48,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JMenu;
@@ -81,6 +82,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -135,6 +137,9 @@ public class RoboTarPC extends IOIOSwingApp {
 	protected ShowcasePatterns patterns;
 
 	private IOIOReconnectAction ioioReconnectAction;
+
+	private String remoteVersion;
+	private String localVersion = "0.3.3";
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
@@ -293,15 +298,16 @@ public class RoboTarPC extends IOIOSwingApp {
 			LOG.error("wrong format of version information");
 			return false;
 		}
+		String[] arrLocal = localVersion.split("\\.");
 		try {
 			int remoteMajor = Integer.parseInt(arr[0], 10);
 			int remoteMinor = Integer.parseInt(arr[1], 10);
 			int remotePatch = Integer.parseInt(arr[2], 10);
 			LOG.info("remote version: {}.{}.{}", remoteMajor, remoteMinor, remotePatch);
 			
-			int localMajor = 0;
-			int localMinor = 3;
-			int localPatch = 3;
+			int localMajor = Integer.parseInt(arrLocal[0], 10);
+			int localMinor = Integer.parseInt(arrLocal[1], 10);
+			int localPatch = Integer.parseInt(arrLocal[2], 10);
 			LOG.info("local version: {}.{}.{}", localMajor, localMinor, localPatch);
 			
 			if (remoteMajor < localMajor) {
@@ -324,12 +330,12 @@ public class RoboTarPC extends IOIOSwingApp {
 	public boolean isNewerVersionAvailable() {
 		String url = "http://kleekru.mydomain.com/currentversion";
 		LOG.info("checking for new version at address: {}", url);
-		String remoteVersion = getRemoteVersion(url);
+		this.remoteVersion = getRemoteVersion(url);
 		return isNewerVersion(remoteVersion);
 	}
 	
 	public boolean displayVersionNotification() {
-		return false;
+		return true;
 	}
 	
 	/**
@@ -510,6 +516,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		
 		// display warning if device not yet configured!
 		if (!servoSettings.isAnyCorrectionSet()) {
+			// this is crucial, therefore it is modal dialog box (connection to ioio is stopped)
 			JOptionPane.showMessageDialog(frmBlueAhuizote, 
 					messages.getString("robotar.corrections.notset"), 
 					"RoboTar WARNING", JOptionPane.WARNING_MESSAGE);
@@ -517,9 +524,17 @@ public class RoboTarPC extends IOIOSwingApp {
 		
 		// check for newer versions
 		if (displayVersionNotification() && isNewerVersionAvailable()) {
-			JOptionPane.showMessageDialog(frmBlueAhuizote, 
-				messages.getString("robotar.version.available"), 
-				"RoboTar", JOptionPane.INFORMATION_MESSAGE);
+			// this is informational only, therefore it is modeless, connection to ioio continues
+			JDialog dialog3 = new JDialog(frmBlueAhuizote, messages.getString("robotar.version.title"));
+		    dialog3.setBounds(200, 300, 400, 90);
+		    JLabel label = new JLabel(MessageFormat.format(messages.getString("robotar.version.available"), remoteVersion));
+		    JLabel labelYours = new JLabel(MessageFormat.format(messages.getString("robotar.version.yours"), localVersion));
+		    JLabel labelDesc = new JLabel(messages.getString("robotar.version.desc"));
+		    dialog3.getContentPane().add(label, BorderLayout.NORTH);
+		    dialog3.getContentPane().add(labelYours, BorderLayout.CENTER);
+		    dialog3.getContentPane().add(labelDesc, BorderLayout.SOUTH);
+		    //dialog3.pack();
+		    dialog3.setVisible(true);
 		}
 	}
 	
