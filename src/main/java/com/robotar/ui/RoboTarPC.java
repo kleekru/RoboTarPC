@@ -342,7 +342,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	 
 		getChordManager();
 		servoSettings = ServoSettings.loadCorrectionsFrom(new File(preferences.getCorrectionsFile()), ROBOTAR_FOLDER);
-		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle_es", Locale.ENGLISH);
+		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();
 		
