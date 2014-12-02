@@ -342,7 +342,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	 
 		getChordManager();
 		servoSettings = ServoSettings.loadCorrectionsFrom(new File(preferences.getCorrectionsFile()), ROBOTAR_FOLDER);
-		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH);
+		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle_es", Locale.ENGLISH);
 		
 		frmBlueAhuizote = new JFrame();
 		
@@ -482,7 +482,7 @@ public class RoboTarPC extends IOIOSwingApp {
 		JMenuItem mntmEnglish = new JMenuItem(messages.getString("robotar.menu.english"));
 		mnLang.add(mntmEnglish);
 		JMenuItem mntmSpanish = new JMenuItem(messages.getString("robotar.menu.spanish"));
-		mntmSpanish.setEnabled(false);
+		//mntmSpanish.setEnabled(false);
 		mnLang.add(mntmSpanish);
 		JMenuItem mntmCzech = new JMenuItem(messages.getString("robotar.menu.czech"));
 		mntmCzech.setEnabled(false);

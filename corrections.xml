@@ -1,16 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<servo-corrections>
-    <correction servo="1" neutral="0.025" muted="0.025" left="0.025" right="0.025"/>
-    <correction servo="2" neutral="-0.025" muted="-0.025" left="-0.025" right="-0.025"/>
-    <correction servo="3" neutral="0.025" muted="0.025" left="0.025" right="0.025"/>
-    <correction servo="4" neutral="0.125" muted="0.125" left="0.125" right="0.125"/>
-    <correction servo="5" neutral="-0.075" muted="-0.075" left="-0.075" right="-0.075"/>
-    <correction servo="6" neutral="0.0" muted="0.0" left="0.0" right="0.0"/>
-    <correction servo="7" neutral="0.15" muted="0.15" left="0.15" right="0.15"/>
-    <correction servo="8" neutral="-0.025" muted="-0.025" left="-0.025" right="-0.025"/>
-    <correction servo="9" neutral="0.1" muted="0.1" left="0.1" right="0.1"/>
-    <correction servo="10" neutral="0.0" muted="0.0" left="0.0" right="0.0"/>
-    <correction servo="11" neutral="0.15" muted="0.15" left="0.15" right="0.15"/>
-    <correction servo="12" neutral="0.05" muted="0.05" left="0.05" right="0.05"/>
-</servo-corrections>
- 
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><servo-corrections><correction left="0.075" muted="0.075" neutral="0.075" right="0.075" servo="1"/><correction left="-0.05" muted="-0.05" neutral="-0.05" right="-0.05" servo="2"/><correction left="-0.125" muted="-0.125" neutral="-0.125" right="-0.125" servo="3"/><correction left="0.075" muted="0.075" neutral="0.075" right="0.075" servo="4"/><correction left="-0.05" muted="-0.05" neutral="-0.05" right="-0.05" servo="5"/><correction left="0.1" muted="0.1" neutral="0.1" right="0.1" servo="6"/><correction left="0.0" muted="0.0" neutral="0.0" right="0.0" servo="7"/><correction left="-0.025" muted="-0.025" neutral="-0.025" right="-0.025" servo="8"/><correction left="0.05" muted="0.05" neutral="0.05" right="0.05" servo="9"/><correction left="-0.125" muted="-0.125" neutral="-0.125" right="-0.125" servo="10"/><correction left="0.124" muted="0.124" neutral="0.124" right="0.124" servo="11"/><correction left="-0.075" muted="-0.075" neutral="-0.075" right="-0.075" servo="12"/></servo-corrections>
