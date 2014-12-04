@@ -136,6 +136,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		this.mainFrame = mainFrame;
 		messages = mainFrame.getMessages();
 
+		setTitle(messages.getString("robotar.songs.title"));
 		setBounds(100, 100, 1200, 510);
 		frmBlueAhuizoteSongs = new JPanel() {
 
@@ -327,14 +328,18 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 		frmBlueAhuizoteSongs.add(songList, gbc_songList);
 		
 		helpPane = new JEditorPane();
-		URL editSongHelp = RoboTarSongsPage.class.getResource("/help/songs.html");
+		String lang = mainFrame.getPreferences().getLocale().getLanguage();
+		URL editSongHelp = RoboTarSongsPage.class.getResource("/help/songs_"+lang+".html");
+		if (editSongHelp == null) {
+			editSongHelp = RoboTarSongsPage.class.getResource("/help/songs_en.html");
+		}
 		try {
 			helpPane.setPage(editSongHelp);
 			helpPane.setVisible(false);
 			helpPane.setAutoscrolls(true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			helpPane.setText("Problem with loading help from classpath...");
+			helpPane.setText(messages.getString("robotar.songs.help_problem"));
 		}
 		frmBlueAhuizoteSongs.add(helpPane, gbc_songList);
 		
