@@ -216,17 +216,17 @@ public class RoboTarPC extends IOIOSwingApp {
 	private void closingMethod() {
 		StringBuilder sb = new StringBuilder(100);
 		if (chordsPage != null && chordsPage.isUnsavedChords()) {
-			sb.append("There are unsaved chords on Chords page!\n\n");
+			sb.append(messages.getString("robotar.end.unsavedchords"));
 		}
 		if (songsPage != null && songsPage.getModifiedCount() > 0) {
-			sb.append("There may be unsaved songs (");
+			sb.append(messages.getString("robotar.end.unsavedsongs"));
 			sb.append(songsPage.getModifiedCount());
-			sb.append(") on Songs page!\n\n");
+			sb.append(messages.getString("robotar.end.unsavedsongs2"));
 		}
-		sb.append("Are You sure to close RoboTar?");
+		sb.append(messages.getString("robotar.end.question"));
 		int confirm = JOptionPane.showOptionDialog(frmBlueAhuizote,
                 sb.toString(),
-                "Exit confirmation", JOptionPane.YES_NO_OPTION,
+                messages.getString("robotar.end.confirmation"), JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE, null, null, null);
         if (confirm == JOptionPane.YES_OPTION) {
         	// save all needed information for next start
@@ -342,7 +342,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	 
 		getChordManager();
 		servoSettings = ServoSettings.loadCorrectionsFrom(new File(preferences.getCorrectionsFile()), ROBOTAR_FOLDER);
-		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", Locale.ENGLISH);
+		messages = ResourceBundle.getBundle("com.robotar.util.RoboTarBundle", preferences.getLocale());
 		
 		frmBlueAhuizote = new JFrame();
 		
@@ -481,16 +481,33 @@ public class RoboTarPC extends IOIOSwingApp {
 		
 		JMenuItem mntmEnglish = new JMenuItem(messages.getString("robotar.menu.english"));
 		mnLang.add(mntmEnglish);
+		mntmEnglish.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateLocale(Locale.ENGLISH);
+			}
+		});
 		JMenuItem mntmSpanish = new JMenuItem(messages.getString("robotar.menu.spanish"));
 		//mntmSpanish.setEnabled(false);
 		mnLang.add(mntmSpanish);
+		mntmSpanish.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateLocale(new Locale("es", "ES"));
+			}
+		});
 		JMenuItem mntmCzech = new JMenuItem(messages.getString("robotar.menu.czech"));
-		mntmCzech.setEnabled(false);
 		mnLang.add(mntmCzech);
+		mntmCzech.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateLocale(new Locale("cs", "CZ"));
+			}
+		});
 		
 		JMenu mnHelp = new JMenu(messages.getString("robotar.menu.help"));
 		menuBar.add(mnHelp);
-
+		
 		Action startHelpAction = new StartHelpPageAction(messages.getString("robotar.menu.help"), KeyEvent.VK_H);
 		JMenuItem mntmHelp = new JMenuItem(messages.getString("robotar.menu.robotar_help"));
 		mnHelp.add(mntmHelp);
@@ -531,6 +548,9 @@ public class RoboTarPC extends IOIOSwingApp {
 		}
 	}
 	
+	private void updateLocale(Locale locale) {
+		preferences.setLocale(locale);
+	}
 	protected void showCorrectionsDialog(ActionEvent evt) {
 		CorrectionsDialog dlg = new CorrectionsDialog(this);
 		dlg.setVisible(true);

@@ -223,7 +223,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			}
 		});
 		
-		btnLoadSong = new JButton("Load song");
+		btnLoadSong = new JButton(messages.getString("robotar.songs.load_song"));
 		GridBagConstraints gbc_btnLoadSong = new GridBagConstraints();
 		gbc_btnLoadSong.fill = GridBagConstraints.BOTH;
 		gbc_btnLoadSong.insets = new Insets(0, 0, 5, 5);
@@ -288,7 +288,7 @@ public class RoboTarSongsPage extends JFrame implements WindowListener {
 			}
 		});
 		
-		btnSaveSong = new JButton("Save song");
+		btnSaveSong = new JButton(messages.getString("robotar.songs.save_song"));
 		GridBagConstraints gbc_btnSaveSong = new GridBagConstraints();
 		gbc_btnSaveSong.fill = GridBagConstraints.BOTH;
 		gbc_btnSaveSong.insets = new Insets(0, 0, 5, 5);

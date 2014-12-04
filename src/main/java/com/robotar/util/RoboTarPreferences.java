@@ -3,6 +3,7 @@ package com.robotar.util;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -58,6 +59,9 @@ public class RoboTarPreferences {
 	/** Check for new version at the startup? */
 	private boolean checkNewVersion;
 	
+	/** Language */
+	private Locale locale;
+	
 	// keys in preferences file 
 	private static final String CORRECTIONS_FILE = "correctionsFile";
 	private static final String MAIN_SIZE = "mainSize";
@@ -71,6 +75,7 @@ public class RoboTarPreferences {
 	private static final String MARKED_SIZE = "markedSize";
 	private static final String MAX_INACTIVITY = "maxInactivity";
 	private static final String CHECK_NEW_VERSION = "checkNewVersion";
+	private static final String LOCALE = "locale";
 	
 	/**
 	 * Loads and saves preferences.
@@ -79,6 +84,7 @@ public class RoboTarPreferences {
 	protected RoboTarPreferences(Preferences p) {
 		correctionsFile = p.get(CORRECTIONS_FILE, "corrections.xml");
 		checkNewVersion = p.getBoolean(CHECK_NEW_VERSION, true);
+		locale = decodeLocale(p, LOCALE, "en");
 		mainSize = p.getInt(MAIN_SIZE, 12);
 		markedSize = p.getInt(MARKED_SIZE, 18);
 		markedColor = decodeColor(p, MARKED_COLOR, "0x0000ff");
@@ -110,6 +116,19 @@ public class RoboTarPreferences {
 		// after load, save them again (useful in first run, but not needed)
 		update(p);
 		flush(p);
+	}
+	
+	private Locale decodeLocale(Preferences p, String name, String defValue) {
+		String []arr = p.get(name, defValue).split("_");
+		if (arr.length < 2) {
+			return Locale.ENGLISH;
+		}
+		// what if wrong codes?
+		return new Locale(arr[0], arr[1]);
+	}
+	
+	private String encodeLocale(Locale locale) {
+		return locale.getLanguage() + "_" + locale.getCountry();
 	}
 	
 	private Color decodeColor(Preferences p, String name, String defValue) {
@@ -155,6 +174,7 @@ public class RoboTarPreferences {
 	private void update(Preferences p) {
 		p.put(CORRECTIONS_FILE, correctionsFile);
 		p.putBoolean(CHECK_NEW_VERSION, checkNewVersion);
+		p.put(LOCALE, encodeLocale(getLocale()));
 		p.put(MAIN_SIZE, Integer.toString(getMainSize(), 10));
 		p.put(MARKED_COLOR, encodeColor(getMarkedColor()));
 		p.put(MARKED_SIZE, Integer.toString(getMarkedSize(), 10));
@@ -176,7 +196,7 @@ public class RoboTarPreferences {
 			si++;
 		}
 	}
-	
+
 	private void flush(Preferences p) {
 		try {
 			p.flush();
@@ -197,6 +217,10 @@ public class RoboTarPreferences {
 		return mainSize;
 	}
 
+	public Locale getLocale() {
+		return locale;
+	}
+	
 	public Color getMarkedColor() {
 		return markedColor;
 	}
@@ -255,6 +279,10 @@ public class RoboTarPreferences {
 
 	public void setCheckNewVersion(boolean checkNewVersion) {
 		this.checkNewVersion = checkNewVersion;
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 	
 }
