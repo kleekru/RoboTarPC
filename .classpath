@@ -16,17 +16,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/logback-classic-1.0.13.jar"/>
-	<classpathentry kind="lib" path="lib/logback-core-1.0.13.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/IOIOLibPC"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/RoboTarIOIO"/>
+	<classpathentry exported="true" kind="con" path="org.springsource.ide.eclipse.gradle.classpathcontainer"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/xchords"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/xsong"/>
-	<classpathentry kind="lib" path="lib/kitfox-svg-salamander-1.0.8.jar" sourcepath="/Users/miira/Documents/prj/svgsalamander~svn/trunk/svg-core/src/main/java">
-		<attributes>
-			<attribute name="source_encoding" value="UTF-8"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/RoboTarIOIO"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -130,7 +130,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	private IOIOReconnectAction ioioReconnectAction;
 
 	private String remoteVersion;
-	private String localVersion = "0.3.3";
+	private String localVersion = "0.3.4";
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
