@@ -14,7 +14,7 @@
 	</info>
 
 	<variables>
-		<variable name="releasedOn" value="09/12/2014"/>
+		<variable name="releasedOn" value="09/15/2014"/>
 		<!-- <variable name="TargetPanel.dir.windows" value="C:/RoboTar"/>
   		<variable name="TargetPanel.dir.unix" value="/usr/local/robotar"/>
   		<variable name="TargetPanel.dir.mac" value="$APPLICATIONS_DEFAULT_ROOT/ff/"/> -->

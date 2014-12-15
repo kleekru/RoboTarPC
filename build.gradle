@@ -65,7 +65,26 @@ jar { //.doFirst {
 	}
 }
 
-task copyToLib(type: Copy) {
+ext {
+	println "$buildDir"
+	libDir = new File("$buildDir/libs/lib")
+}
+
+task resources << {
+	println 'trying to create folders'
+	libDir.mkdirs()
+	println 'we are done'
+}
+
+task copyToLib(type: Copy, dependsOn: 'resources') {
+	/*if (libDir.isDirectory()) {
+		println 'The class directory exists. I can operate'
+	} else {
+		println 'the directory still does not exist'
+	}*/
+	println "copying......"
+	outputs.files.setFrom(configurations.runtime)
+	
 	into "$buildDir/libs/lib"
 	from configurations.runtime
 }

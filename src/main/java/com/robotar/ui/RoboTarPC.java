@@ -504,6 +504,14 @@ public class RoboTarPC extends IOIOSwingApp {
 				updateLocale(new Locale("cs", "CZ"));
 			}
 		});
+		JMenuItem mntmGerman = new JMenuItem(messages.getString("robotar.menu.german"));
+		mnLang.add(mntmGerman);
+		mntmGerman.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateLocale(new Locale("de", "DE"));
+			}
+		});
 		
 		JMenu mnHelp = new JMenu(messages.getString("robotar.menu.help"));
 		menuBar.add(mnHelp);

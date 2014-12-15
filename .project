@@ -14,5 +14,13 @@
 	<natures>
 		<nature>org.springsource.ide.eclipse.gradle.core.nature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.jdt.groovy.core.groovyNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>java</name>
+			<type>2</type>
+			<location>/Users/miira/Documents/prj/xsong/src/main/java</location>
+		</link>
+	</linkedResources>
 </projectDescription>
