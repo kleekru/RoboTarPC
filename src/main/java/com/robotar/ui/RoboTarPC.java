@@ -102,7 +102,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	 * LED settings for the current chord.
 	 */
 	private LEDSettings leds;
-	private boolean stateLedOn = false;
+	private boolean stateLedOff = true;
 
 	/**
 	 * Burn prevention field. (+
@@ -130,7 +130,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	private IOIOReconnectAction ioioReconnectAction;
 
 	private String remoteVersion;
-	private String localVersion = "0.3.4";
+	private String localVersion = "0.3.5";
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
@@ -793,8 +793,23 @@ public class RoboTarPC extends IOIOSwingApp {
 					public void run() {
 						// set the activityPIN to false after max inactivity limit is reached
 						try {
-							resetAll();
+							LOG.debug("Safety timer reached, turn off state led");
+							
+							// turn off led
+							stateLedOff = true;
+							stateLED.write(stateLedOff);
+							
+							//LOG.debug("release all chords");
+							// release chord
+							//resetAll();
+							
+							//LOG.debug("all servos should be in neutral positions");
+							Thread.sleep(100);
+							//LOG.debug("and now power off to servos");
+							
+							// power off servos
 							activityPIN.write(false);
+
 						} catch (ConnectionLostException e) {
 							LOG.error("timer. can not reset servos/write false to activity PIN!", e);
 						} catch (InterruptedException e) {
@@ -840,94 +855,117 @@ public class RoboTarPC extends IOIOSwingApp {
 			public void loop() throws ConnectionLostException,
 					InterruptedException {
 				//LOG.info("Start of the loop method");
-				stateLED.write(!stateLedOn);
-
+				
 				if (showChecked) {
 					runDemo();
+					// thread.sleep ?
 					return;
 				}
 				// initial position
 				// high = true, low = false
+				// read pedal position
 				boolean pedalInHighPosition = pedalButton.read();
-				//LOG.debug("current position of pedal is: {}", pedalInHighPosition);
-
-				//LOG.debug("lastPedalPosition: {}", lastKnownPedalPosition);
 				if (lastKnownPedalPosition == pedalInHighPosition) {
-					// no change from last time
+					// no change from last time, wait a little, than continue
+					Thread.sleep(20);
 					return;
 				}
-				
-				if (!pedalInHighPosition) {
-					LOG.debug("Pedal is pressed");
-					// PEDAL IS PRESSED
-					stateLedOn = true;
-
-					// we are checking and logging the status first
-					if (frmBlueAhuizote == null) {
-						LOG.error("There is no RoboTar GUI!");
-					} else {
-						if (RoboTarPC.this.getChordsPage() == null) {
-							LOG.debug("informative - there is no chords page");
-						}
-						if (RoboTarPC.this.getSongsPage() == null) {
-							LOG.debug("informative - there is no songs page");
-						}
-						
-						if (RoboTarPC.this.getServoSettings() == null) {
-							// this should not happen, servo settings are initialized to neutral positions in the constructor
-							LOG.warn("There is no chord chosen!");
-						} else {
-							// user made some activity! reschedule max inactivity action
-							if (RoboTarPC.this.servoSettings.isAnyCorrectionSet()) {
-								LOG.debug("rescheduling the timer");
-								activityPIN.write(true);
-								safetyTimer.reschedule(preferences.getMaxInactivity() * 1000); // in milliseconds
-							}
-							
-							// if songs page exists and we already play the song, play next chord
-							if (RoboTarPC.this.getSongsPage() != null && RoboTarPC.this.getSongsPage().isPlaying()) {
-								RoboTarPC.this.getSongsPage().simPedalPressed();
-							} else if (RoboTarPC.this.getChordsPage() != null) {
-								// if not, and chords page exists, play chord that is set in radio buttons
-								RoboTarPC.this.getChordsPage().prepareChord();
-							}
-							
-							// everything is set correctly and we have servo settings available 
-							// (either from songs or chords page, or default - neutral) or last one? - check
-							ServoSettings chordServoValues = RoboTarPC.this.getServoSettings();
-							LEDSettings leds = RoboTarPC.this.getLeds();
-							LOG.debug("got chord: {}", chordServoValues.debugOutput());
-							LOG.debug("leds: {}", leds);
-							long timeStart = System.currentTimeMillis();
-							for (int i = 0; i < 6; i++) {
-								int servoNumber = chordServoValues.getServos()[i];
-								float servoValue = chordServoValues.getValues()[i];
-								setServo(servoNumber, servoValue);
-								if (leds != null) {
-									LOG.debug("leds 2: {}", leds.getLeds());
-									if (leds.getLeds() != null) {
-										setLED(i, leds.getLeds()[i]);
-									}
-								}
-							}
-							long timeEnd = System.currentTimeMillis();
-							LOG.debug("It took {} ms to execute 6 servos and LEDs", timeEnd - timeStart);
-						}
-					}
-				} else {
-					LOG.debug("Pedal is released");
-					// PEDAL IS RELEASED
-					// turn off led
-					stateLedOn = false;
-					// reset servos
-					resetAll();
-				} 
-
 				// save current status of the pedal
 				lastKnownPedalPosition = pedalInHighPosition;
 				
+				if (!pedalInHighPosition) {
+					LOG.debug("Pedal is pressed");
+					if (preferences.getPedalMode() == RoboTarPreferences.PRESS_AND_RELEASE) {
+						// no action
+						return;
+					}
+					
+					// do action, PRESS_AND_HOLD
+					sendChord2RoboTar();
+					
+				} else {
+					LOG.debug("Pedal is released");
+					
+					// turn off led
+					stateLedOff = true;
+					stateLED.write(stateLedOff);
+					
+					// reset servos - in both cases
+					resetAll();
+					
+					if (preferences.getPedalMode() == RoboTarPreferences.PRESS_AND_RELEASE) {
+						// do action
+						sendChord2RoboTar();
+					}
+
+				} 
+				
 			}
 			
+			private void sendChord2RoboTar() throws ConnectionLostException, InterruptedException {
+				// turn led on
+				stateLedOff = false;
+				stateLED.write(stateLedOff);
+				
+				// we are checking and logging the status first
+				if (frmBlueAhuizote == null) {
+					LOG.error("There is no RoboTar GUI!");
+				} else {
+					if (RoboTarPC.this.getChordsPage() == null) {
+						LOG.debug("informative - there is no chords page");
+					}
+					if (RoboTarPC.this.getSongsPage() == null) {
+						LOG.debug("informative - there is no songs page");
+					}
+					
+					if (RoboTarPC.this.getServoSettings() == null) {
+						// this should not happen, servo settings are initialized to neutral positions in the constructor
+						LOG.warn("There is no chord chosen!");
+					} else {
+						// user made some activity! reschedule max inactivity action
+						if (RoboTarPC.this.servoSettings.isAnyCorrectionSet()) {
+							LOG.debug("rescheduling the timer");
+							// send POWER ON to servos
+							activityPIN.write(true);
+							safetyTimer.reschedule(preferences.getMaxInactivity() * 1000); // in milliseconds
+						}
+						// if songs page exists and we already play the song, play next chord
+						if (RoboTarPC.this.getSongsPage() != null && RoboTarPC.this.getSongsPage().isPlaying()) {
+							if (preferences.getAfterTimeout() == RoboTarPreferences.MOVE_TO_NEXT) {
+								RoboTarPC.this.getSongsPage().simPedalPressed();
+							} else {
+								// otherwise the chord is already set, unless it is before 1st chord? 
+								// TODO check
+							}
+						} else if (RoboTarPC.this.getChordsPage() != null) {
+							// if not, and chords page exists, play chord that is set in radio buttons
+							RoboTarPC.this.getChordsPage().prepareChord();
+						}
+						
+						// everything is set correctly and we have servo settings available 
+						// (either from songs or chords page, or default - neutral) or last one? - check
+						ServoSettings chordServoValues = RoboTarPC.this.getServoSettings();
+						LEDSettings leds = RoboTarPC.this.getLeds();
+						LOG.debug("got chord: {}", chordServoValues.debugOutput());
+						LOG.debug("leds: {}", leds);
+						long timeStart = System.currentTimeMillis();
+						for (int i = 0; i < 6; i++) {
+							int servoNumber = chordServoValues.getServos()[i];
+							float servoValue = chordServoValues.getValues()[i];
+							setServo(servoNumber, servoValue);
+							if (leds != null) {
+								LOG.debug("leds 2: {}", leds.getLeds());
+								if (leds.getLeds() != null) {
+									setLED(i, leds.getLeds()[i]);
+								}
+							}
+						}
+						long timeEnd = System.currentTimeMillis();
+						LOG.debug("It took {} ms to execute 6 servos and LEDs", timeEnd - timeStart);
+					}
+				}
+			}
+
 			/**
 			 * Showcase demo
 			 * @throws ConnectionLostException
@@ -952,7 +990,7 @@ public class RoboTarPC extends IOIOSwingApp {
 			 * @throws InterruptedException
 			 */
 			public void resetAll() throws ConnectionLostException, InterruptedException {
-				stateLedOn = false;
+				stateLedOff = false;
 				ServoSettings sett = RoboTarPC.this.getServoSettings();
 				for (int servo = 0; servo < 12; servo++) {
 					setServo(servo, sett.getInitial(servo));

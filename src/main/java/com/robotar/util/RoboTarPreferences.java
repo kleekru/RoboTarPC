@@ -10,6 +10,8 @@ import java.util.prefs.Preferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.xml.internal.ws.api.pipe.NextAction;
+
 import cz.versarius.xchords.ChordManager;
 
 /**
@@ -19,6 +21,14 @@ import cz.versarius.xchords.ChordManager;
 public class RoboTarPreferences {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RoboTarPreferences.class);
+	
+	/** constants for pedal mode. */
+	public static final int PRESS_AND_HOLD = 0;
+	public static final int PRESS_AND_RELEASE = 1;
+	
+	/** constants for after timeout action. */
+	public static final int PLAY_THE_SAME = 0;
+	public static final int MOVE_TO_NEXT = 1;
 	
 	/** where the corrections file is - correction values for servos. Relative to current working folder
 	 * or {user.home}/.robotar folder. In this order. */
@@ -54,7 +64,13 @@ public class RoboTarPreferences {
 	
 	/** Max inactivity time (in seconds) */
 	private int maxInactivity;
-	private static final int MAX_MAX_INACTIVITY = 120;
+	private static final int MAX_MAX_INACTIVITY = 15;
+	
+	/** Pedal mode. */
+	private int pedalMode = PRESS_AND_HOLD;
+	
+	/** Meaning of pedal press after inactivity timeout. */
+	private int afterTimeout = PLAY_THE_SAME;
 	
 	/** Check for new version at the startup? */
 	private boolean checkNewVersion;
@@ -76,6 +92,8 @@ public class RoboTarPreferences {
 	private static final String MAX_INACTIVITY = "maxInactivity";
 	private static final String CHECK_NEW_VERSION = "checkNewVersion";
 	private static final String LOCALE = "locale";
+	private static final String PEDAL_MODE = "pedalMode";
+	private static final String PRESS_AFTER_TIMEOUT = "pressAfterTimeout";
 	
 	/**
 	 * Loads and saves preferences.
@@ -95,6 +113,16 @@ public class RoboTarPreferences {
 		maxInactivity = p.getInt(MAX_INACTIVITY, MAX_MAX_INACTIVITY);
 		if (maxInactivity <= 0 || maxInactivity > MAX_MAX_INACTIVITY) {
 			maxInactivity = MAX_MAX_INACTIVITY;
+		}
+		// pedal mode
+		pedalMode = p.getInt(PEDAL_MODE, PRESS_AND_HOLD);
+		if (pedalMode < 0 || pedalMode > PRESS_AND_RELEASE) {
+			pedalMode = PRESS_AND_HOLD;
+		}
+		// press after inactivity timeout
+		afterTimeout = p.getInt(PRESS_AFTER_TIMEOUT, MOVE_TO_NEXT);
+		if (afterTimeout < 0 || afterTimeout > MOVE_TO_NEXT) {
+			afterTimeout = MOVE_TO_NEXT;
 		}
 		// recent chord files - generally only 1 is visible in chords page
 		chosenLibrary = p.get(CHOSEN_LIBRARY, ChordManager.DEFAULT_ROBOTAR); //?
@@ -182,6 +210,9 @@ public class RoboTarPreferences {
 		p.put(MARKED_CHORD_SIZE, Integer.toString(getMarkedChordSize(), 10));
 		p.put(EDIT_MARKED_CHORD_COLOR, encodeColor(getEditMarkedChordColor()));
 		p.put(MAX_INACTIVITY, Integer.toString(getMaxInactivity(), 10));
+		p.put(PEDAL_MODE, Integer.toString(getPedalMode(), 10));
+		p.put(PRESS_AFTER_TIMEOUT, Integer.toString(getAfterTimeout(), 10));
+		
 		// recent chord files - generally only 1 is visible in chords page
 		p.put(CHOSEN_LIBRARY, chosenLibrary);
 		int i = 1;
@@ -283,6 +314,22 @@ public class RoboTarPreferences {
 
 	public void setLocale(Locale locale) {
 		this.locale = locale;
+	}
+
+	public int getPedalMode() {
+		return pedalMode;
+	}
+
+	public void setPedalMode(int pedalMode) {
+		this.pedalMode = pedalMode;
+	}
+
+	public int getAfterTimeout() {
+		return afterTimeout;
+	}
+
+	public void setAfterTimeout(int afterTimeout) {
+		this.afterTimeout = afterTimeout;
 	}
 	
 }
