@@ -69,6 +69,8 @@ java -jar RoboTarIOIOforPCConsole-0.0.1-SNAPSHOT.jar
 
 ##E. izpack build
 
+modify install.xml
+
 create installation jar
 
 	cd RoboTarPC

@@ -10,8 +10,6 @@ import java.util.prefs.Preferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.xml.internal.ws.api.pipe.NextAction;
-
 import cz.versarius.xchords.ChordManager;
 
 /**

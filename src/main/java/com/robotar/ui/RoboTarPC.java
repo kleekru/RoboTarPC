@@ -449,8 +449,11 @@ public class RoboTarPC extends IOIOSwingApp {
 		JMenu mnUtilities = new JMenu(messages.getString("robotar.menu.utilities"));
 		menuBar.add(mnUtilities);
 		
-		JMenuItem corr = new JMenuItem(new CorrectionsAction(messages.getString("robotar.menu.servo_corrections"), KeyEvent.VK_R));
+		JMenuItem corr = new JMenuItem(new CorrectionsAction(messages.getString("robotar.menu.servo_corrections"), KeyEvent.VK_E));
 		mnUtilities.add(corr);
+		
+		JMenuItem mntmSettings = new JMenuItem(new StartSettingsPageAction(messages.getString("robotar.menu.settings"), KeyEvent.VK_T));
+		mnUtilities.add(mntmSettings);
 		
 		JMenuItem mntmTuner = new JMenuItem(messages.getString("robotar.menu.tuner"));
 		mntmTuner.setEnabled(false);
@@ -476,6 +479,7 @@ public class RoboTarPC extends IOIOSwingApp {
 				}
 			}
 		});
+		
 		JMenu mnLang = new JMenu(messages.getString("robotar.menu.lang_sel"));
 		menuBar.add(mnLang);
 		
@@ -561,11 +565,19 @@ public class RoboTarPC extends IOIOSwingApp {
 	}
 	protected void showCorrectionsDialog(ActionEvent evt) {
 		CorrectionsDialog dlg = new CorrectionsDialog(this);
+		dlg.setLocationRelativeTo(frmBlueAhuizote);
 		dlg.setVisible(true);
 	}
 
 	protected void showAboutDialog(ActionEvent evt) {
 		AboutDialog dlg = new AboutDialog(this);
+		dlg.setLocationRelativeTo(frmBlueAhuizote);
+		dlg.setVisible(true);
+	}
+	
+	protected void showSettingsDialog(ActionEvent evt) {
+		RoboTarSettingsDialog dlg = new RoboTarSettingsDialog(this);
+		dlg.setLocationRelativeTo(frmBlueAhuizote);
 		dlg.setVisible(true);
 	}
 	
@@ -595,6 +607,17 @@ public class RoboTarPC extends IOIOSwingApp {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			startSongsPage();
+		}
+	}
+	
+	private class StartSettingsPageAction extends MyAction {
+		public StartSettingsPageAction(String text, int mnemonic) {
+	       super(text, mnemonic);
+	    }
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			showSettingsDialog(e);
 		}
 	}
 	
@@ -848,7 +871,7 @@ public class RoboTarPC extends IOIOSwingApp {
 				InterruptedException {
 				LOG.info("Start of the write8 method");
 				byte[] request = {reg, val};
-				twi_.writeReadAsync(PCA_ADDRESS, false, request, request.length, null, 0);
+				twi_.writeRead(PCA_ADDRESS, false, request, request.length, null, 0);
 			}
 		
 			@Override
@@ -1035,7 +1058,7 @@ public class RoboTarPC extends IOIOSwingApp {
 				int pw = Math.round(ms / 1000 * FREQ * 4096);
 				// Skip to every 4th address value to turn off the pulse (see datasheet addresses for LED#_OFF_L)
 				byte[] request = { (byte) (0x08 + channel * 4), (byte) pw, (byte) (pw >> 8) };
-				twi_.writeReadAsync(PCA_ADDRESS, false, request, request.length, null, 0);
+				twi_.writeRead(PCA_ADDRESS, false, request, request.length, null, 0);
 			}
 
 			/**

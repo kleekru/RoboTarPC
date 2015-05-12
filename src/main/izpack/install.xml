@@ -2,7 +2,7 @@
 <installation version="1.0">
 	<info>
 		<appname>RoboTar</appname>
-		<appversion>0.3.4</appversion>
+		<appversion>0.3.5</appversion>
 		<url>http://www.robo-tar.com</url>
 		<authors>
 			<author name="Kevin Krumwiede" email="kevin@robo-tar.com"/>
@@ -14,7 +14,7 @@
 	</info>
 
 	<variables>
-		<variable name="releasedOn" value="09/15/2014"/>
+		<variable name="releasedOn" value="05/12/2015"/>
 		<!-- <variable name="TargetPanel.dir.windows" value="C:/RoboTar"/>
   		<variable name="TargetPanel.dir.unix" value="/usr/local/robotar"/>
   		<variable name="TargetPanel.dir.mac" value="$APPLICATIONS_DEFAULT_ROOT/ff/"/> -->
@@ -51,7 +51,7 @@
 		<pack name="app" id="app" required="yes">
 			<description>RoboTar application</description>	
 			
-			<file src="build/libs/RoboTarPC-0.3.4.jar" targetdir="$INSTALL_PATH/" override="true" />
+			<file src="build/libs/RoboTarPC-0.3.5.jar" targetdir="$INSTALL_PATH/" override="true" />
 			<file src="src/main/izpack/ahuizote.ico" targetdir="$INSTALL_PATH/" override="true"/>
 			<file src="src/main/izpack/ahuizote.png" targetdir="$INSTALL_PATH/" override="true"/>
 			
