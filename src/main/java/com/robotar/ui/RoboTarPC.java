@@ -28,6 +28,7 @@ import ioio.lib.util.pc.IOIOSwingApp;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -46,6 +47,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -56,6 +58,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -130,7 +134,7 @@ public class RoboTarPC extends IOIOSwingApp {
 	private IOIOReconnectAction ioioReconnectAction;
 
 	private String remoteVersion;
-	private String localVersion = "0.3.5";
+	private String localVersion = "0.3.2";
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
@@ -319,7 +323,8 @@ public class RoboTarPC extends IOIOSwingApp {
 	}
 	
 	public boolean isNewerVersionAvailable() {
-		String url = "http://kleekru.mydomain.com/currentversion";
+		//String url = "http://kleekru.mydomain.com/currentversion";
+		String url = "https://raw.githubusercontent.com/kleekru/RoboTarPC/master/currentversion";
 		LOG.info("checking for new version at address: {}", url);
 		this.remoteVersion = getRemoteVersion(url);
 		return isNewerVersion(remoteVersion);
@@ -545,15 +550,19 @@ public class RoboTarPC extends IOIOSwingApp {
 		if (displayVersionNotification() && isNewerVersionAvailable()) {
 			// this is informational only, therefore it is modeless, connection to ioio continues
 			JDialog dialog3 = new JDialog(frmBlueAhuizote, messages.getString("robotar.version.title"));
-		    dialog3.setBounds(200, 300, 400, 90);
+		    dialog3.setBounds(200, 300, 500, 120);
 		    dialog3.setBackground(Const.BACKGROUND_COLOR);
 			
 		    JLabel label = new JLabel(MessageFormat.format(messages.getString("robotar.version.available"), remoteVersion));
 		    JLabel labelYours = new JLabel(MessageFormat.format(messages.getString("robotar.version.yours"), localVersion));
+		    JTextField textUrl = new JTextField("https://github.com/kleekru/RoboTarPC/releases/latest");
+		    textUrl.setEditable(false);
 		    JLabel labelDesc = new JLabel(messages.getString("robotar.version.desc"));
-		    dialog3.getContentPane().add(label, BorderLayout.NORTH);
-		    dialog3.getContentPane().add(labelYours, BorderLayout.CENTER);
-		    dialog3.getContentPane().add(labelDesc, BorderLayout.SOUTH);
+		    dialog3.getContentPane().setLayout(new BoxLayout(dialog3.getContentPane(), BoxLayout.Y_AXIS));
+		    dialog3.getContentPane().add(label);
+		    dialog3.getContentPane().add(labelYours);
+		    dialog3.getContentPane().add(labelDesc);
+		    dialog3.getContentPane().add(textUrl);
 		    //dialog3.pack();
 		    dialog3.setVisible(true);
 		    dialog3.repaint();
