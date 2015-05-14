@@ -134,7 +134,13 @@ public class RoboTarPC extends IOIOSwingApp {
 	private IOIOReconnectAction ioioReconnectAction;
 
 	private String remoteVersion;
-	private String localVersion = "0.3.2";
+	private String localVersion = "0.3.5";
+
+	private CorrectionsDialog correctionsDlg;
+
+	private AboutDialog aboutDlg;
+
+	private RoboTarSettingsDialog settingsDlg;
 	
 	public static final String ROBOTAR_FOLDER = ".robotar";
 	public static final String ROBOTAR_PROPS_FILE = ".robotar.properties";
@@ -573,21 +579,27 @@ public class RoboTarPC extends IOIOSwingApp {
 		preferences.setLocale(locale);
 	}
 	protected void showCorrectionsDialog(ActionEvent evt) {
-		CorrectionsDialog dlg = new CorrectionsDialog(this);
-		dlg.setLocationRelativeTo(frmBlueAhuizote);
-		dlg.setVisible(true);
+		if (correctionsDlg == null) {
+			correctionsDlg = new CorrectionsDialog(this);
+			correctionsDlg.setLocationRelativeTo(frmBlueAhuizote);
+		}
+		correctionsDlg.setVisible(true);
 	}
 
 	protected void showAboutDialog(ActionEvent evt) {
-		AboutDialog dlg = new AboutDialog(this);
-		dlg.setLocationRelativeTo(frmBlueAhuizote);
-		dlg.setVisible(true);
+		if (aboutDlg == null) {
+			aboutDlg = new AboutDialog(this);
+			aboutDlg.setLocationRelativeTo(frmBlueAhuizote);
+		}
+		aboutDlg.setVisible(true);
 	}
 	
 	protected void showSettingsDialog(ActionEvent evt) {
-		RoboTarSettingsDialog dlg = new RoboTarSettingsDialog(this);
-		dlg.setLocationRelativeTo(frmBlueAhuizote);
-		dlg.setVisible(true);
+		if (settingsDlg == null) {
+			settingsDlg = new RoboTarSettingsDialog(this);
+			settingsDlg.setLocationRelativeTo(frmBlueAhuizote);
+		}
+		settingsDlg.setVisible(true);
 	}
 	
 	private abstract class MyAction extends AbstractAction {
